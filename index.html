@@ -1,0 +1,464 @@
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Night Chat | چت گیمری</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Tahoma, Arial, sans-serif;
+  background: #080b12;
+  color: #f2f5ff;
+  min-height: 100vh;
+}
+
+header {
+  padding: 20px;
+  text-align: center;
+  background: #101522;
+  border-bottom: 1px solid #26304a;
+}
+
+.logo {
+  color: #8b5cf6;
+  font-size: 30px;
+  font-weight: bold;
+  letter-spacing: 2px;
+}
+
+header p {
+  color: #9ba6c3;
+  font-size: 13px;
+}
+
+main {
+  width: 95%;
+  max-width: 850px;
+  margin: 25px auto;
+}
+
+.panel {
+  background: #101522;
+  border: 1px solid #26304a;
+  border-radius: 15px;
+  padding: 18px;
+  margin-bottom: 15px;
+}
+
+h3 {
+  margin-top: 0;
+}
+
+input, textarea, button {
+  font-family: inherit;
+  font-size: 14px;
+}
+
+input, textarea {
+  width: 100%;
+  padding: 13px;
+  border: 1px solid #303b58;
+  border-radius: 9px;
+  background: #090d17;
+  color: white;
+  outline: none;
+  margin: 7px 0;
+}
+
+input:focus, textarea:focus {
+  border-color: #8b5cf6;
+}
+
+button {
+  padding: 12px 17px;
+  border: 0;
+  border-radius: 9px;
+  cursor: pointer;
+  font-weight: bold;
+  background: #8b5cf6;
+  color: white;
+  margin-top: 6px;
+}
+
+button:hover {
+  filter: brightness(1.15);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+.secondary {
+  background: #252e43;
+}
+
+.scare-button {
+  background: #a21caf;
+}
+
+#status {
+  font-size: 13px;
+  color: #a5b4fc;
+  line-height: 1.9;
+}
+
+#messages {
+  height: 370px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.message {
+  padding: 12px;
+  border-radius: 10px;
+  background: #171f30;
+  border-right: 3px solid #8b5cf6;
+  overflow-wrap: anywhere;
+}
+
+.message .name {
+  color: #c4b5fd;
+  font-weight: bold;
+  font-size: 13px;
+  margin-bottom: 7px;
+}
+
+.message .body {
+  white-space: pre-wrap;
+  line-height: 1.8;
+}
+
+.message .time {
+  color: #7e8ba8;
+  font-size: 10px;
+  margin-top: 7px;
+}
+
+.composer textarea {
+  resize: vertical;
+  min-height: 75px;
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.row button {
+  flex: 1;
+}
+
+footer {
+  text-align: center;
+  color: #64708b;
+  font-size: 12px;
+  padding: 20px;
+}
+
+/* جامپ‌اسکر شوخی */
+#scare {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #050000;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  text-align: center;
+}
+
+#scare.active {
+  display: flex;
+  animation: flash 0.16s infinite alternate;
+}
+
+.monster {
+  font-size: clamp(130px, 32vw, 290px);
+  line-height: 1.2;
+  filter: drop-shadow(0 0 25px #ff0000);
+  animation: monsterMove 0.17s infinite alternate;
+}
+
+#scare h1 {
+  color: #ff2929;
+  font-size: clamp(25px, 6vw, 55px);
+  margin: 0;
+}
+
+#scare p {
+  color: white;
+  font-size: 18px;
+}
+
+#scare .close-scare {
+  background: #292929;
+}
+
+@keyframes flash {
+  from { background: #080000; }
+  to { background: #300000; }
+}
+
+@keyframes monsterMove {
+  from { transform: scale(0.88) rotate(-4deg); }
+  to { transform: scale(1.08) rotate(4deg); }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">☠ NIGHT CHAT</div>
+  <p>یک اتاق عمومی برای گیمرها</p>
+</header>
+
+<main>
+
+  <section class="panel">
+    <h3>👤 اسم مستعار تو</h3>
+    <input id="nickname" maxlength="20"
+      placeholder="مثلاً ZombieKiller">
+    <button id="saveName">ثبت اسم</button>
+    <p id="status">در حال اتصال به چت...</p>
+  </section>
+
+  <section class="panel">
+    <h3>💬 چت عمومی</h3>
+    <div id="messages">
+      <p>در حال دریافت پیام‌ها...</p>
+    </div>
+  </section>
+
+  <section class="panel composer">
+    <h3>✍️ پیام جدید</h3>
+    <textarea id="messageInput" maxlength="500"
+      placeholder="پیامت رو بنویس..."></textarea>
+    <div class="row">
+      <button id="sendButton" disabled>ارسال پیام 🚀</button>
+      <button class="secondary" id="clearInput">پاک کردن متن</button>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  NIGHT CHAT — ساخته‌شده برای گیمرها 🎮
+</footer>
+
+<div id="scare" role="dialog" aria-label="جامپ‌اسکر شوخی">
+  <div class="monster">👹</div>
+  <h1>بووووووم!!!</h1>
+  <p>😂 گول خوردی رفیق!</p>
+  <button class="close-scare" id="closeScare">
+    برگشت به چت
+  </button>
+</div>
+
+<script type="module">
+import { initializeApp } from
+  "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+  getAuth,
+  signInAnonymously
+} from
+  "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  onSnapshot,
+  query,
+  orderBy,
+  limit,
+  serverTimestamp
+} from
+  "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* تنظیمات واقعی Firebase خودت را اینجا قرار بده */
+const firebaseConfig = {
+  apiKey: "AIzaSyCG_xTcYnddaB-5lmzoaZ9tdHaLRfa3Wq8",
+  authDomain: "chat-b8e03.firebaseapp.com",
+  projectId: "chat-b8e03",
+  storageBucket: "chat-b8e03.firebasestorage.app",
+  messagingSenderId: "955243619912",
+  appId: "1:955243619912:web:7763dfcb887bebd4109a7d",
+};
+
+const status = document.getElementById("status");
+const nickname = document.getElementById("nickname");
+const messageInput = document.getElementById("messageInput");
+const sendButton = document.getElementById("sendButton");
+const messages = document.getElementById("messages");
+
+let db;
+let auth;
+let currentUser = null;
+let sending = false;
+
+nickname.value = localStorage.getItem("nightChatName") || "";
+
+document.getElementById("saveName").addEventListener("click", () => {
+  const name = nickname.value.trim();
+
+  if (!name || name.length > 20) {
+    alert("یک اسم بین ۱ تا ۲۰ حرف وارد کن.");
+    return;
+  }
+
+  localStorage.setItem("nightChatName", name);
+  nickname.value = name;
+  status.textContent = "اسم تو ذخیره شد: " + name;
+});
+
+nickname.addEventListener("change", () => {
+  const name = nickname.value.trim();
+  if (name && name.length <= 20) {
+    localStorage.setItem("nightChatName", name);
+  }
+});
+
+document.getElementById("clearInput").addEventListener("click", () => {
+  messageInput.value = "";
+});
+
+function showMessage(data) {
+  const box = document.createElement("div");
+  box.className = "message";
+
+  const name = document.createElement("div");
+  name.className = "name";
+  name.textContent = data.name || "گیمر";
+
+  const body = document.createElement("div");
+  body.className = "body";
+  body.textContent = data.text || "";
+
+  const time = document.createElement("div");
+  time.className = "time";
+
+  if (data.createdAt && data.createdAt.toDate) {
+    time.textContent = data.createdAt.toDate().toLocaleTimeString("fa-IR");
+  } else {
+    time.textContent = "پیام جدید";
+  }
+
+  box.append(name, body, time);
+  return box;
+}
+
+async function startChat() {
+  try {
+    const app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getFirestore(app);
+
+    status.textContent = "در حال ورود ناشناس...";
+
+    const credential = await signInAnonymously(auth);
+    currentUser = credential.user;
+
+    status.textContent = "✅ وصل شدی! حالا می‌تونی پیام بدی.";
+    sendButton.disabled = false;
+
+    const messagesQuery = query(
+      collection(db, "messages"),
+      orderBy("createdAt", "asc"),
+      limit(100)
+    );
+
+    onSnapshot(messagesQuery, (snapshot) => {
+      messages.replaceChildren();
+
+      if (snapshot.empty) {
+        const empty = document.createElement("p");
+        empty.textContent = "هنوز پیامی نیست؛ اولین پیام رو بفرست!";
+        messages.appendChild(empty);
+        return;
+      }
+
+      snapshot.forEach((item) => {
+        messages.appendChild(showMessage(item.data()));
+      });
+
+      messages.scrollTop = messages.scrollHeight;
+    }, (error) => {
+      console.error(error);
+      status.textContent =
+        "خطا در دریافت پیام‌ها؛ قوانین پایگاه داده را بررسی کن.";
+    });
+
+  } catch (error) {
+    console.error(error);
+    status.textContent =
+      "اتصال ناموفق بود. تنظیمات Firebase و ورود ناشناس را بررسی کن.";
+  }
+}
+
+async function sendMessage() {
+  if (!currentUser || sending) return;
+
+  const name = nickname.value.trim();
+  const text = messageInput.value.trim();
+
+  if (!name || name.length > 20) {
+    alert("اول یک اسم مستعار بین ۱ تا ۲۰ حرف ثبت کن.");
+    return;
+  }
+
+  if (!text || text.length > 500) {
+    alert("پیام باید بین ۱ تا ۵۰۰ حرف باشد.");
+    return;
+  }
+
+  localStorage.setItem("nightChatName", name);
+  sending = true;
+  sendButton.disabled = true;
+
+  try {
+    await addDoc(collection(db, "messages"), {
+      name: name,
+      text: text,
+      uid: currentUser.uid,
+      createdAt: serverTimestamp()
+    });
+
+    messageInput.value = "";
+  } catch (error) {
+    console.error(error);
+    alert("پیام ارسال نشد. قوانین Firestore را بررسی کن.");
+  } finally {
+    sending = false;
+    sendButton.disabled = false;
+  }
+}
+
+sendButton.addEventListener("click", sendMessage);
+
+messageInput.addEventListener("keydown", (event) => {
+  if (event.key === "Enter" && !event.shiftKey) {
+    event.preventDefault();
+    sendMessage();
+  }
+});
+
+
+startChat();
+</script>
+
+</body>
+</html>
