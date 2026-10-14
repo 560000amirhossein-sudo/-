@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
@@ -100,10 +99,6 @@ button:disabled {
   background: #252e43;
 }
 
-.scare-button {
-  background: #a21caf;
-}
-
 #status {
   font-size: 13px;
   color: #a5b4fc;
@@ -165,63 +160,13 @@ footer {
   font-size: 12px;
   padding: 20px;
 }
-
-/* جامپ‌اسکر شوخی */
-#scare {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  background: #050000;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  text-align: center;
-}
-
-#scare.active {
-  display: flex;
-  animation: flash 0.16s infinite alternate;
-}
-
-.monster {
-  font-size: clamp(130px, 32vw, 290px);
-  line-height: 1.2;
-  filter: drop-shadow(0 0 25px #ff0000);
-  animation: monsterMove 0.17s infinite alternate;
-}
-
-#scare h1 {
-  color: #ff2929;
-  font-size: clamp(25px, 6vw, 55px);
-  margin: 0;
-}
-
-#scare p {
-  color: white;
-  font-size: 18px;
-}
-
-#scare .close-scare {
-  background: #292929;
-}
-
-@keyframes flash {
-  from { background: #080000; }
-  to { background: #300000; }
-}
-
-@keyframes monsterMove {
-  from { transform: scale(0.88) rotate(-4deg); }
-  to { transform: scale(1.08) rotate(4deg); }
-}
 </style>
 </head>
 
 <body>
 
 <header>
-  <div class="logo">☠ NIGHT CHAT</div>
+  <div class="logo">NIGHT CHAT</div>
   <p>یک اتاق عمومی برای گیمرها</p>
 </header>
 
@@ -258,15 +203,6 @@ footer {
   NIGHT CHAT — ساخته‌شده برای گیمرها 🎮
 </footer>
 
-<div id="scare" role="dialog" aria-label="جامپ‌اسکر شوخی">
-  <div class="monster">👹</div>
-  <h1>بووووووم!!!</h1>
-  <p>😂 گول خوردی رفیق!</p>
-  <button class="close-scare" id="closeScare">
-    برگشت به چت
-  </button>
-</div>
-
 <script type="module">
 import { initializeApp } from
   "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -289,7 +225,7 @@ import {
 } from
   "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-/* تنظیمات واقعی Firebase خودت را اینجا قرار بده */
+/* تنظیمات Firebase فعلی حفظ شده است */
 const firebaseConfig = {
   apiKey: "AIzaSyCG_xTcYnddaB-5lmzoaZ9tdHaLRfa3Wq8",
   authDomain: "chat-b8e03.firebaseapp.com",
@@ -306,7 +242,6 @@ const sendButton = document.getElementById("sendButton");
 const messages = document.getElementById("messages");
 
 let db;
-let auth;
 let currentUser = null;
 let sending = false;
 
@@ -364,7 +299,7 @@ function showMessage(data) {
 async function startChat() {
   try {
     const app = initializeApp(firebaseConfig);
-    auth = getAuth(app);
+    const auth = getAuth(app);
     db = getFirestore(app);
 
     status.textContent = "در حال ورود ناشناس...";
@@ -455,7 +390,6 @@ messageInput.addEventListener("keydown", (event) => {
     sendMessage();
   }
 });
-
 
 startChat();
 </script>
