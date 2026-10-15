@@ -1090,6 +1090,81 @@ const adminLogout = document.getElementById("adminLogout");
 ```
 let loading = false;
 let sending = false;
+  ```javascript
+function isAdmin() {
+  return !!currentUser && currentUser.id === ADMIN_UID;
+}
+
+function updateAdminUI() {
+  const admin = isAdmin();
+
+  adminStatus.textContent = admin
+    ? "✅ با حساب مدیر وارد شدی."
+    : currentUser
+      ? "این حساب دسترسی مدیریت ندارد."
+      : "برای مدیریت پیام‌ها وارد حساب مدیر شو.";
+
+  adminEmail.hidden = admin;
+  adminLogin.hidden = admin;
+  adminLogout.hidden = !admin;
+
+  lastMessageIds = "";
+}
+
+adminLogin.addEventListener("click", async () => {
+  if (!supabase) {
+    adminStatus.textContent = "اتصال به سرور برقرار نیست.";
+    return;
+  }
+
+  const email = adminEmail.value.trim();
+
+  if (!email) {
+    adminStatus.textContent = "اول ایمیل حساب مدیر را وارد کن.";
+    return;
+  }
+
+  adminLogin.disabled = true;
+
+  try {
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: window.location.href,
+        shouldCreateUser: false
+      }
+    });
+
+    if (error) throw error;
+
+    adminStatus.textContent =
+      "اگر ارسال موفق باشد، لینک ورود به ایمیلت می‌آید. پوشه Spam را هم بررسی کن.";
+  } catch (error) {
+    console.error("Admin sign-in:", error);
+    adminStatus.textContent =
+      error.message?.toLowerCase().includes("rate limit")
+        ? "محدودیت ارسال ایمیل فعال است؛ فعلاً دوباره درخواست نده."
+        : "ارسال لینک ورود ناموفق بود؛ تنظیمات ورود Supabase را بررسی کن.";
+  } finally {
+    adminLogin.disabled = false;
+  }
+});
+
+adminLogout.addEventListener("click", async () => {
+  if (!supabase) return;
+
+  const { error } = await supabase.auth.signOut();
+
+  if (error) {
+    adminStatus.textContent = "خروج ناموفق بود.";
+    return;
+  }
+
+  currentUser = null;
+  updateAdminUI();
+  await loadMessages();
+});
+```
 let lastMessageIds = "";
 const adminPanel = document.getElementById("adminPanel");
 const adminStatus = document.getElementById("adminStatus");
@@ -1319,6 +1394,47 @@ const signature = (isAdmin() ? "admin|" : "guest|") +
     body.textContent = row.text || "";
 
     card.append(top, body);
+    ```javascript
+if (isAdmin()) {
+  const deleteButton = document.createElement("button");
+  deleteButton.type = "button";
+  deleteButton.className = "btn";
+  deleteButton.textContent = "🗑️ حذف پیام";
+  deleteButton.style.marginTop = "10px";
+
+  deleteButton.addEventListener("click", async () => {
+    if (!isAdmin()) return;
+    if (!confirm("این پیام حذف شود؟")) return;
+
+    deleteButton.disabled = true;
+
+    const { data, error } = await supabase
+      .from("messages")
+      .delete()
+      .eq("id", row.id)
+      .select("id");
+
+    if (error) {
+      console.error(error);
+      setStatus("حذف ناموفق بود؛ دسترسی مدیر را بررسی کن.");
+      deleteButton.disabled = false;
+      return;
+    }
+
+    if (!data || data.length === 0) {
+      setStatus("حذف انجام نشد؛ مجوز مدیر تأیید نشد.");
+      deleteButton.disabled = false;
+      return;
+    }
+
+    setStatus("پیام با موفقیت حذف شد 💜");
+    lastMessageIds = "";
+    await loadMessages();
+  });
+
+  card.append(deleteButton);
+}
+```
     if (isAdmin()) {
   const deleteButton = document.createElement("button");
 
@@ -1473,7 +1589,18 @@ async function startChat() {
       SUPABASE_URL,
       SUPABASE_PUBLISHABLE_KEY
     );
+    ```javascript
 const { data: { session } } = await supabase.auth.getSession();
+currentUser = session?.user ?? null;
+updateAdminUI();
+
+supabase.auth.onAuthStateChange((_event, session) => {
+  currentUser = session?.user ?? null;
+  updateAdminUI();
+  loadMessages();
+});
+```
+
 
 currentUser = session?.user ?? null;
 updateAdminUI();
