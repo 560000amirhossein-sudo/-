@@ -66,9 +66,10 @@ button{cursor:pointer;border:0;background:none}
 .emo.open{display:flex}.emo button{font-size:22px;width:38px;height:38px;border-radius:10px}.emo button:hover{background:#ffffff14}
 .prev{display:none;align-items:center;gap:10px;padding:8px 14px;background:var(--pn);border-top:1px solid var(--bd);font-size:12px;color:#c4b5fd}
 .prev.show{display:flex}.prev img{width:48px;height:48px;border-radius:8px;object-fit:cover}
-.ov{position:fixed;inset:0;z-index:50;background:#000b;display:none;align-items:center;justify-content:center;padding:16px;overflow-y:auto}
+.ov{position:fixed;inset:0;z-index:50;background:#000b;display:none;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+#lb{align-items:center}
 .ov.open{display:flex}
-.card{width:min(400px,100%);background:linear-gradient(145deg,#171020,#100b1c);border:1px solid var(--bd);border-radius:22px;padding:24px;box-shadow:0 25px 80px #000a;animation:in .25s}
+.card{margin:auto;width:min(400px,100%);background:linear-gradient(145deg,#171020,#100b1c);border:1px solid var(--bd);border-radius:22px;padding:24px;box-shadow:0 25px 80px #000a;animation:in .25s}
 .card h3{margin-bottom:14px;font-size:18px}
 .card label{display:block;font-size:12px;color:var(--mu);margin:12px 0 5px}
 .card input[type=text],.card input[type=email],.card input[type=password],.card textarea{width:100%;padding:11px 13px;border-radius:12px;border:1px solid var(--bd);background:var(--pn2);outline:0}
@@ -318,14 +319,17 @@ function authErr(e){const m=String(e?.message||e||"");
  if(/Invalid login/i.test(m))return"ایمیل یا رمز عبور اشتباه است.";
  if(/not confirmed/i.test(m))return"ایمیل هنوز تأیید نشده؛ لینک ارسال‌شده به ایمیلت را باز کن.";
  if(/already registered/i.test(m))return"این ایمیل قبلاً ثبت شده است.";
+ if(/email rate limit|over_email_send_rate_limit/i.test(m+(e?.code||"")))return"سقف ارسال ایمیل تأیید پر شده است؛ حدود یک ساعت صبر کن یا در Supabase تأیید ایمیل را خاموش کن.";
+ if(/sending (confirmation|recovery)|error sending/i.test(m))return"ارسال ایمیل تأیید ناموفق بود؛ تنظیمات ایمیل Supabase را بررسی کن.";
+ if(/redirect/i.test(m))return"آدرس سایت در تنظیمات Supabase (Redirect URLs) مجاز نشده است.";
  if(e?.status===429||/rate limit|too many/i.test(m))return"تعداد درخواست‌ها زیاد است؛ کمی بعد دوباره تلاش کن.";
  if(/password/i.test(m))return"رمز عبور پذیرفته نشد؛ رمز قوی‌تری انتخاب کن.";
  if(/Database error/i.test(m))return"ثبت‌نام انجام نشد؛ نام کاربری معتبر نیست یا قبلاً گرفته شده است.";
  if(/fetch|network/i.test(m)||!navigator.onLine)return"اتصال اینترنت برقرار نیست.";
- return"خطایی رخ داد؛ دوباره تلاش کن.";}
+ return"خطایی رخ داد؛ دوباره تلاش کن."+(m?" ("+m.slice(0,120)+")":"");}
 async function taken(u){const {data,error}=await sb.from("profiles").select("id").ilike("username",likeEsc(u)).limit(1);if(error)throw error;return data.length>0;}
 function gate(mode){
- const I=(id,l,t)=>`<label>${l}</label><input type="${t}" id="${id}" dir="ltr" autocomplete="off">`;
+ const I=(id,l,t)=>`<label>${l}</label><input type="${t}" id="${id}" dir="ltr" autocomplete="${t==="password"?(mode==="login"?"current-password":"new-password"):t==="email"?"email":"off"}" autocapitalize="off" autocorrect="off" spellcheck="false"${t==="email"?' inputmode="email"':""}>`;
  const T={login:"ورود",signup:"ثبت‌نام",forgot:"بازیابی رمز عبور",recovery:"رمز عبور جدید",complete:"تکمیل پروفایل"}[mode];
  $("gBody").innerHTML=`<div class="logo">NIGHT <b style="color:#c084fc">CHAT</b></div><h3>${T}</h3>`
  +(mode==="signup"||mode==="complete"?I("gU","نام کاربری (انگلیسی، عدد و _ ؛ ۳ تا ۲۰ کاراکتر)","text")+`<label>نام نمایشی</label><input type="text" id="gD" maxlength="30">`:"")
@@ -337,7 +341,7 @@ function gate(mode){
  $("gBody").onkeydown=e=>{if(e.key==="Enter")$("gGo").click();};
  const a=$("l1"),b=$("l2");if(a)a.onclick=()=>mode==="login"?gate("signup"):mode==="complete"?sb.auth.signOut():gate("login");if(b)b.onclick=()=>gate("forgot");}
 async function go(mode){
- const v=id=>$(id)?$(id).value.trim():"",p=$("gP")?$("gP").value:"";
+ const v=id=>{const x=$(id)?$(id).value.trim():"";return id==="gE"?x.toLowerCase():x;},p=$("gP")?$("gP").value:"";
  if(mode==="login"){if(!EMRE.test(v("gE"))||!p)return gm("ایمیل و رمز عبور را وارد کن.");const {error}=await sb.auth.signInWithPassword({email:v("gE"),password:p});if(error)throw error;}
  else if(mode==="signup"||mode==="complete"){
   const u=v("gU"),d=v("gD")||u;
