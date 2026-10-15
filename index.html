@@ -83,6 +83,10 @@ button{cursor:pointer;border:0;background:none}
  .app.open .side{display:none}.app.open .main{display:flex}.back{display:grid}
  .row{max-width:92%}
 }
+.atm{position:absolute;bottom:64px;inset-inline-start:56px;display:none;flex-direction:column;gap:2px;padding:6px;min-width:150px;background:var(--pn2);border:1px solid var(--bd);border-radius:14px;box-shadow:0 12px 30px #000a;z-index:6;animation:in .15s}
+.atm.open{display:flex}
+.atm button{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;font-size:13px;text-align:start}
+.atm button:hover{background:#a855f71f}
 </style></head><body>
 <div class="app" id="app">
  <aside class="side">
@@ -112,9 +116,10 @@ button{cursor:pointer;border:0;background:none}
    <div class="prev" id="prev"><img id="prevImg" alt=""><span style="flex:1">عکس آماده ارسال</span><button class="ib" id="prevX">✕</button></div>
    <div class="comp" id="comp">
     <div class="emo" id="emo"></div>
+    <div class="atm" id="atm"><button id="atI" type="button">🖼️ تصویر</button><button id="atV" type="button">🎬 ویدیو</button></div>
     <button class="ib" id="emoB">😊</button>
     <button class="ib" id="attB" title="پیوست عکس">📎</button>
-    <input type="file" id="file" accept="image/*" hidden>
+    <input type="file" id="file" accept="image/*,video/*" hidden>
     <textarea id="txt" rows="1" maxlength="1000" placeholder="پیام بنویس..."></textarea>
     <button class="ib send" id="sendB">➤</button>
    </div>
@@ -135,6 +140,11 @@ let D;try{D=JSON.parse(localStorage.getItem(LSK));}catch{}
 D=D||{me:{name:"مهمان"+(1000+Math.floor(Math.random()*9000)),avatar:null},chats:[],msgs:{},seen:""};
 if(!D.chats.some(c=>c.id===DEF))D.chats.unshift({id:DEF,type:"group",title:"NIGHT CHAT عمومی",desc:"گروه عمومی همه‌ی اعضا",role:"member",pub:true});
 const save=()=>{try{localStorage.setItem(LSK,JSON.stringify(D));}catch{alert("حافظه‌ی مرورگر پر شد.");}};save();
+const PUB="https://jpsttfuajyfvysqydqqj.supabase.co/storage/v1/object/public/",BUCKET="chat-media",MAXV=20*1024*1024;
+let mediaOk=true,pendingKind="image",pendingFile=null;
+const safeM=u=>typeof u==="string"&&u.startsWith(PUB)?u:"";
+async function upload(blob,ext,type){const p=Date.now()+"-"+Math.random().toString(36).slice(2,8)+"."+ext;const {error}=await sb.storage.from(BUCKET).upload(p,blob,{contentType:type});if(error)throw error;return sb.storage.from(BUCKET).getPublicUrl(p).data.publicUrl;}
+function clearPending(){pending=null;pendingFile=null;pendingKind="image";$("prev").classList.remove("show");$("prevImg").style.display="";$("prev").querySelector("span").textContent="عکس آماده ارسال";}
 let cur=null,tab="all",query="",pending=null,pubMsgs=[],pubErr=false,sig="";
 const safe=u=>typeof u==="string"&&u.startsWith("data:image/")?u:"";
 const hue=n=>{let h=0;for(const c of String(n||""))h=(h*31+c.charCodeAt(0))%360;return h;};
@@ -149,10 +159,12 @@ function view(){return D.chats.map(c=>{
  if(c.id===DEF){const l=pubMsgs[pubMsgs.length-1];return{...c,last:l?.text,at:l?.created_at||"",unread:pubMsgs.filter(m=>m.created_at>D.seen&&m.name!==D.me.name).length};}
  return{...c,unread:0,at:c.at||""};}).sort((a,b)=>String(b.at).localeCompare(String(a.at)));}
 function msgsOf(c){
- if(c.id===DEF)return pubMsgs.map(m=>({id:m.id,text:m.text,img:null,at:m.created_at,mine:m.name===D.me.name,name:m.name}));
+ if(c.id===DEF)return pubMsgs.map(m=>({id:m.id,text:m.text,img:m.media_type==="image"?m.media_url:null,vid:m.media_type==="video"?m.media_url:null,at:m.created_at,mine:m.name===D.me.name,name:m.name}));
  return(D.msgs[c.id]||[]).map(m=>({...m,mine:true,name:D.me.name,avatar:D.me.avatar}));}
 async function pull(){
- const r=await sb.from("messages").select("id,name,text,created_at").order("created_at",{ascending:true}).limit(100);
+ const q=c=>sb.from("messages").select(c).order("created_at",{ascending:true}).limit(100);
+ let r=await q("id,name,text,created_at,media_url,media_type");
+ if(r.error){r=await q("id,name,text,created_at");mediaOk=false;}else mediaOk=true;
  pubErr=!!r.error;if(!r.error)pubMsgs=r.data;
 }
 const canPost=()=>cur&&(cur.type!=="channel"||cur.role==="owner");
@@ -187,9 +199,9 @@ function renderMsgs(force){
  const box=$("msgs"),near=box.scrollHeight-box.scrollTop-box.clientHeight<120||force;
  box.innerHTML=data.length?"":`<div class="empty">هنوز پیامی نیست. اولین نفر باش! 👋</div>`;
  for(const m of data){
-  const img=safe(m.img),r=document.createElement("div");r.className="row"+(m.mine?" me":"");
-  r.innerHTML=(m.mine||cur.type!=="group"?"":avHtml(m.avatar,m.name,"s"))+`<div class="bub">${m.mine||cur.type!=="group"?"":`<div class="who">${esc(m.name)}</div>`}${m.text?esc(m.text):""}${img?`<img class="pic" src="${img}" alt="">`:""}<div class="mt"><span>${fmt(m.at)}</span>${cur.id!==DEF?`<button class="del">حذف</button>`:""}</div></div>`;
-  const pic=r.querySelector(".pic");if(pic)pic.onclick=()=>{$("lbImg").src=img;$("lb").classList.add("open");};
+  const img=safe(m.img)||safeM(m.img),vid=safeM(m.vid),r=document.createElement("div");r.className="row"+(m.mine?" me":"");
+  r.innerHTML=(m.mine||cur.type!=="group"?"":avHtml(m.avatar,m.name,"s"))+`<div class="bub">${m.mine||cur.type!=="group"?"":`<div class="who">${esc(m.name)}</div>`}${m.text?esc(m.text):""}${img?`<img class="pic" src="${img}" alt="">`:""}${vid?`<video class="pic" src="${vid}" controls preload="metadata" playsinline style="cursor:default"></video>`:""}<div class="mt"><span>${fmt(m.at)}</span>${cur.id!==DEF?`<button class="del">حذف</button>`:""}</div></div>`;
+  const pic=r.querySelector("img.pic");if(pic)pic.onclick=()=>{$("lbImg").src=img;$("lb").classList.add("open");};
   const d=r.querySelector(".del");if(d)d.onclick=()=>{if(!confirm("این پیام حذف شود؟"))return;D.msgs[cur.id]=(D.msgs[cur.id]||[]).filter(z=>z.id!==m.id);save();renderMsgs(true);renderList();};
   box.appendChild(r);
  }
@@ -204,29 +216,47 @@ async function send(){
  $("sendB").disabled=true;
  try{
   if(cur.id===DEF){
-   if(pending){alert("ارسال عکس در گروه عمومی فعلاً ممکن نیست.");$("sendB").disabled=false;return;}
-   const {error}=await sb.from("messages").insert({name:D.me.name,text});if(error)throw error;await pull();
+   const row={name:D.me.name,text};
+   if(pending){
+    if(!mediaOk){alert("برای ارسال عکس و ویدیو باید فایل media_setup.sql را در Supabase اجرا کنی.");$("sendB").disabled=false;return;}
+    row.media_type=pendingKind;
+    row.media_url=pendingKind==="video"?await upload(pendingFile,pendingFile.type.includes("quicktime")?"mov":pendingFile.type.includes("webm")?"webm":"mp4",pendingFile.type):await upload(pending,"jpg","image/jpeg");
+   }
+   const {error}=await sb.from("messages").insert(row);if(error)throw error;await pull();
    D.seen=pubMsgs[pubMsgs.length-1]?.created_at||D.seen;
   }else{
+   if(pendingKind==="video"){alert("ویدیو فقط در گروه عمومی ارسال می‌شود.");$("sendB").disabled=false;return;}
    const m={id:"m"+Date.now(),text,img:pending?await b2d(pending):null,at:new Date().toISOString()};
    (D.msgs[cur.id]=D.msgs[cur.id]||[]).push(m);
    const c=D.chats.find(x=>x.id===cur.id);c.last=text;c.img=!!m.img;c.at=m.at;
   }
-  save();$("txt").value="";$("txt").style.height="";pending=null;$("prev").classList.remove("show");
+  save();$("txt").value="";$("txt").style.height="";clearPending();
   renderMsgs(true);renderList();
- }catch(e){console.error(e);alert("ارسال ناموفق بود.");}
+ }catch(e){console.error(e);alert("ارسال ناموفق بود؛ مطمئن شو media_setup.sql اجرا شده و حجم ویدیو کمتر از ۲۰ مگابایت است.");}
  $("sendB").disabled=false;
 }
 $("sendB").onclick=send;
 $("txt").onkeydown=e=>{if(e.key==="Enter"&&!e.shiftKey&&matchMedia("(min-width:761px)").matches){e.preventDefault();send();}};
 $("txt").oninput=()=>{$("txt").style.height="auto";$("txt").style.height=Math.min($("txt").scrollHeight,120)+"px";};
-$("attB").onclick=()=>$("file").click();
-$("file").onchange=async()=>{const f=$("file").files[0];$("file").value="";if(!f||!f.type.startsWith("image/"))return;try{pending=await resize(f,640,false);$("prevImg").src=URL.createObjectURL(pending);$("prev").classList.add("show");}catch{alert("عکس قابل خواندن نبود.");}};
-$("prevX").onclick=()=>{pending=null;$("prev").classList.remove("show");};
+$("attB").onclick=e=>{e.stopPropagation();$("emo").classList.remove("open");$("atm").classList.toggle("open");};
+const pickFile=acc=>{$("atm").classList.remove("open");$("file").accept=acc;$("file").click();};
+$("atI").onclick=()=>pickFile("image/*");$("atV").onclick=()=>pickFile("video/*");
+document.addEventListener("click",e=>{if(!e.target.closest("#atm"))$("atm").classList.remove("open");});
+$("file").onchange=async()=>{
+ const f=$("file").files[0];$("file").value="";if(!f)return;
+ if(f.type.startsWith("video/")){
+  if(!["video/mp4","video/webm","video/quicktime"].includes(f.type)){alert("فقط mp4، webm یا mov پشتیبانی می‌شود.");return;}
+  if(f.size>MAXV){alert("حجم ویدیو باید کمتر از ۲۰ مگابایت باشد.");return;}
+  clearPending();pending=f;pendingFile=f;pendingKind="video";$("prevImg").style.display="none";$("prev").querySelector("span").textContent="🎬 ویدیو آماده ارسال: "+f.name;$("prev").classList.add("show");return;
+ }
+ if(!f.type.startsWith("image/"))return;
+ try{clearPending();pending=await resize(f,cur&&cur.id===DEF?1024:640,false);$("prevImg").src=URL.createObjectURL(pending);$("prev").classList.add("show");}catch{alert("عکس قابل خواندن نبود.");}
+};
+$("prevX").onclick=clearPending;
 const EM="😀 😂 🥹 😍 😎 🤩 😭 😡 🥳 😴 🤔 👍 👎 👏 🙏 💜 🔥 ✨ 🎮 🕹️ 👾 🏆 ⚔️ 🛡️ 💀 👑 🌙 ⭐ 💯 🎉 ❤️ 😅 🤝 👀 🫡".split(" ");
 $("emo").innerHTML=EM.map(e=>`<button>${e}</button>`).join("");
 $("emo").onclick=e=>{if(e.target.tagName==="BUTTON"){$("txt").value+=e.target.textContent;$("txt").focus();}};
-$("emoB").onclick=()=>$("emo").classList.toggle("open");
+$("emoB").onclick=()=>{$("atm").classList.remove("open");$("emo").classList.toggle("open");};
 
 // ---- پنجره‌ها ----
 const modal=h=>{$("mdBody").innerHTML=h;$("md").classList.add("open");},close=()=>$("md").classList.remove("open");
