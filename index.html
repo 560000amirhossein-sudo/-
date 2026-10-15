@@ -232,7 +232,7 @@ async function send(){
   }
   save();$("txt").value="";$("txt").style.height="";clearPending();
   renderMsgs(true);renderList();
- }catch(e){console.error(e);alert("ارسال ناموفق بود؛ مطمئن شو media_setup.sql اجرا شده و حجم ویدیو کمتر از ۲۰ مگابایت است.");}
+ }catch(e){console.error(e);alert("ارسال ناموفق بود.\n\nجزئیات خطا (این را برای رفع مشکل بفرست):\n"+(e&&(e.message||e.error_description||JSON.stringify(e))||e));}
  $("sendB").disabled=false;
 }
 $("sendB").onclick=send;
