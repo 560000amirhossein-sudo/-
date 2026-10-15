@@ -315,7 +315,11 @@ const likeEsc=t=>t.replace(/[\\%_]/g,"\\$&"),pName=p=>p?(p.display_name||p.usern
 const showGate=v=>{$("gate").style.display=v?"flex":"none";};
 const redir=()=>/^https?:$/.test(location.protocol)?location.origin+location.pathname:undefined;
 const gm=t=>{const e=$("gM");if(e)e.textContent=t||"";};
-function authErr(e){const m=String(e?.message||e||"");
+const ser=e=>{try{if(typeof e==="string")return e;if(e instanceof Error)return e.name+": "+(typeof e.message==="string"?e.message:JSON.stringify(e.message));return JSON.stringify(e,Object.getOwnPropertyNames(Object(e)));}catch{return String(e);}};
+function showErr(t){console.error(t);if($("gM")&&$("gate").style.display!=="none")gm("⚠ "+String(t).slice(0,300));else callToast("⚠ "+String(t).slice(0,200));}
+addEventListener("unhandledrejection",ev=>showErr(ser(ev.reason)));
+addEventListener("error",ev=>showErr(ev.message||ser(ev.error)));
+function authErr(e){const m=typeof e?.message==="string"?e.message:ser(e);
  if(/Invalid login/i.test(m))return"ایمیل یا رمز عبور اشتباه است.";
  if(/not confirmed/i.test(m))return"ایمیل هنوز تأیید نشده؛ لینک ارسال‌شده به ایمیلت را باز کن.";
  if(/already registered/i.test(m))return"این ایمیل قبلاً ثبت شده است.";
@@ -326,7 +330,7 @@ function authErr(e){const m=String(e?.message||e||"");
  if(/password/i.test(m))return"رمز عبور پذیرفته نشد؛ رمز قوی‌تری انتخاب کن.";
  if(/Database error/i.test(m))return"ثبت‌نام انجام نشد؛ نام کاربری معتبر نیست یا قبلاً گرفته شده است.";
  if(/fetch|network/i.test(m)||!navigator.onLine)return"اتصال اینترنت برقرار نیست.";
- return"خطایی رخ داد؛ دوباره تلاش کن."+(m?" ("+m.slice(0,120)+")":"");}
+ return"خطایی رخ داد؛ دوباره تلاش کن. [کد: "+[e?.name,e?.status,e?.code,m.slice(0,150)].filter(Boolean).join(" | ")+"]";}
 async function taken(u){const {data,error}=await sb.from("profiles").select("id").ilike("username",likeEsc(u)).limit(1);if(error)throw error;return data.length>0;}
 function gate(mode){
  const I=(id,l,t)=>`<label>${l}</label><input type="${t}" id="${id}" dir="ltr" autocomplete="${t==="password"?(mode==="login"?"current-password":"new-password"):t==="email"?"email":"off"}" autocapitalize="off" autocorrect="off" spellcheck="false"${t==="email"?' inputmode="email"':""}>`;
@@ -361,7 +365,8 @@ async function go(mode){
  else if(mode==="forgot"){if(!EMRE.test(v("gE")))return gm("ایمیل معتبر نیست.");const {error}=await sb.auth.resetPasswordForEmail(v("gE"),{redirectTo:redir()});if(error)throw error;gm("اگر این ایمیل ثبت شده باشد، لینک بازیابی ارسال می‌شود.");}
  else if(mode==="recovery"){if(p.length<8)return gm("رمز عبور حداقل ۸ کاراکتر باشد.");const {error}=await sb.auth.updateUser({password:p});if(error)throw error;recov=false;history.replaceState(null,"",location.pathname);const {data}=await sb.auth.getSession();boot(data.session?data.session.user:null);}
 }
-async function boot(user){
+async function boot(u){try{await boot0(u);}catch(e){showErr("boot: "+ser(e));}}
+async function boot0(user){
  if(!user){endLocal();closeInc();stopCallRT();ME=null;PROF=null;stopRT();PC=[];PM={};UR=[];cur=null;$("chat").style.display="none";$("ph").style.display="grid";$("app").classList.remove("open");gate("login");showGate(true);renderList();return;}
  ME=user;
  const {data,error}=await sb.from("profiles").select("id,username,display_name,avatar_url").eq("id",user.id).maybeSingle();
