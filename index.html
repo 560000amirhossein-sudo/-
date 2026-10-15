@@ -128,11 +128,12 @@ button{cursor:pointer;border:0;background:none}
  </main>
 </div>
 <div class="ov" id="md"><div class="card" id="mdBody"></div></div>
+<div id="gate" class="ov"><div class="card" id="gBody"></div></div>
 <div class="ov" id="lb" style="cursor:zoom-out"><img id="lbImg" alt=""></div>
 
 <script type="module">
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
-const sb=createClient("https://jpsttfuajyfvysqydqqj.supabase.co","sb_publishable_D_D03bZTtXlKxPgz74MYfQ_Vvpmjn3x",{auth:{persistSession:false,autoRefreshToken:false}});
+const sb=createClient("https://jpsttfuajyfvysqydqqj.supabase.co","sb_publishable_D_D03bZTtXlKxPgz74MYfQ_Vvpmjn3x",{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const LSK="nc_new_v1",DEF="public",TL={private:"خصوصی",group:"گروه",channel:"کانال"};
@@ -146,7 +147,7 @@ const safeM=u=>typeof u==="string"&&u.startsWith(PUB)?u:"";
 async function upload(blob,ext,type){const p=Date.now()+"-"+Math.random().toString(36).slice(2,8)+"."+ext;const {error}=await sb.storage.from(BUCKET).upload(p,blob,{contentType:type});if(error)throw error;return sb.storage.from(BUCKET).getPublicUrl(p).data.publicUrl;}
 function clearPending(){pending=null;pendingFile=null;pendingKind="image";$("prev").classList.remove("show");$("prevImg").style.display="";$("prev").querySelector("span").textContent="عکس آماده ارسال";}
 let cur=null,tab="all",query="",pending=null,pubMsgs=[],pubErr=false,sig="";
-const safe=u=>typeof u==="string"&&u.startsWith("data:image/")?u:"";
+const safe=u=>typeof u==="string"&&(u.startsWith("data:image/")||u.startsWith(PUB+"avatars/"))?u:"";
 const hue=n=>{let h=0;for(const c of String(n||""))h=(h*31+c.charCodeAt(0))%360;return h;};
 function avHtml(url,name,cls=""){const u=safe(url);return `<div class="av ${cls}" style="${u?"":`background:hsl(${hue(name)} 55% 42%)`}">${u?`<img src="${u}" alt="">`:esc([...String(name||"?")][0])}</div>`;}
 function setAv(el,url,name){const u=safe(url);el.style.background=u?"":`hsl(${hue(name)} 55% 42%)`;el.innerHTML=u?`<img src="${u}" alt="">`:esc([...String(name||"?")][0]);}
@@ -157,9 +158,10 @@ function resize(file,max,square){return new Promise((ok,no)=>{const u=URL.create
 // ---- داده ----
 function view(){return D.chats.map(c=>{
  if(c.id===DEF){const l=pubMsgs[pubMsgs.length-1];return{...c,last:l?.text,at:l?.created_at||"",unread:pubMsgs.filter(m=>m.created_at>D.seen&&m.name!==D.me.name).length};}
- return{...c,unread:0,at:c.at||""};}).sort((a,b)=>String(b.at).localeCompare(String(a.at)));}
+ return{...c,unread:0,at:c.at||""};}).concat(PC.map(c=>({...c,unread:c.unread||0,at:c.at||""}))).sort((a,b)=>String(b.at).localeCompare(String(a.at)));}
 function msgsOf(c){
  if(c.id===DEF)return pubMsgs.map(m=>({id:m.id,text:m.text,img:m.media_type==="image"?m.media_url:null,vid:m.media_type==="video"?m.media_url:null,at:m.created_at,mine:m.name===D.me.name,name:m.name}));
+ if(c.type==="private")return(PM[c.peer]||[]).map(m=>({id:m.id,text:m.text,at:m.created_at,mine:m.sender_id===ME.id,name:pName(P[m.sender_id])}));
  return(D.msgs[c.id]||[]).map(m=>({...m,mine:true,name:D.me.name,avatar:D.me.avatar}));}
 async function pull(){
  const q=c=>sb.from("messages").select(c).order("created_at",{ascending:true}).limit(100);
@@ -177,22 +179,23 @@ function renderList(){
  let rows=view();
  if(query)rows=rows.filter(c=>c.title.toLowerCase().includes(query.toLowerCase()));else rows=rows.filter(c=>tab==="all"||c.type===tab);
  let h=rows.map(itemHtml).join("");
- if(!rows.length)h=`<div class="empty">${query?"نتیجه‌ای پیدا نشد.":tab==="private"?"گفتگوی خصوصی بعد از راه‌اندازی حساب کاربری فعال می‌شود.":tab==="group"?"گروهی نداری.<br>با «گروه جدید» یکی بساز.":tab==="channel"?"کانالی نداری.<br>با «کانال جدید» یکی بساز.":"گفتگویی وجود ندارد."}</div>`;
- L.innerHTML=h;L.querySelectorAll(".it").forEach(b=>b.onclick=()=>openChat(b.dataset.id));
+ if(!rows.length&&!(query&&UR.length))h=`<div class="empty">${query?"نتیجه‌ای پیدا نشد.":tab==="private"?"گفتگوی خصوصی نداری.<br>نام کاربری را جست‌وجو کن و پیام بده.":tab==="group"?"گروهی نداری.<br>با «گروه جدید» یکی بساز.":tab==="channel"?"کانالی نداری.<br>با «کانال جدید» یکی بساز.":"گفتگویی وجود ندارد."}</div>`;
+ if(query&&UR.length)h+=`<div class="sec">کاربران</div>`+UR.filter(p=>!PC.some(c=>c.peer===p.id)).map(p=>itemHtml({...mkPC(p.id),unread:0})).join("");L.innerHTML=h;L.querySelectorAll(".it").forEach(b=>b.onclick=()=>openChat(b.dataset.id));
 }
-$("q").oninput=()=>{query=$("q").value.trim();renderList();};
+let st;$("q").oninput=()=>{query=$("q").value.trim();UR=[];renderList();clearTimeout(st);if(!ME||query.length<2)return;st=setTimeout(async()=>{const q0=query,{data}=await sb.from("profiles").select("id,username,display_name,avatar_url").ilike("username","%"+likeEsc(q0)+"%").neq("id",ME.id).limit(20);if(q0!==query)return;UR=data||[];UR.forEach(p=>P[p.id]=p);renderList();},300);};
 $("qx").onclick=()=>{$("q").value="";query="";renderList();};
 $("tabs").onclick=e=>{const b=e.target.closest(".tab");if(!b)return;tab=b.dataset.t;document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("on",x===b));renderList();};
 
 // ---- گفتگو ----
 function openChat(id){
- const c=view().find(x=>x.id===id);if(!c)return;cur=c;sig="";
+ if(id.startsWith("u:")&&ME&&UUID.test(id.slice(2))&&!view().some(x=>x.id===id))PC.push(mkPC(id.slice(2)));const c=view().find(x=>x.id===id);if(!c)return;cur=c;sig="";
  $("ph").style.display="none";$("chat").style.display="flex";$("app").classList.add("open");
  setAv($("hAv"),c.avatar,c.title);$("hNm").textContent=c.title;
- $("hSub").textContent=id===DEF&&pubErr?"اتصال برقرار نیست":TL[c.type]+(c.pub===false?" خصوصی":" عمومی");
- const p=canPost();$("comp").style.display=p?"flex":"none";$("joinbar").style.display=p?"none":"block";$("joinbar").textContent="فقط مدیر کانال می‌تواند پیام ارسال کند.";
+ $("hSub").textContent=c.type==="private"?"@"+c.uname:id===DEF&&pubErr?"اتصال برقرار نیست":TL[c.type]+(c.pub===false?" خصوصی":" عمومی");
+ const p=canPost();$("attB").style.display=c.type==="private"?"none":"";$("comp").style.display=p?"flex":"none";$("joinbar").style.display=p?"none":"block";$("joinbar").textContent="فقط مدیر کانال می‌تواند پیام ارسال کند.";
  if(id===DEF&&pubMsgs.length){D.seen=pubMsgs[pubMsgs.length-1].created_at;save();}
  renderMsgs(true);renderList();
+ if(c.type==="private")loadPM(c.peer).then(()=>{if(cur&&cur.id===c.id){renderMsgs(true);}renderList();});
 }
 function renderMsgs(force){
  if(!cur)return;const data=msgsOf(cur),s=cur.id+data.map(m=>m.id).join();if(s===sig&&!force)return;sig=s;
@@ -200,7 +203,7 @@ function renderMsgs(force){
  box.innerHTML=data.length?"":`<div class="empty">هنوز پیامی نیست. اولین نفر باش! 👋</div>`;
  for(const m of data){
   const img=safe(m.img)||safeM(m.img),vid=safeM(m.vid),r=document.createElement("div");r.className="row"+(m.mine?" me":"");
-  r.innerHTML=(m.mine||cur.type!=="group"?"":avHtml(m.avatar,m.name,"s"))+`<div class="bub">${m.mine||cur.type!=="group"?"":`<div class="who">${esc(m.name)}</div>`}${m.text?esc(m.text):""}${img?`<img class="pic" src="${img}" alt="">`:""}${vid?`<video class="pic" src="${vid}" controls preload="metadata" playsinline style="cursor:default"></video>`:""}<div class="mt"><span>${fmt(m.at)}</span>${cur.id!==DEF?`<button class="del">حذف</button>`:""}</div></div>`;
+  r.innerHTML=(m.mine||cur.type!=="group"?"":avHtml(m.avatar,m.name,"s"))+`<div class="bub">${m.mine||cur.type!=="group"?"":`<div class="who">${esc(m.name)}</div>`}${m.text?esc(m.text):""}${img?`<img class="pic" src="${img}" alt="">`:""}${vid?`<video class="pic" src="${vid}" controls preload="metadata" playsinline style="cursor:default"></video>`:""}<div class="mt"><span>${fmt(m.at)}</span>${cur.id!==DEF&&cur.type!=="private"?`<button class="del">حذف</button>`:""}</div></div>`;
   const pic=r.querySelector("img.pic");if(pic)pic.onclick=()=>{$("lbImg").src=img;$("lb").classList.add("open");};
   const d=r.querySelector(".del");if(d)d.onclick=()=>{if(!confirm("این پیام حذف شود؟"))return;D.msgs[cur.id]=(D.msgs[cur.id]||[]).filter(z=>z.id!==m.id);save();renderMsgs(true);renderList();};
   box.appendChild(r);
@@ -224,6 +227,8 @@ async function send(){
    }
    const {error}=await sb.from("messages").insert(row);if(error)throw error;await pull();
    D.seen=pubMsgs[pubMsgs.length-1]?.created_at||D.seen;
+  }else if(cur.type==="private"){
+   if(!await sendPM(text)){$("sendB").disabled=false;return;}
   }else{
    if(pendingKind==="video"){alert("ویدیو فقط در گروه عمومی ارسال می‌شود.");$("sendB").disabled=false;return;}
    const m={id:"m"+Date.now(),text,img:pending?await b2d(pending):null,at:new Date().toISOString()};
@@ -232,7 +237,7 @@ async function send(){
   }
   save();$("txt").value="";$("txt").style.height="";clearPending();
   renderMsgs(true);renderList();
- }catch(e){console.error(e);alert("ارسال ناموفق بود.\n\nجزئیات خطا (این را برای رفع مشکل بفرست):\n"+(e&&(e.message||e.error_description||JSON.stringify(e))||e));}
+ }catch(e){console.error(e);alert("ارسال ناموفق بود؛ مطمئن شو media_setup.sql اجرا شده و حجم ویدیو کمتر از ۲۰ مگابایت است.");}
  $("sendB").disabled=false;
 }
 $("sendB").onclick=send;
@@ -271,15 +276,114 @@ function newChat(kind){
 }
 $("newG").onclick=()=>newChat("group");$("newC").onclick=()=>newChat("channel");
 $("info").onclick=()=>{if(!cur)return;
- modal(`<h3>${esc(cur.title)}</h3><p style="color:var(--mu);font-size:13px;line-height:2">${TL[cur.type]}${cur.desc?`<br>${esc(cur.desc)}`:""}<br>نقش تو: ${cur.role==="owner"?"مالک":"عضو"}</p>${cur.id!==DEF?`<button class="btn g" id="lv">حذف ${TL[cur.type]} از این دستگاه</button>`:""}`);
+ modal(`<h3>${esc(cur.title)}</h3><p style="color:var(--mu);font-size:13px;line-height:2">${TL[cur.type]}${cur.desc?`<br>${esc(cur.desc)}`:""}<br>نقش تو: ${cur.role==="owner"?"مالک":"عضو"}</p>${cur.id!==DEF&&cur.type!=="private"?`<button class="btn g" id="lv">حذف ${TL[cur.type]} از این دستگاه</button>`:""}`);
  if($("lv"))$("lv").onclick=()=>{if(!confirm("حذف شود؟"))return;D.chats=D.chats.filter(c=>c.id!==cur.id);delete D.msgs[cur.id];save();close();$("back").click();};
 };
 function setMe(){setAv($("meAv"),D.me.avatar,D.me.name);}
-$("meAv").onclick=()=>{
- modal(`<h3>پروفایل من</h3><div style="display:flex;justify-content:center;margin-bottom:6px" id="pAv">${avHtml(D.me.avatar,D.me.name)}</div><label>نام نمایشی</label><input type="text" id="pN" maxlength="30" value="${esc(D.me.name)}"><label>عکس پروفایل</label><input type="file" id="pF" accept="image/*"><button class="btn" id="pS">ذخیره</button>`);
- let nb=null;$("pF").onchange=async()=>{const f=$("pF").files[0];if(f)try{nb=await b2d(await resize(f,200,true));$("pAv").innerHTML=avHtml(nb,"");}catch{}};
- $("pS").onclick=()=>{const n=$("pN").value.trim();if(!n)return;D.me.name=n;if(nb)D.me.avatar=nb;save();setMe();close();renderMsgs(true);renderList();};
+
+// ---- احراز هویت، پروفایل و پیام خصوصی ----
+const AVB="avatars",UNRE=/^[A-Za-z0-9_]{3,20}$/,UUID=/^[0-9a-f-]{36}$/i,EMRE=/^\S+@\S+\.\S+$/;
+let ME=null,PROF=null,P={},PC=[],PM={},UR=[],rt=null,rtOk=false,recov=false;
+const likeEsc=t=>t.replace(/[\\%_]/g,"\\$&"),pName=p=>p?(p.display_name||p.username):"کاربر";
+const showGate=v=>{$("gate").style.display=v?"flex":"none";};
+const redir=()=>/^https?:$/.test(location.protocol)?location.origin+location.pathname:undefined;
+const gm=t=>{const e=$("gM");if(e)e.textContent=t||"";};
+function authErr(e){const m=String(e?.message||e||"");
+ if(/Invalid login/i.test(m))return"ایمیل یا رمز عبور اشتباه است.";
+ if(/not confirmed/i.test(m))return"ایمیل هنوز تأیید نشده؛ لینک ارسال‌شده به ایمیلت را باز کن.";
+ if(/already registered/i.test(m))return"این ایمیل قبلاً ثبت شده است.";
+ if(e?.status===429||/rate limit|too many/i.test(m))return"تعداد درخواست‌ها زیاد است؛ کمی بعد دوباره تلاش کن.";
+ if(/password/i.test(m))return"رمز عبور پذیرفته نشد؛ رمز قوی‌تری انتخاب کن.";
+ if(/Database error/i.test(m))return"ثبت‌نام انجام نشد؛ نام کاربری معتبر نیست یا قبلاً گرفته شده است.";
+ if(/fetch|network/i.test(m)||!navigator.onLine)return"اتصال اینترنت برقرار نیست.";
+ return"خطایی رخ داد؛ دوباره تلاش کن.";}
+async function taken(u){const {data,error}=await sb.from("profiles").select("id").ilike("username",likeEsc(u)).limit(1);if(error)throw error;return data.length>0;}
+function gate(mode){
+ const I=(id,l,t)=>`<label>${l}</label><input type="${t}" id="${id}" dir="ltr" autocomplete="off">`;
+ const T={login:"ورود",signup:"ثبت‌نام",forgot:"بازیابی رمز عبور",recovery:"رمز عبور جدید",complete:"تکمیل پروفایل"}[mode];
+ $("gBody").innerHTML=`<div class="logo">NIGHT <b style="color:#c084fc">CHAT</b></div><h3>${T}</h3>`
+ +(mode==="signup"||mode==="complete"?I("gU","نام کاربری (انگلیسی، عدد و _ ؛ ۳ تا ۲۰ کاراکتر)","text")+`<label>نام نمایشی</label><input type="text" id="gD" maxlength="30">`:"")
+ +(mode==="login"||mode==="signup"||mode==="forgot"?I("gE","ایمیل","email"):"")
+ +(mode==="login"||mode==="signup"||mode==="recovery"?I("gP","رمز عبور (حداقل ۸ کاراکتر)","password"):"")
+ +`<button class="btn" id="gGo">${T}</button><div class="msg" id="gM"></div>`
+ +(mode==="login"?`<button class="btn g" id="l1">ساخت حساب جدید</button><button class="btn g" id="l2">فراموشی رمز عبور</button>`:mode==="recovery"?"":`<button class="btn g" id="l1">${mode==="complete"?"خروج":"بازگشت به ورود"}</button>`);
+ $("gGo").onclick=async()=>{$("gGo").disabled=true;gm("");try{await go(mode);}catch(e){console.error(e);gm(authErr(e));}$("gGo").disabled=false;};
+ $("gBody").onkeydown=e=>{if(e.key==="Enter")$("gGo").click();};
+ const a=$("l1"),b=$("l2");if(a)a.onclick=()=>mode==="login"?gate("signup"):mode==="complete"?sb.auth.signOut():gate("login");if(b)b.onclick=()=>gate("forgot");}
+async function go(mode){
+ const v=id=>$(id)?$(id).value.trim():"",p=$("gP")?$("gP").value:"";
+ if(mode==="login"){if(!EMRE.test(v("gE"))||!p)return gm("ایمیل و رمز عبور را وارد کن.");const {error}=await sb.auth.signInWithPassword({email:v("gE"),password:p});if(error)throw error;}
+ else if(mode==="signup"||mode==="complete"){
+  const u=v("gU"),d=v("gD")||u;
+  if(!UNRE.test(u))return gm("نام کاربری باید ۳ تا ۲۰ کاراکتر انگلیسی، عدد یا _ باشد.");
+  if(mode==="signup"){if(!EMRE.test(v("gE")))return gm("ایمیل معتبر نیست.");if(p.length<8)return gm("رمز عبور حداقل ۸ کاراکتر باشد.");}
+  if(await taken(u))return gm("این نام کاربری قبلاً گرفته شده است.");
+  if(mode==="signup"){
+   const {data,error}=await sb.auth.signUp({email:v("gE"),password:p,options:{data:{username:u,display_name:d},emailRedirectTo:redir()}});
+   if(error){if(/Database error/i.test(error.message)&&await taken(u))return gm("این نام کاربری قبلاً گرفته شده است.");throw error;}
+   if(data.user&&Array.isArray(data.user.identities)&&!data.user.identities.length)return gm("این ایمیل قبلاً ثبت شده است.");
+   if(!data.session)gm("حساب ساخته شد. لینک تأیید به ایمیلت ارسال شد؛ بعد از تأیید وارد شو.");
+  }else{
+   const {error}=await sb.from("profiles").insert({id:ME.id,username:u,display_name:d});
+   if(error){if(error.code==="23505")return gm("این نام کاربری قبلاً گرفته شده است.");throw error;}
+   boot(ME);
+  }}
+ else if(mode==="forgot"){if(!EMRE.test(v("gE")))return gm("ایمیل معتبر نیست.");const {error}=await sb.auth.resetPasswordForEmail(v("gE"),{redirectTo:redir()});if(error)throw error;gm("اگر این ایمیل ثبت شده باشد، لینک بازیابی ارسال می‌شود.");}
+ else if(mode==="recovery"){if(p.length<8)return gm("رمز عبور حداقل ۸ کاراکتر باشد.");const {error}=await sb.auth.updateUser({password:p});if(error)throw error;recov=false;history.replaceState(null,"",location.pathname);const {data}=await sb.auth.getSession();boot(data.session?data.session.user:null);}
+}
+async function boot(user){
+ if(!user){ME=null;PROF=null;stopRT();PC=[];PM={};UR=[];cur=null;$("chat").style.display="none";$("ph").style.display="grid";$("app").classList.remove("open");gate("login");showGate(true);renderList();return;}
+ ME=user;
+ const {data,error}=await sb.from("profiles").select("id,username,display_name,avatar_url").eq("id",user.id).maybeSingle();
+ if(error){alert("بارگذاری پروفایل ناموفق بود؛ دوباره وارد شو.");await sb.auth.signOut();return;}
+ if(!data){gate("complete");showGate(true);return;}
+ PROF=data;P[data.id]=data;D.me.name=data.username;D.me.avatar=data.avatar_url;save();setMe();showGate(false);
+ startRT();await refreshPC();renderList();if(wide())openChat(DEF);
+}
+const wide=()=>matchMedia("(min-width:761px)").matches;
+sb.auth.onAuthStateChange((ev,s)=>{setTimeout(()=>{
+ if(ev==="PASSWORD_RECOVERY"){recov=true;gate("recovery");showGate(true);}
+ else if(ev==="SIGNED_OUT")boot(null);
+ else if(ev==="INITIAL_SESSION"&&!s)boot(null);
+ else if((ev==="SIGNED_IN"||ev==="INITIAL_SESSION")&&s&&!recov&&!(ME&&ME.id===s.user.id))boot(s.user);
+},0);});
+$("meAv").onclick=()=>{if(!PROF)return;
+ modal(`<h3>پروفایل من</h3><div style="display:flex;justify-content:center" id="pAv">${avHtml(PROF.avatar_url,PROF.username)}</div><p style="text-align:center;color:var(--mu);font-size:13px;margin-top:6px" dir="ltr">@${esc(PROF.username)}</p><label>نام نمایشی</label><input type="text" id="pN" maxlength="30" value="${esc(PROF.display_name||"")}"><label>عکس پروفایل</label><input type="file" id="pF" accept="image/*"><button class="btn" id="pS">ذخیره</button><button class="btn g" id="pO">خروج از حساب</button><div class="msg" id="pM"></div>`);
+ let nb=null;$("pF").onchange=async()=>{const f=$("pF").files[0];if(f)try{nb=await resize(f,256,true);$("pAv").innerHTML=avHtml(await b2d(nb),"");}catch{$("pM").textContent="عکس قابل خواندن نبود.";}};
+ $("pS").onclick=async()=>{const n=$("pN").value.trim();if(!n)return;$("pS").disabled=true;try{
+  const base=PUB+AVB+"/";let url=PROF.avatar_url;const old=url&&url.startsWith(base)?url.slice(base.length):null;
+  if(nb){const k=ME.id+"/"+Date.now()+".jpg",u=await sb.storage.from(AVB).upload(k,nb,{contentType:"image/jpeg"});if(u.error)throw u.error;url=sb.storage.from(AVB).getPublicUrl(k).data.publicUrl;}
+  const {error}=await sb.from("profiles").update({display_name:n,avatar_url:url}).eq("id",ME.id);if(error)throw error;
+  if(nb&&old)sb.storage.from(AVB).remove([old]);
+  PROF={...PROF,display_name:n,avatar_url:url};P[ME.id]=PROF;D.me.avatar=url;save();setMe();close();renderMsgs(true);renderList();
+ }catch(e){console.error(e);$("pM").textContent="ذخیره نشد؛ مطمئن شو مهاجرت SQL اجرا شده است.";$("pS").disabled=false;}};
+ $("pO").onclick=async()=>{close();await sb.auth.signOut();};
 };
+function mkPC(id){const p=P[id]||{};return{id:"u:"+id,type:"private",peer:id,title:pName(p),uname:p.username||"",avatar:p.avatar_url,desc:p.username?"@"+p.username:""};}
+async function profs(ids){const m=[...new Set(ids)].filter(i=>UUID.test(i)&&!P[i]);if(!m.length)return;const {data}=await sb.from("profiles").select("id,username,display_name,avatar_url").in("id",m);(data||[]).forEach(p=>P[p.id]=p);}
+async function refreshPC(){if(!ME)return;const {data,error}=await sb.rpc("my_conversations",{p_limit:50});if(error){console.error(error);return;}
+ await profs(data.map(r=>r.peer_id));
+ const keep=PC.filter(c=>!c.at&&!data.some(r=>"u:"+r.peer_id===c.id));
+ PC=data.map(r=>({...mkPC(r.peer_id),last:r.last_text,at:r.last_at,unread:r.last_sender!==ME.id&&r.last_at>((D.pmSeen||{})[r.peer_id]||"")?1:0})).concat(keep);}
+function markSeen(peer){const a=PM[peer]||[],l=a[a.length-1];(D.pmSeen=D.pmSeen||{})[peer]=l?l.created_at:new Date().toISOString();save();const c=PC.find(x=>x.peer===peer);if(c)c.unread=0;}
+async function loadPM(peer){if(!ME||!UUID.test(peer))return;const {data,error}=await sb.from("private_messages").select("id,sender_id,recipient_id,text,created_at").or(`and(sender_id.eq.${ME.id},recipient_id.eq.${peer}),and(sender_id.eq.${peer},recipient_id.eq.${ME.id})`).order("created_at",{ascending:false}).limit(200);
+ if(error){console.error(error);PM[peer]=PM[peer]||[];return;}PM[peer]=data.reverse();markSeen(peer);}
+function addPM(m){const peer=m.sender_id===ME.id?m.recipient_id:m.sender_id,a=PM[peer]=PM[peer]||[];if(a.some(x=>x.id===m.id))return false;a.push(m);a.sort((x,y)=>x.created_at<y.created_at?-1:1);
+ let c=PC.find(x=>x.peer===peer);if(!c){c=mkPC(peer);PC.push(c);}c.last=m.text;c.at=m.created_at;
+ if(cur&&cur.peer===peer)markSeen(peer);else if(m.sender_id!==ME.id)c.unread=(c.unread||0)+1;return true;}
+async function sendPM(text){
+ if(pending||!text){alert("در پیام خصوصی فقط متن ارسال می‌شود.");return false;}
+ const {data,error}=await sb.from("private_messages").insert({sender_id:ME.id,recipient_id:cur.peer,text}).select("id,sender_id,recipient_id,text,created_at").single();
+ if(error){console.error(error);alert(navigator.onLine?"ارسال پیام ناموفق بود؛ دوباره تلاش کن.":"اتصال اینترنت برقرار نیست.");return false;}
+ addPM(data);return true;}
+function stopRT(){if(rt){sb.removeChannel(rt);rt=null;}rtOk=false;}
+function startRT(){stopRT();
+ const h=async p=>{const m=p.new;await profs([m.sender_id,m.recipient_id]);if(addPM(m)){if(cur&&cur.peer===(m.sender_id===ME.id?m.recipient_id:m.sender_id))renderMsgs();renderList();}};
+ rt=sb.channel("pm-"+ME.id)
+  .on("postgres_changes",{event:"INSERT",schema:"public",table:"private_messages",filter:"recipient_id=eq."+ME.id},h)
+  .on("postgres_changes",{event:"INSERT",schema:"public",table:"private_messages",filter:"sender_id=eq."+ME.id},h)
+  .subscribe(s=>{rtOk=s==="SUBSCRIBED";});}
+setInterval(async()=>{if(!ME||document.hidden||rtOk)return;await refreshPC();if(cur&&cur.peer){await loadPM(cur.peer);renderMsgs();}renderList();},5000);
 
 setMe();renderList();
 pull().then(()=>{renderList();if(matchMedia("(min-width:761px)").matches)openChat(DEF);});
