@@ -236,9 +236,8 @@ body{background:radial-gradient(60% 50% at 12% 8%,#6d28d955,transparent 62%),rad
 .list{z-index:1;scrollbar-width:thin;scrollbar-color:#6d4bd6 transparent}
 .msgs{scrollbar-width:thin;scrollbar-color:#6d4bd688 transparent}
 .top{padding:14px 14px 10px}
-.brand{display:flex;align-items:center;gap:8px;direction:ltr;font-size:18px;letter-spacing:.8px}
-.brand::before{content:"";width:28px;height:28px;flex-shrink:0;background:var(--moon) center/contain no-repeat;filter:drop-shadow(0 0 5px #a855f7aa)}
-.brand b{background:linear-gradient(90deg,#e879f9,#a855f7 55%,#60a5fa);-webkit-background-clip:text;background-clip:text;color:transparent}
+.brand{display:flex;align-items:center;justify-content:center;min-width:0;direction:rtl;letter-spacing:0}
+.side .top::after{content:"";width:34px;flex-shrink:0}
 #meAv{box-shadow:0 0 0 2px #a855f788,0 0 12px #7c3aed77}
 .sbox input{background:#1a1660b3;border:1px solid #3b3aa0aa;border-radius:16px}
 .sbox input:focus{border-color:var(--tq);box-shadow:0 0 0 3px #22d3ee22,0 0 16px #22d3ee33}
@@ -367,12 +366,27 @@ body{background:radial-gradient(60% 50% at 12% 8%,#6d28d955,transparent 62%),rad
  #md.pfo .card.pf{width:100%;margin:auto 0 0;border-radius:26px 26px 0 0;padding-bottom:env(safe-area-inset-bottom,0px);animation:pfup .26s cubic-bezier(.2,.9,.3,1)}
 }
 @media(prefers-reduced-motion:reduce){.card.pf,#md.pfo .card.pf{animation:none}.card.pf .pf-b{transition:none}}
+
+/* ===== لوگوی آریا پیوند (فقط نام و هویت بصری) ===== */
+.ar-logo{display:flex;flex-direction:column;align-items:center;direction:rtl;font-family:Vazirmatn,Vazir,Tahoma,"Segoe UI",system-ui,sans-serif;letter-spacing:0;line-height:1;user-select:none;margin:0}
+.ar-row{display:flex;align-items:center;justify-content:center;gap:.3em;direction:rtl}
+.ar-w{display:inline-block;font-weight:900;line-height:1.45;padding:0 .04em;white-space:nowrap;background:linear-gradient(180deg,#fff4c9 0%,#f6d77a 30%,#d9a22e 64%,#a8741a 100%);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 .22em rgba(230,176,60,.45))}
+.ar-sw{display:block;height:3.3em;width:auto;flex-shrink:0;filter:drop-shadow(0 0 .3em rgba(245,213,138,.35))}
+.ar-tag{margin-top:.2em;font-size:.5em;font-weight:500;line-height:1.6;white-space:nowrap;color:#ecc96e;text-shadow:0 0 .8em rgba(230,176,60,.35)}
+.brand .ar-logo{font-size:19px}
+#gate .ar-logo{font-size:2.6em}
+#gate .ar-logo+.gtag{margin-top:.55em;font-weight:500;color:#ecc96e;text-shadow:0 0 .7em rgba(230,176,60,.35)}
+#gate .gtag i{background:linear-gradient(90deg,#f6d77a,#d9a22e33)}
+#gate .gtag i::before{background:#f6d77a}
+#gate .gsign span{letter-spacing:0;direction:rtl;line-height:1.4;font-family:Vazirmatn,Vazir,Tahoma,"Segoe UI",system-ui,sans-serif}
+@media (max-width:899px){#gate .ar-logo{font-size:2.15em}}
+@media (max-width:360px){.brand .ar-logo{font-size:17px}}
 </style></head><body>
 <div class="app" id="app">
  <aside class="side">
   <div class="top">
    <button class="av s" id="meAv" title="پروفایل"></button>
-   <div class="brand" id="brand">NIGHT <b>CHAT</b></div>
+   <div class="brand" id="brand"><div class="ar-logo" role="img" aria-label="آریا پیوند — جایی برای پیوند آدم‌ها"><span class="ar-row"><span class="ar-w">آریا</span><svg class="ar-sw" viewBox="12 0 60 284" aria-hidden="true" focusable="false"><g fill="#f5d58a"><rect x="36.25" y="1.5" width="11.5" height="49" rx="5.75"/><rect x="13" y="42.75" width="58" height="8" rx="4"/><rect x="40.75" y="50" width="2.5" height="165"/></g><rect x="34.75" y="61" width="1.5" height="142" fill="#fff" opacity=".7"/><path d="M30.1 214.1 H53.9 L42 276.4 Z" fill="#d9e2f2" stroke="#f5d58a" stroke-width="2.2" stroke-linejoin="miter" stroke-miterlimit="10"/></svg><span class="ar-w">پیوند</span></span><div class="ar-tag">جایی برای پیوند آدم‌ها</div></div></div>
   </div>
   <div class="sbox"><span class="ic">🔍</span><input id="q" placeholder="جست‌وجوی کاربران، گروه‌ها و کانال‌ها..." autocomplete="off"><button class="x" id="qx">✕</button></div>
   <div class="tabs" id="tabs">
@@ -466,26 +480,14 @@ body{background:radial-gradient(60% 50% at 12% 8%,#6d28d955,transparent 62%),rad
 </g>
 </g>
 </svg>
-  <div class="gsign"><span>NIGHT<br>CHAT</span></div>
+  <div class="gsign"><span>آریا<br>پیوند</span></div>
   <div class="gfloor"></div>
   <div class="gdots"><i style="--x:12%;--y:32%;--s:3px;--d:5s;--l:0s"></i><i style="--x:20%;--y:58%;--s:2px;--d:6s;--l:0.8s"></i><i style="--x:4%;--y:70%;--s:3px;--d:4.5s;--l:1.6s"></i><i style="--x:27%;--y:16%;--s:2px;--d:7s;--l:0.3s"></i><i style="--x:47%;--y:7%;--s:3px;--d:5.5s;--l:2.1s"></i><i style="--x:63%;--y:13%;--s:2px;--d:6.5s;--l:1s"></i><i style="--x:78%;--y:9%;--s:3px;--d:5s;--l:2.8s"></i><i style="--x:88%;--y:22%;--s:2px;--d:6s;--l:0.5s"></i><i style="--x:93%;--y:44%;--s:3px;--d:4.8s;--l:1.9s"></i><i style="--x:84%;--y:64%;--s:2px;--d:6.2s;--l:3.2s"></i><i style="--x:70%;--y:80%;--s:3px;--d:5.2s;--l:0.9s"></i><i style="--x:30%;--y:84%;--s:2px;--d:6.8s;--l:2.5s"></i><i style="--x:52%;--y:88%;--s:3px;--d:5s;--l:1.3s"></i><i style="--x:9%;--y:46%;--s:2px;--d:5.6s;--l:3.6s"></i><i style="--x:96%;--y:70%;--s:3px;--d:4.6s;--l:0.2s"></i></div>
  </div>
  <div class="gmain">
   <header class="ghead">
-   <svg class="glogo" viewBox="0 0 200 168" aria-hidden="true" focusable="false">
-<defs>
-<linearGradient id="gl-r" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#e879f9"/><stop offset=".55" stop-color="#c026d3"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient>
-<linearGradient id="gl-b" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8b5cf6"/><stop offset=".6" stop-color="#6d28d9"/><stop offset="1" stop-color="#4c1d95"/></linearGradient>
-</defs>
-<g transform="rotate(-20 100 96)"><path d="M6 96 A94 27 0 0 1 194 96" fill="none" stroke="url(#gl-r)" stroke-width="3" stroke-linecap="round" opacity=".8"/></g>
-<path d="M100 40 C130 40 150 58 150 84 C150 110 130 128 104 128 C97 128 91 127 85 125 L64 138 L68 116 C56 108 50 97 50 84 C50 58 70 40 100 40Z" fill="url(#gl-b)" stroke="#e9b4ff" stroke-width="4.5" stroke-linejoin="round"/>
-<path d="M68 64 C76 52 90 47 106 48" fill="none" stroke="#fff" stroke-opacity=".4" stroke-width="3" stroke-linecap="round"/>
-<g fill="#fff"><circle cx="80" cy="84" r="6.5"/><circle cx="100" cy="84" r="6.5"/><circle cx="120" cy="84" r="6.5"/></g>
-<g transform="rotate(-20 100 96)"><path d="M6 96 A94 27 0 0 0 194 96" fill="none" stroke="url(#gl-r)" stroke-width="4.5" stroke-linecap="round"/></g>
-<g transform="rotate(10 118 30)"><path d="M101 42 L104 22 L112 31 L118 14 L124 31 L132 22 L135 42Z" fill="#f5d0fe" fill-opacity=".85" stroke="#e879f9" stroke-width="2.4" stroke-linejoin="round"/><g fill="#fff"><circle cx="104" cy="20" r="2.2"/><circle cx="118" cy="12" r="2.4"/><circle cx="132" cy="20" r="2.2"/></g></g>
-</svg>
-   <h1 class="gtitle">NIGHT <b>CHAT</b></h1>
-   <div class="gtag"><i></i><span>با هم، همیشه آنلاین</span><i></i></div>
+   <h1 class="ar-logo" aria-label="آریا پیوند"><span class="ar-row"><span class="ar-w">آریا</span><svg class="ar-sw" viewBox="12 0 60 284" aria-hidden="true" focusable="false"><g fill="#f5d58a"><rect x="36.25" y="1.5" width="11.5" height="49" rx="5.75"/><rect x="13" y="42.75" width="58" height="8" rx="4"/><rect x="40.75" y="50" width="2.5" height="165"/></g><rect x="34.75" y="61" width="1.5" height="142" fill="#fff" opacity=".7"/><path d="M30.1 214.1 H53.9 L42 276.4 Z" fill="#d9e2f2" stroke="#f5d58a" stroke-width="2.2" stroke-linejoin="miter" stroke-miterlimit="10"/></svg><span class="ar-w">پیوند</span></span></h1>
+   <div class="gtag"><i></i><span>جایی برای پیوند آدم‌ها</span><i></i></div>
   </header>
   <div id="gBody"></div>
  </div>
@@ -718,7 +720,7 @@ const IC={
  p:S('<circle cx="9.5" cy="8" r="4"/><path d="M2.5 20c.7-3.4 3.4-5.2 7-5.2 1.6 0 3 .4 4.2 1M19 9v6M16 12h6"/>')
 };
 const GT={login:"ورود",signup:"ثبت‌نام",forgot:"بازیابی رمز عبور",recovery:"رمز عبور جدید",complete:"تکمیل پروفایل"};
-const GH={login:["ورود به حساب کاربری","به NIGHT CHAT خوش آمدید"],signup:["ثبت‌نام در NIGHT CHAT","به جمع ما بپیوندید"],forgot:["بازیابی رمز عبور","ایمیل حساب خود را وارد کنید"],recovery:["رمز عبور جدید","یک رمز عبور تازه انتخاب کنید"],complete:["تکمیل پروفایل","یک نام کاربری برای خود انتخاب کنید"]};
+const GH={login:["ورود به حساب کاربری","به آریا پیوند خوش آمدید"],signup:["ثبت‌نام در آریا پیوند","به جمع ما بپیوندید"],forgot:["بازیابی رمز عبور","ایمیل حساب خود را وارد کنید"],recovery:["رمز عبور جدید","یک رمز عبور تازه انتخاب کنید"],complete:["تکمیل پروفایل","یک نام کاربری برای خود انتخاب کنید"]};
 // فقط ظاهر: کارت فعال همان فرم واقعی (با شناسه‌های اصلی) است؛ کارت کناری فقط نمایشی است و با کلیک، حالت را عوض می‌کند.
 function gCard(m,live){
  const T=GT[m];
@@ -943,12 +945,12 @@ function callBtns(){const ok=!!(ME&&cur&&cur.type==="private"&&cur.peer&&cur.pee
  ["callA","callV"].forEach(i=>{const b=$(i);b.style.display=ok?"":"none";b.disabled=!!CALL||!!INC||!navigator.onLine;});}
 async function getIce(){
  if(iceCache&&Date.now()-iceAt<30*60*1000)return iceCache;
- let list=[...STUN];
+ let list=[...STUN],turnOk=false;
  try{const {data,error}=await sb.functions.invoke("turn-credentials");
-  if(!error&&data&&data.iceServers){const t=data.iceServers;list=list.concat(Array.isArray(t)?t:[t]);}
+  if(!error&&data&&data.iceServers){const t=data.iceServers;list=list.concat(Array.isArray(t)?t:[t]);turnOk=true;}
   else console.warn("TURN در دسترس نیست؛ فقط STUN استفاده می‌شود.",error);
  }catch(e){console.warn("TURN در دسترس نیست؛ فقط STUN استفاده می‌شود.",e);}
- iceCache=list;iceAt=Date.now();return list;}
+ iceCache=list;iceAt=Date.now()-(turnOk?0:28*60*1000);return list;}
 async function getMedia(kind){
  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)throw new Error("NOSUPPORT");
  return navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true},video:kind==="video"?{facingMode:"user",width:{ideal:640},height:{ideal:480}}:false});}
@@ -975,9 +977,10 @@ async function makePC(c){
  pc.onicecandidate=e=>{if(e.candidate&&CALL===c)sendSig(c,"ice",e.candidate.toJSON()).catch(()=>{});};
  pc.onconnectionstatechange=()=>onConn(c);
  return pc;}
+function connGuard(c){clearTimeout(c.connTO);c.connTO=setTimeout(()=>{if(CALL===c&&c.state!=="connected")endCall("اتصال برقرار نشد؛ دوباره تلاش کن.");},45000);}
 function onConn(c){if(CALL!==c||!c.pc)return;const s=c.pc.connectionState;clearTimeout(c.discT);
  if(s==="connected"){
-  if(c.state!=="connected"){c.state="connected";c.t0=Date.now();ringStop();clearTimeout(c.ringTO);$("call").classList.add("on");
+  if(c.state!=="connected"){c.state="connected";c.t0=Date.now();ringStop();clearTimeout(c.ringTO);clearTimeout(c.connTO);$("call").classList.add("on");
    clearInterval(tickT);tickT=setInterval(()=>{if(CALL===c&&!c.msg)$("clSt").textContent=fmtT(c);},1000);
    clearInterval(hbT);hbT=setInterval(()=>{if(CALL===c)sb.from("calls").update({heartbeat_at:new Date().toISOString()}).eq("id",c.id).then(()=>{});},20000);}
   setSt(null);
@@ -992,7 +995,7 @@ async function handleSig(s){
   else if(s.kind==="ice"){if(c.pc.remoteDescription)await c.pc.addIceCandidate(s.payload).catch(()=>{});else c.pendingIce.push(s.payload);}
  }catch(e){console.error(e);endCall("خطا در برقراری ارتباط.");}}
 function endLocal(msg){const c=CALL;if(!c)return;CALL=null;
- clearTimeout(c.ringTO);clearTimeout(c.discT);clearInterval(tickT);clearInterval(hbT);tickT=hbT=null;ringStop();
+ clearTimeout(c.ringTO);clearTimeout(c.discT);clearTimeout(c.connTO);clearInterval(tickT);clearInterval(hbT);tickT=hbT=null;ringStop();
  try{c.pc&&c.pc.close();}catch{}
  stopStream(c.local);stopStream(c.remote);$("rv").srcObject=null;$("lv").srcObject=null;
  $("call").classList.remove("open","on","vid","audio");callBtns();if(msg)callToast(msg);}
@@ -1007,12 +1010,12 @@ async function startCall(kind){
  try{c.local=await getMedia(kind);}catch(e){CALL=null;callBtns();alert(mediaErr(e));return;}
  if(CALL!==c){stopStream(c.local);return;}
  const {data,error}=await sb.from("calls").insert({caller_id:ME.id,callee_id:peer,kind}).select("id").single();
- if(error||!data){const m=String(error&&error.message||"");stopStream(c.local);CALL=null;callBtns();
-  alert(/CALLEE_BUSY/.test(m)?"مخاطب در تماس دیگری است.":/CALLER_BUSY/.test(m)?"تو در تماس دیگری هستی.":navigator.onLine?"شروع تماس ناموفق بود؛ مطمئن شو فایل SQL تماس اجرا شده است.":"اتصال اینترنت برقرار نیست.");return;}
+ if(error||!data){const m=String(error&&error.message||""),cd=String(error&&error.code||"");console.error("calls insert failed",error);stopStream(c.local);CALL=null;callBtns();
+  alert(/CALLEE_BUSY/.test(m)?"مخاطب در تماس دیگری است.":/CALLER_BUSY/.test(m)?"تو در تماس دیگری هستی.":/CALL_RATE_LIMIT/.test(m)?"تعداد تماس‌ها زیاد است؛ کمی صبر کن.":/CALLEE_NOT_FOUND/.test(m)?"این کاربر پیدا نشد.":!navigator.onLine?"اتصال اینترنت برقرار نیست.":(cd==="PGRST205"||cd==="42P01"||/schema cache|does not exist/i.test(m))?"جدول تماس در دیتابیس ساخته نشده؛ فایل SQL تماس را در Supabase اجرا کن. ["+(cd||m.slice(0,100))+"]":(cd==="42501"||/row-level security|permission denied/i.test(m))?"دسترسی تماس در دیتابیس (RLS/مجوز) مجاز نشده است. ["+(cd||m.slice(0,100))+"]":"شروع تماس ناموفق بود. [کد: "+[cd,m.slice(0,150)].filter(Boolean).join(" | ")+"]");return;}
  c.id=data.id;c.state="ringing";showCallUI(c,"در حال زنگ زدن...");ringStart(true);
  c.ringTO=setTimeout(()=>{if(CALL===c&&c.state==="ringing"){sb.from("calls").update({status:"missed"}).eq("id",c.id).then(()=>{});endLocal("پاسخی داده نشد.");}},45000);
  try{await makePC(c);const o=await c.pc.createOffer();await c.pc.setLocalDescription(o);await sendSig(c,"offer",{type:o.type,sdp:o.sdp});}
- catch(e){console.error(e);endCall("خطا در شروع تماس.");}}
+ catch(e){console.error(e);endCall("خطا در شروع تماس. ["+[e&&e.code,String(e&&e.message||e).slice(0,120)].filter(Boolean).join(" | ")+"]");}}
 function closeInc(){if(INC)clearTimeout(INC.to);INC=null;ringStop();$("inc").classList.remove("open");callBtns();}
 async function onIncoming(r){
  if(!ME||r.status!=="ringing"||Date.now()-new Date(r.created_at)>60000)return;
@@ -1030,7 +1033,7 @@ async function acceptCall(){
  try{c.local=await getMedia(i.kind);}catch(e){CALL=null;callBtns();alert(mediaErr(e));sb.from("calls").update({status:"rejected"}).eq("id",i.id).then(()=>{});return;}
  const {error}=await sb.from("calls").update({status:"accepted"}).eq("id",c.id);
  if(error){stopStream(c.local);CALL=null;callBtns();alert("تماس دیگر فعال نیست.");return;}
- c.state="connecting";showCallUI(c,"در حال اتصال...");
+ c.state="connecting";showCallUI(c,"در حال اتصال...");connGuard(c);
  try{await makePC(c);let ok=false;
   for(let k=0;k<10&&CALL===c&&!ok;k++){
    const {data}=await sb.from("call_signals").select("id,call_id,kind,payload").eq("call_id",c.id).eq("recipient_id",ME.id).order("id");
@@ -1040,7 +1043,7 @@ async function acceptCall(){
 function onCallRow(r){
  if(INC&&INC.id===r.id&&r.status!=="ringing"){closeInc();if(r.status==="missed"||r.status==="canceled")callToast("تماس بی‌پاسخ از "+pName(P[r.caller_id]));return;}
  const c=CALL;if(!c||c.id!==r.id)return;
- if(r.status==="accepted"&&c.role==="caller"&&c.state==="ringing"){c.state="connecting";ringStop();clearTimeout(c.ringTO);setSt("در حال اتصال...");}
+ if(r.status==="accepted"&&c.role==="caller"&&c.state==="ringing"){c.state="connecting";ringStop();clearTimeout(c.ringTO);setSt("در حال اتصال...");connGuard(c);}
  else if(r.status==="rejected")endLocal("تماس رد شد.");
  else if(r.status==="busy")endLocal("مخاطب مشغول است.");
  else if(r.status==="missed"||r.status==="canceled")endLocal("تماس بی‌پاسخ ماند.");
