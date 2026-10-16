@@ -700,7 +700,7 @@ function authErr(e){const m=typeof e?.message==="string"?e.message:ser(e);
  if(/Invalid login/i.test(m))return"ایمیل یا رمز عبور اشتباه است.";
  if(/not confirmed/i.test(m))return"ایمیل هنوز تأیید نشده؛ لینک ارسال‌شده به ایمیلت را باز کن.";
  if(/already registered/i.test(m))return"این ایمیل قبلاً ثبت شده است.";
- if(/email rate limit|over_email_send_rate_limit/i.test(m+(e?.code||"")))return"سقف ارسال ایمیل تأیید پر شده است؛ حدود یک ساعت صبر کن یا در Supabase تأیید ایمیل را خاموش کن.";
+ if(/email rate limit|over_email_send_rate_limit/i.test(m+(e?.code||"")))return"در حال حاضر امکان ارسال ایمیل وجود ندارد. لطفاً کمی بعد دوباره تلاش کنید.";
  if(/sending (confirmation|recovery)|error sending/i.test(m))return"ارسال ایمیل تأیید ناموفق بود؛ تنظیمات ایمیل Supabase را بررسی کن.";
  if(/redirect/i.test(m))return"آدرس سایت در تنظیمات Supabase (Redirect URLs) مجاز نشده است.";
  if(e?.status===429||/rate limit|too many/i.test(m))return"تعداد درخواست‌ها زیاد است؛ کمی بعد دوباره تلاش کن.";
