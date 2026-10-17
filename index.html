@@ -718,7 +718,7 @@ async function send(){
  $("sendB").disabled=false;
 }
 $("sendB").onclick=send;
-$("txt").onkeydown=e=>{if(e.key==="Enter"&&!e.shiftKey&&matchMedia("(min-width:761px)").matches){e.preventDefault();send();}};
+$("txt").onkeydown=e=>{if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing&&matchMedia("(pointer:fine)").matches){e.preventDefault();send();}};
 $("txt").oninput=()=>{$("txt").style.height="auto";$("txt").style.height=Math.min($("txt").scrollHeight,120)+"px";};
 $("attB").onclick=e=>{e.stopPropagation();$("emo").classList.remove("open");$("atm").classList.toggle("open");};
 const pickFile=acc=>{$("atm").classList.remove("open");$("file").accept=acc;$("file").click();};
