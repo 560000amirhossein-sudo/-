@@ -638,6 +638,7 @@ function clearPending(){pending=null;pendingFile=null;pendingKind="image";upDone
 let cur=null,tab="all",query="",pending=null,pubMsgs=[],pubErr=false,sig="";
 let pubKnown=null,ncReady=false,pubLoaded=false,pcLoaded=false,UN={};
 const UCNT={},POP={},NK=new Set();
+const GHID=new Set();let gHideOk=true;
 const safe=u=>typeof u==="string"&&(u.startsWith("data:image/")||u.startsWith(PUB+"avatars/"))?u:"";
 const hue=n=>{let h=0;for(const c of String(n||""))h=(h*31+c.charCodeAt(0))%360;return h;};
 const avBg=n=>{const h=hue(n);return `linear-gradient(135deg,hsl(${h} 65% 55%),hsl(${(h+40)%360} 60% 32%))`;};
@@ -663,7 +664,7 @@ function view(){return D.chats.map(c=>{
  return{...c,unread:0,at:c.at||""};}).concat(PC.map(c=>({...c,unread:unc(c),at:c.at||""}))).concat(SG.map(c=>({...c,unread:GU[c.gid]||0,at:c.at||""}))).sort((a,b)=>String(b.at).localeCompare(String(a.at)));}
 function msgsOf(c){
  if(c.id===DEF)return pubMsgs.map(m=>({id:m.id,text:m.text,img:m.media_type==="image"?m.media_url:null,vid:m.media_type==="video"?m.media_url:null,at:m.created_at,mine:m.name===D.me.name,name:m.name,replyTo:m.reply_to_id?findPubReply(m.reply_to_id):null}));
- if(c.gid)return(GM[c.gid]||[]).map(m=>({id:m.id,text:m.text,img:m.media_type==="image"?m.media_url:null,vid:m.media_type==="video"?m.media_url:null,at:m.created_at,mine:m.sender_id===ME.id,name:pName(P[m.sender_id]),avatar:(P[m.sender_id]||{}).avatar_url,uid:m.sender_id,replyTo:m.reply_to_id?findGroupReply(c.gid,m.reply_to_id):null}));
+ if(c.gid)return gVis(c.gid).map(m=>({id:m.id,text:m.text,img:m.media_type==="image"?m.media_url:null,vid:m.media_type==="video"?m.media_url:null,at:m.created_at,mine:m.sender_id===ME.id,name:pName(P[m.sender_id]),avatar:(P[m.sender_id]||{}).avatar_url,uid:m.sender_id,replyTo:m.reply_to_id?findGroupReply(c.gid,m.reply_to_id):null}));
  if(c.type==="private")return visPM(c.peer).map(m=>({id:m.id,text:m.text,at:m.created_at,mine:m.sender_id===ME.id,name:pName(P[m.sender_id]),avatar:(P[m.sender_id]||{}).avatar_url,uid:m.sender_id,replyTo:m.reply_to_id?findPMReply(c.peer,m.reply_to_id):null}));
  return(D.msgs[c.id]||[]).map(m=>({...m,mine:true,name:D.me.name,avatar:D.me.avatar,replyTo:m.replyTo?findLocalReply(c.id,m.replyTo):null}));}
 // ---- پاسخ به پیام: پیدا کردن پیام اصلی ----
@@ -738,7 +739,7 @@ function renderMsgs(force){
   const sgR=cur.gid?((GMEM[cur.gid]||{})[m.uid]||""):"";
   const who=(!m.mine&&grp)||(m.mine&&own)||(cur.gid&&sgR&&sgR!=="member")?`<div class="who"><span>${esc(m.name)}</span>${cur.gid?roleBadge(sgR):m.mine&&own?`<span class="badge">${cur.type==="channel"?"مدیر":"مالک"}</span>`:""}</div>`:"";
   const rqHtml=replyQuoteHtml(m.replyTo);
-  r.innerHTML=(!m.mine&&(priv||grp)?avHtml(m.avatar,m.name,"s"):"")+`<div class="bub${img||vid?" med":""}${isE?" emj":""}">${who}${rqHtml}${m.text?`<div class="tx">${esc(m.text)}</div>`:""}${img?`<img class="pic" src="${img}" alt="" decoding="async">`:""}${vid?`<video class="pic" src="${vid}" controls preload="metadata" playsinline style="cursor:default"></video>`:""}<div class="mt"><span>${fmtM(m.at)}</span>${cur.id!==DEF&&(!cur.gid||canDelG(m))?`<button class="del" type="button">حذف</button>`:""}</div></div>`;
+  r.innerHTML=(!m.mine&&(priv||grp)?avHtml(m.avatar,m.name,"s"):"")+`<div class="bub${img||vid?" med":""}${isE?" emj":""}">${who}${rqHtml}${m.text?`<div class="tx">${esc(m.text)}</div>`:""}${img?`<img class="pic" src="${img}" alt="" decoding="async">`:""}${vid?`<video class="pic" src="${vid}" controls preload="metadata" playsinline style="cursor:default"></video>`:""}<div class="mt"><span>${fmtM(m.at)}</span>${cur.id!==DEF?`<button class="del" type="button">حذف</button>`:""}</div></div>`;
   const pu=!m.mine&&m.uid||null,pn=!m.mine&&!pu&&cur.id===DEF?m.name:null;
   if(pu||pn)r.querySelectorAll(":scope>.av,.who>span:first-child").forEach(el=>{el.classList.add("lnk");el.tabIndex=0;el.setAttribute("role","button");el.onclick=()=>pu?openProfile(pu):openProfileByName(pn);el.onkeydown=e=>{if(e.key==="Enter")el.click();};});
   const pic=r.querySelector("img.pic");if(pic){pic.onclick=()=>{$("lbImg").src=img;$("lb").classList.add("open");};pic.onload=()=>{if(near)box.scrollTop=box.scrollHeight;};}
@@ -1173,17 +1174,25 @@ async function refreshSG(){
  const {data,error}=await sb.rpc("my_groups");
  if(error){if(!sgWarn){sgWarn=true;console.warn("my_groups:",error);}return;}
  SG=data.map(r=>({id:"g:"+r.id,gid:r.id,type:"group",title:r.title,desc:r.description,avatar:r.avatar_url,pub:r.is_public,role:r.role,owner:r.owner_id,last:r.last_text||(r.last_at?"📎 رسانه":""),at:r.last_at||r.created_at}));
+ for(const c of SG){const a=GM[c.gid];if(a&&a.length&&GHID.has(String(a[a.length-1].id))){const l=gVis(c.gid).slice(-1)[0];c.last=l?(l.text||gLab(l.media_type)):"";}}
  if(cur&&cur.gid){const n=SG.find(x=>x.gid===cur.gid);if(!n){gpHide();cur=null;$("back").click();callToast("دیگر عضو این گروه نیستی.");}else cur.role=n.role;}
 }
 const gLab=t=>t==="image"?"🖼️ عکس":t==="video"?"🎬 ویدیو":"";
+const gHideMissing=e=>/PGRST205|42P01|schema cache|does not exist|Could not find/i.test(String((e&&e.code)||"")+" "+String((e&&e.message)||""));
+function gVis(gid){return(GM[gid]||[]).filter(m=>!GHID.has(String(m.id)));}
+async function loadGHides(ids){if(!gHideOk||!ids||!ids.length)return;
+  const {data,error}=await sb.from("group_message_hides").select("message_id").in("message_id",ids);
+  if(error){if(gHideMissing(error))gHideOk=false;console.warn("group_message_hides:",error);return;}
+  (data||[]).forEach(r=>GHID.add(String(r.message_id)));}
+function afterGDel(gid){const l=gVis(gid).slice(-1)[0],c=SG.find(x=>x.gid===gid);if(c)c.last=l?(l.text||gLab(l.media_type)):"";renderMsgs(true);renderList();}
 async function loadGM(gid){
  const qq=()=>sb.from("group_messages").select("id,group_id,sender_id,text,created_at,reply_to_id"+(gMediaOk?",media_url,media_type":"")).eq("group_id",gid).order("created_at",{ascending:false}).limit(200);
  let r=await qq();
  if(r.error&&gMediaOk&&/media_url|media_type|42703|PGRST204/.test((r.error.code||"")+(r.error.message||""))){gMediaOk=false;r=await qq();}
  const {data,error}=r;
  if(error){console.error(error);return false;}
- GM[gid]=data.reverse();await profs(GM[gid].map(m=>m.sender_id));loadPin(gid);
- const c=SG.find(x=>x.gid===gid),l=GM[gid][GM[gid].length-1];if(c&&l){c.last=l.text||gLab(l.media_type);c.at=l.created_at;}
+ data.reverse();await loadGHides(data.map(m=>m.id));GM[gid]=data;await profs(GM[gid].map(m=>m.sender_id));loadPin(gid);
+ const c=SG.find(x=>x.gid===gid),l=gVis(gid).slice(-1)[0];if(c){if(l){c.last=l.text||gLab(l.media_type);c.at=l.created_at;}else if(GM[gid].length)c.last="";}
  return true;}
 async function loadMembers(gid){
  let {data,error}=await sb.from("group_members").select("user_id,role,joined_at,perms").eq("group_id",gid);if(error&&/perms|42703/.test((error.code||"")+(error.message||""))){({data,error}=await sb.from("group_members").select("user_id,role,joined_at").eq("group_id",gid));}
@@ -1209,10 +1218,21 @@ const PERMS=[["delete_messages","حذف پیام‌ها","حذف پیام اعض
 function myPerm(k){const r=cur&&cur.role;if(r==="owner")return true;if(r!=="admin")return false;const x=(GMR[cur.gid]||[]).find(q=>q.user_id===ME.id);return !!(x&&x.perms&&x.perms[k]);}
 function canDelG(m){const r=cur&&cur.role;if(m.mine||r==="owner")return true;return r==="admin"&&myPerm("delete_messages")&&((GMEM[cur.gid]||{})[m.uid]==="member");}
 async function delGM(m){
- if(!confirm("این پیام برای همه حذف شود؟"))return;const gid=cur.gid;
- const {data,error}=await sb.from("group_messages").delete().eq("id",m.id).select("id");
- if(error||!data||!data.length){callToast("اجازهٔ حذف این پیام را نداری.");return;}
- GM[gid]=(GM[gid]||[]).filter(x=>String(x.id)!==String(m.id));renderMsgs(true);renderList();}
+ const gid=cur.gid,canAll=canDelG(m);
+ modal(`<h3>حذف پیام</h3><p style="color:var(--mu);font-size:13px;line-height:2">این پیام چطور حذف شود؟</p><button class="btn g" id="dMe">حذف برای من</button>${canAll?`<button class="btn g" id="dAll">حذف برای همه</button>`:""}<button class="btn g" id="dNo">انصراف</button>`);
+ $("dNo").onclick=close;
+ $("dMe").onclick=async()=>{
+  if(!gHideOk){close();callToast("حذف برای من در گروه هنوز در دیتابیس فعال نیست؛ فایل SQL را اجرا کن.");return;}
+  $("dMe").disabled=true;
+  const {error}=await sb.from("group_message_hides").insert({user_id:ME.id,message_id:m.id});
+  if(error&&error.code!=="23505"){console.error(error);if(gHideMissing(error))gHideOk=false;close();callToast(gHideMissing(error)?"حذف برای من در گروه هنوز در دیتابیس فعال نیست؛ فایل SQL را اجرا کن.":(navigator.onLine?"حذف انجام نشد؛ دوباره تلاش کن.":"اتصال اینترنت برقرار نیست."));return;}
+  GHID.add(String(m.id));close();afterGDel(gid);};
+ if(canAll)$("dAll").onclick=async()=>{
+  $("dAll").disabled=true;
+  const {data,error}=await sb.from("group_messages").delete().eq("id",m.id).select("id");
+  if(error||!data||!data.length){console.error(error);close();callToast(error&&!navigator.onLine?"اتصال اینترنت برقرار نیست.":"حذف برای همه انجام نشد؛ اجازهٔ حذف این پیام را نداری.");return;}
+  GM[gid]=(GM[gid]||[]).filter(x=>String(x.id)!==String(m.id));close();afterGDel(gid);};
+}
 async function gAct(a,u){
  const gid=cur.gid;if(a==="perms")return openPerms(gid,u);if(a==="ban"&&!confirm("تأیید نهایی: این عضو از گروه حذف و به فهرست سیاه همین گروه اضافه شود؟ تا رفع مسدودیت نمی‌تواند برگردد."))return;if(a==="demote"&&!confirm("این مدیر عزل شود و همه اختیاراتش گرفته شود؟"))return;if(a==="rm")return removeDlg(gid,u);
  const {error}=a==="ban"?await sb.rpc("ban_group_member",{p_gid:gid,p_uid:u}):a==="remove"?await sb.rpc("remove_group_member",{p_gid:gid,p_uid:u}):await sb.rpc("set_group_role",{p_gid:gid,p_uid:u,p_role:a==="promote"?"admin":"member"});
