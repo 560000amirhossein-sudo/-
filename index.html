@@ -1091,19 +1091,21 @@ async function loadPM(peer){if(!ME||!UUID.test(peer))return;
  if(error&&/reply_to_id|PGRST204|42703/.test((error.code||"")+(error.message||""))){replyOkP=false;const r2=await sb.from("private_messages").select("id,sender_id,recipient_id,text,created_at").or(`and(sender_id.eq.${ME.id},recipient_id.eq.${peer}),and(sender_id.eq.${peer},recipient_id.eq.${ME.id})`).order("created_at",{ascending:false}).limit(200);data=r2.data;error=r2.error;}
  if(error){console.error(error);PM[peer]=PM[peer]||[];return;}PM[peer]=data.reverse();await loadHides(peer);markSeen(peer);}
 const visPM=peer=>(PM[peer]||[]).filter(m=>!HID.has(String(m.id)));
-async function loadHides(peer){const {data,error}=await sb.from("private_message_hides").select("message_id").eq("peer_id",peer).limit(1000);if(error){console.warn(error);return;}(data||[]).forEach(r=>HID.add(r.message_id));}
+async function loadHides(peer){const {data,error}=await sb.from("private_message_hides").select("message_id").eq("user_id",ME.id).limit(1000);if(error){console.warn("بارگذاری حذف‌های خصوصی:",error);return;}(data||[]).forEach(r=>HID.add(String(r.message_id)));}
 function afterDel(peer){const l=visPM(peer).slice(-1)[0],c=PC.find(x=>x.peer===peer);if(c)c.last=l?l.text:"";renderMsgs(true);renderList();}
 function delPM(m){
  const peer=cur.peer;
  modal(`<h3>حذف پیام</h3><p style="color:var(--mu);font-size:13px;line-height:2">این پیام چطور حذف شود؟</p><button class="btn g" id="dMe">حذف برای من</button>${m.mine?`<button class="btn g" id="dBoth">حذف برای هر دو</button>`:""}<button class="btn g" id="dNo">انصراف</button>`);
  $("dNo").onclick=close;
  $("dMe").onclick=async()=>{
-  const {error}=await sb.from("private_message_hides").insert({user_id:ME.id,peer_id:peer,message_id:String(m.id)});
-  if(error&&error.code!=="23505"){console.error(error);alert("حذف انجام نشد؛ دوباره تلاش کن.");return;}
+  $("dMe").disabled=true;
+  const {error}=await sb.from("private_message_hides").insert({user_id:ME.id,message_id:String(m.id)});
+  if(error&&error.code!=="23505"){console.error("حذف خصوصی برای من:",error);alert("حذف انجام نشد: "+(error.message||error.code||"خطای دیتابیس"));$("dMe").disabled=false;return;}
   HID.add(String(m.id));close();afterDel(peer);};
  if(m.mine)$("dBoth").onclick=async()=>{
-  const {data,error}=await sb.from("private_messages").delete().eq("id",m.id).eq("sender_id",ME.id).select("id");
-  if(error||!data||!data.length){console.error(error);alert("حذف برای هر دو انجام نشد.");return;}
+  $("dBoth").disabled=true;
+  const {error}=await sb.rpc("delete_private_message",{p_id:String(m.id),p_mode:"all"});
+  if(error){console.error("حذف خصوصی برای هر دو:",error);alert("حذف برای هر دو انجام نشد: "+(error.message||error.code||"خطای دیتابیس"));$("dBoth").disabled=false;return;}
   PM[peer]=(PM[peer]||[]).filter(x=>String(x.id)!==String(m.id));close();afterDel(peer);};
 }
 function addPM(m){const peer=m.sender_id===ME.id?m.recipient_id:m.sender_id,a=PM[peer]=PM[peer]||[];if(a.some(x=>x.id===m.id))return false;a.push(m);a.sort((x,y)=>x.created_at<y.created_at?-1:1);
@@ -1229,9 +1231,11 @@ async function delGM(m){
   GHID.add(String(m.id));close();afterGDel(gid);};
  if(canAll)$("dAll").onclick=async()=>{
   $("dAll").disabled=true;
-  const {data,error}=await sb.from("group_messages").delete().eq("id",m.id).select("id");
-  if(error||!data||!data.length){console.error(error);close();callToast(error&&!navigator.onLine?"اتصال اینترنت برقرار نیست.":"حذف برای همه انجام نشد؛ اجازهٔ حذف این پیام را نداری.");return;}
-  GM[gid]=(GM[gid]||[]).filter(x=>String(x.id)!==String(m.id));close();afterGDel(gid);};
+  const {error}=await sb.from("group_messages").delete().eq("id",m.id);
+  if(error){console.error("حذف پیام گروه:",error);close();callToast("حذف گروه ناموفق بود: "+String(error.message||error.code||"خطای دیتابیس").slice(0,130));return;}
+  const reloaded=await loadGM(gid);
+  if(!reloaded||(GM[gid]||[]).some(x=>String(x.id)===String(m.id))){close();callToast("حذف انجام نشد؛ دیتابیس اجازهٔ حذف این پیام را نداده است. جزئیات را در Console بررسی کن.");return;}
+  close();afterGDel(gid);};
 }
 async function gAct(a,u){
  const gid=cur.gid;if(a==="perms")return openPerms(gid,u);if(a==="ban"&&!confirm("تأیید نهایی: این عضو از گروه حذف و به فهرست سیاه همین گروه اضافه شود؟ تا رفع مسدودیت نمی‌تواند برگردد."))return;if(a==="demote"&&!confirm("این مدیر عزل شود و همه اختیاراتش گرفته شود؟"))return;if(a==="rm")return removeDlg(gid,u);
