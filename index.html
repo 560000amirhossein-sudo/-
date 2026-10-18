@@ -468,6 +468,34 @@ body{font-family:Vazirmatn,Vazir,Tahoma,"Segoe UI",system-ui,sans-serif;-webkit-
 .bi.open{color:#fff}.bi.open .bic svg{color:#67e8f9}
 .cmenu{position:fixed;z-index:60;display:none;flex-direction:column;min-width:236px;max-width:calc(100vw - 16px);padding:6px;border-radius:20px;border:1px solid #4a45b8cc;background:linear-gradient(145deg,#1a1660f8,#0e0b3bf8);box-shadow:0 16px 40px #000c,inset 0 0 20px #4f46e522,0 0 0 1px #a855f71f;animation:in .16s}
 .cmenu.open{display:flex}
+
+.pm-list{margin:12px 0;border-radius:16px;overflow:hidden;background:#ffffff0d;border:1px solid #ffffff14}
+.pm-it{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 14px;border-bottom:1px solid #ffffff10;cursor:pointer}.pm-it:last-child{border:0}
+.pm-it b{display:block;font-size:14px}.pm-it small{color:var(--mu);font-size:12px}
+.pm-sw{appearance:none;-webkit-appearance:none;flex-shrink:0;width:46px;height:26px;border-radius:13px;background:#ffffff26;position:relative;transition:background .15s;cursor:pointer;margin:0}
+.pm-sw::after{content:"";position:absolute;top:3px;inset-inline-start:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:inset-inline-start .15s}
+.pm-sw:checked{background:linear-gradient(135deg,#a855f7,#6366f1)}.pm-sw:checked::after{inset-inline-start:23px}
+#eiD{width:100%;box-sizing:border-box;border-radius:14px;border:1px solid #4a45b8aa;background:#0b0830;color:#fff;padding:10px 12px;font:inherit;resize:vertical}
+
+#pinbar{display:flex;align-items:center;gap:10px;margin:6px 10px 0;padding:8px 12px;border-radius:14px;background:#1b1760d9;border:1px solid #4a45b8aa;cursor:pointer;flex-shrink:0}
+.pn-ic{font-size:16px}.pn-t{flex:1;min-width:0}.pn-t b{display:block;font-size:12px;color:#c4b5fd}
+.pn-t span{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pn-x{width:30px;height:30px;border-radius:50%;color:var(--mu)}.pn-x:hover{background:#ffffff14;color:#fff}
+.row.hl .bub{box-shadow:0 0 0 2px #a855f7}
+
+.gp{position:fixed;inset:0;z-index:45;display:none;overflow-y:auto;-webkit-overflow-scrolling:touch;background:linear-gradient(180deg,#120b3a,#06041a 60%)}
+.gp.open{display:block}
+.gp-in{max-width:640px;margin:0 auto;padding:calc(12px + env(safe-area-inset-top,0px)) 14px calc(28px + env(safe-area-inset-bottom,0px))}
+.gp-back{padding:10px 14px;min-height:44px;border-radius:12px;font-weight:700;color:#e9ddff;background:#a855f71f;border:1px solid #a855f755}
+.gp-hero{display:grid;justify-items:center;gap:6px;text-align:center;padding:18px 0 4px}.gp-hero h2{margin:8px 0 0;font-size:21px;overflow-wrap:anywhere}
+.gp-sub{color:var(--mu);font-size:13px}.gp-d{max-width:520px;margin:4px 0;color:#d9ccf5;font-size:14px;line-height:2;overflow-wrap:anywhere}
+.gp-card{margin-top:14px;padding:12px;border-radius:18px;background:#ffffff0d;border:1px solid #ffffff14}
+.gp-card>label{display:block;margin:0 2px 10px;font-size:13px;font-weight:700;color:#c4b5fd}
+.gp .gm-list{display:grid;gap:8px;max-height:none;overflow:visible}
+.gp-set{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:48px;padding:12px;color:#fff;font-size:14px;text-align:start}.gp-set+.gp-set{border-top:1px solid #ffffff10}
+.rm-t{color:var(--mu);font-size:14px;line-height:2}
+.rm-o{display:block;width:100%;text-align:start;margin-bottom:10px;padding:13px 14px;border-radius:14px;color:#fff;background:#a855f71f;border:1px solid #a855f755}
+.rm-o b{display:block;font-size:14px}.rm-o small{display:block;margin-top:2px;color:#d9ccf5;font-size:12px;line-height:1.9}.rm-o.d{background:#dc262622;border-color:#dc262677}
 </style>  <meta property="og:image" content="https://bolt.new/static/og_default.png">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:image" content="https://bolt.new/static/og_default.png">
@@ -502,6 +530,7 @@ body{font-family:Vazirmatn,Vazir,Tahoma,"Segoe UI",system-ui,sans-serif;-webkit-
     <button class="ib" id="callA" title="تماس صوتی" aria-label="تماس صوتی" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg></button><button class="ib" id="callV" title="تماس تصویری" aria-label="تماس تصویری" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="6" width="12" height="12" rx="2.5"/><path d="m15 10 6-3v10l-6-3"/></svg></button>
     <button class="ib" id="info" title="اطلاعات و تنظیمات این گفتگو" aria-label="اطلاعات این گفتگو"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.01"/></svg></button>
    </div>
+   <div id="pinbar" style="display:none"></div>
    <div class="msgs" id="msgs"></div>
    <div class="rprev" id="rprev"><div class="rprev-bar"></div><span class="rprev-ic">↩</span><div class="rprev-body"><div class="rprev-name" id="rprevName"></div><div class="rprev-text" id="rprevText"></div></div><button class="rprev-x" id="rprevX" type="button" aria-label="لغو پاسخ">✕</button></div>
    <div class="prev" id="prev"><img id="prevImg" alt=""><span style="flex:1">عکس آماده ارسال</span><button class="ib" id="prevX" aria-label="لغو ارسال فایل" title="لغو">✕</button><i class="upb" id="upb"></i></div>
@@ -518,6 +547,7 @@ body{font-family:Vazirmatn,Vazir,Tahoma,"Segoe UI",system-ui,sans-serif;-webkit-
   </div>
  </main>
 </div>
+<div class="gp" id="gp" role="dialog" aria-modal="true" aria-label="اطلاعات گروه"><div class="gp-in" id="gpBody"></div></div>
 <div class="ov" id="md"><div class="card" id="mdBody"></div></div>
 <div id="gate" class="ov">
  <div class="gbg" aria-hidden="true">
@@ -587,7 +617,7 @@ body{font-family:Vazirmatn,Vazir,Tahoma,"Segoe UI",system-ui,sans-serif;-webkit-
 <div id="call" class="cl"><video id="rv" autoplay playsinline></video><div class="cl-info"><div class="av" id="clAv"></div><div class="cl-nm" id="clNm"></div><div class="cl-st" id="clSt"></div></div><video id="lv" autoplay playsinline muted></video><div class="cl-bar"><button class="cb" id="clMic" type="button" title="میکروفون">🎤</button><button class="cb" id="clCam" type="button" title="دوربین">📷</button><button class="cb red" id="clEnd" type="button" title="پایان تماس">✕</button></div></div>
 <div id="inc" class="cl inc"><div class="av" id="icAv"></div><div class="cl-nm" id="icNm"></div><div class="cl-st" id="icSt"></div><div class="cl-bar"><button class="cb red" id="icNo" type="button" title="رد تماس">✕</button><button class="cb grn" id="icYes" type="button" title="پاسخ">📞</button></div></div>
 
-<div class="mmenu" id="mmenu" role="menu"><button id="mmReply" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 6 6v3"/></svg>پاسخ دادن</button><button id="mmCopy" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></svg>کپی متن</button><button id="mmDel" type="button" class="dng"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12h10l1-12M9 7V4h6v3"/></svg>حذف پیام</button></div>
+<div class="mmenu" id="mmenu" role="menu"><button id="mmReply" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 6 6v3"/></svg>پاسخ دادن</button><button id="mmCopy" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></svg>کپی متن</button><button id="mmPin" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4h6l-1 6 3 3H7l3-3zM12 13v7"/></svg><span>سنجاق پیام</span></button><button id="mmDel" type="button" class="dng"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12h10l1-12M9 7V4h6v3"/></svg>حذف پیام</button></div>
 <div class="cmenu" id="cmenu" role="menu" aria-label="ساخت مورد جدید"><button type="button" class="fmi g" id="cmG" role="menuitem"><span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="9" cy="9" r="3.2"/><path d="M3.5 19c.6-3 2.8-4.6 5.5-4.6s4.9 1.6 5.5 4.6"/><circle cx="17" cy="9.8" r="2.5"/><path d="M16.5 14.5c2.3-.1 4 1.2 4.5 3.8"/></svg></span><span><b>ساخت گروه جدید</b><small>گروه تازه برای گفتگو</small></span></button><button type="button" class="fmi c" id="cmC" role="menuitem"><span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 10v4a1 1 0 0 0 1 1h2l5 4V5L7 9H5a1 1 0 0 0-1 1z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg></span><span><b>ساخت کانال جدید</b><small>فقط مدیر پیام می‌فرستد</small></span></button></div>
 <div id="nts" aria-live="polite"></div>
 <script type="module">
@@ -695,7 +725,7 @@ function openChat(id){
  if(c.type==="private")loadPM(c.peer).then(()=>{if(cur&&cur.id===c.id){renderMsgs(true);}renderList();});
 }
 function renderMsgs(force){
- if(!cur)return;const data=msgsOf(cur),s=cur.id+data.map(m=>m.id+(m.replyTo?m.replyTo.id:"")).join();if(s===sig&&!force)return;sig=s;
+ if(!cur)return;renderPin();const data=msgsOf(cur),s=cur.id+data.map(m=>m.id+(m.replyTo?m.replyTo.id:"")).join();if(s===sig&&!force)return;sig=s;
  const box=$("msgs"),top=box.scrollTop,near=box.scrollHeight-box.scrollTop-box.clientHeight<120||force;
  const prev=RND.id===cur.id?RND.ids:null,fresh=prev?data.filter(m=>!prev.has(String(m.id))).length:0,anim=fresh>0&&fresh<=5;
  RND={id:cur.id,ids:new Set(data.map(m=>String(m.id)))};
@@ -800,7 +830,7 @@ function showMsgMenu(row,x,y){
  const mid=row.dataset.mid;if(!mid||!cur)return;
  const data=msgsOf(cur);const m=data.find(x=>String(x.id)===mid);if(!m)return;
  activeMsgEl=row;
- $("mmDel").style.display=row.querySelector(".del")?"":"none";$("mmCopy").style.display=m.text?"":"none";
+ $("mmPin").style.display=cur.gid&&myPerm("pin_messages")?"":"none";$("mmPin").lastChild.textContent=PIN[cur.gid]===mid?"برداشتن سنجاق":"سنجاق پیام";$("mmDel").style.display=row.querySelector(".del")?"":"none";$("mmCopy").style.display=m.text?"":"none";
  const mm=$("mmenu");
  mm.classList.remove("open");
  mm.style.left="";mm.style.right="";mm.style.top="";mm.style.transform="";
@@ -824,6 +854,8 @@ msgsBox.addEventListener("click",e=>{
 msgsBox.addEventListener("contextmenu",e=>{const row=e.target.closest(".row");if(row){e.preventDefault();showMsgMenu(row,e.clientX,e.clientY);}});
 document.addEventListener("click",e=>{if(!e.target.closest("#mmenu")&&!e.target.closest(".row"))hideMsgMenu();if(!e.target.closest("#atm"))$("atm").classList.remove("open");});
 $("mmReply").onclick=()=>{const m=getActiveMessage();if(m){setReply(m);hideMsgMenu();$("emo").classList.remove("open");$("txt").focus();}};
+$("mmPin").onclick=async()=>{const id=activeMsgEl&&activeMsgEl.dataset.mid;hideMsgMenu();if(!id||!cur||!cur.gid)return;const g=cur.gid,un=PIN[g]===id;
+ const {error}=await sb.rpc("pin_group_message",{p_gid:g,p_mid:un?null:id});if(error){callToast(gErr(error));return;}PIN[g]=un?null:id;PINM[g]=null;renderPin();};
 $("mmDel").onclick=()=>{const r=activeMsgEl,d=r&&r.querySelector(".del");hideMsgMenu();if(d)d.click();};
 $("mmCopy").onclick=()=>{const m=getActiveMessage();if(m&&m.text){navigator.clipboard&&navigator.clipboard.writeText(m.text).then(()=>callToast("متن کپی شد")).catch(()=>{});}hideMsgMenu();};
 $("file").onchange=async()=>{
@@ -844,7 +876,7 @@ $("emo").onclick=e=>{if(e.target.tagName==="BUTTON"){$("txt").value+=e.target.te
 $("emoB").onclick=()=>{$("atm").classList.remove("open");$("emo").classList.toggle("open");};
 
 // ---- پنجره‌ها ----
-const modal=h=>{const b=$("mdBody");b.className="card";b.removeAttribute("role");b.removeAttribute("aria-modal");$("md").classList.remove("pfo");b.innerHTML=h+'<button type="button" class="mx" id="mdX" aria-label="بستن" title="بستن">✕</button>';b.setAttribute("role","dialog");b.setAttribute("aria-modal","true");$("mdX").onclick=close;$("md").classList.add("open");},close=()=>$("md").classList.remove("open");
+const modal=h=>{const b=$("mdBody");b.className="card";b.removeAttribute("role");b.removeAttribute("aria-modal");$("md").classList.remove("pfo");b.innerHTML=h+'<button type="button" class="mx" id="mdX" aria-label="بستن" title="بستن">✕</button>';b.setAttribute("role","dialog");b.setAttribute("aria-modal","true");$("mdX").onclick=close;$("md").classList.add("open");},close=()=>{$("md").classList.remove("open");$("mdBody").innerHTML="";};
 $("md").onclick=e=>{if(e.target===$("md"))close();};
 function newChat(kind){
  let av=null,avB=null;
@@ -868,6 +900,7 @@ $("cmC").onclick=()=>{cmSet(false);newChat("channel");};
 document.addEventListener("pointerdown",e=>{if(!e.target.closest("#cmenu,#bnav [data-n=new]"))cmSet(false);});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&cm.classList.contains("open")){cmSet(false);cb.focus();}});
 addEventListener("resize",()=>cmSet(false));
+for(const id of ["hAv","hNm"])$(id).addEventListener("click",()=>{if(cur&&cur.gid)openGroupInfo();});
 $("info").onclick=()=>{if(!cur)return;if(cur.type==="private"){openProfile(cur.peer);return;}if(cur.gid){openGroupInfo();return;}
  modal(`<div style="display:flex;justify-content:center;margin-bottom:12px">${avHtml(cur.avatar,cur.title,"xl")}</div><h3 style="text-align:center;overflow-wrap:anywhere">${esc(cur.title)}</h3><p style="color:var(--mu);font-size:13px;line-height:2;text-align:center;overflow-wrap:anywhere">${TL[cur.type]}${cur.desc?`<br>${esc(cur.desc)}`:""}<br>نقش تو: ${cur.role==="owner"?"مالک":"عضو"}</p>${cur.id!==DEF&&cur.type!=="private"?`<button class="btn g" id="lvC">حذف ${TL[cur.type]} از این دستگاه</button>`:""}`);
  if($("lvC"))$("lvC").onclick=()=>{if(!confirm("حذف شود؟"))return;D.chats=D.chats.filter(c=>c.id!==cur.id);delete D.msgs[cur.id];save();close();$("back").click();};
@@ -1040,7 +1073,7 @@ async function openProfileByName(name){
 }
 $("meAv").onclick=()=>{if(!PROF)return;viewMine();};
 $("hAv").onclick=$("hNm").onclick=()=>{if(cur&&cur.type==="private")openProfile(cur.peer);};
-document.addEventListener("keydown",e=>{if(e.key==="Escape"&&$("md").classList.contains("open"))close();});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){if($("md").classList.contains("open"))close();else gpHide();}});
 function mkPC(id){const p=P[id]||{};return{id:"u:"+id,type:"private",peer:id,title:pName(p),uname:p.username||"",avatar:p.avatar_url,desc:p.username?"@"+p.username:""};}
 async function profs(ids){const m=[...new Set(ids)].filter(i=>UUID.test(i)&&!P[i]);if(!m.length)return;const {data}=await sb.from("profiles").select("id,username,display_name,avatar_url").in("id",m);(data||[]).forEach(p=>P[p.id]=p);}
 async function refreshPC(poll){if(!ME)return;const {data,error}=await sb.rpc("my_conversations",{p_limit:50});if(error){console.error(error);return;}
@@ -1130,7 +1163,7 @@ setInterval(async()=>{if(!ME||document.hidden||rtOk)return;await refreshPC(true)
 
 // ================= گروه‌های سرور با نقش‌های مالک / مدیر / عضو =================
 // نقش‌ها در دیتابیس (جدول group_members) ذخیره و با RLS و تابع‌های SQL اعمال می‌شوند؛ دکمه‌های مخفی‌شده فقط راحتی کاربر هستند.
-const GERR={FORBIDDEN:"اجازهٔ این کار را نداری.",NOT_A_MEMBER:"این کاربر عضو گروه نیست.",USER_NOT_FOUND:"کاربر پیدا نشد.",OWNER_CANNOT_LEAVE:"مالک نمی‌تواند از گروه خارج شود.",BAD_ROLE:"نقش نامعتبر است.",NOT_PUBLIC:"این گروه عمومی نیست.",GROUP_NOT_FOUND:"گروه پیدا نشد.",NOT_AUTHENTICATED:"ابتدا وارد حساب شو."};
+const GERR={BANNED:"دسترسی شما به این گروه مسدود شده است.",NOT_FOUND:"پیام پیدا نشد.",FORBIDDEN:"اجازهٔ این کار را نداری.",NOT_A_MEMBER:"این کاربر عضو گروه نیست.",USER_NOT_FOUND:"کاربر پیدا نشد.",OWNER_CANNOT_LEAVE:"مالک نمی‌تواند از گروه خارج شود.",BAD_ROLE:"نقش نامعتبر است.",NOT_PUBLIC:"این گروه عمومی نیست.",GROUP_NOT_FOUND:"گروه پیدا نشد.",NOT_AUTHENTICATED:"ابتدا وارد حساب شو."};
 function gErr(e){const m=String((e&&e.message)||e||"");for(const k in GERR)if(m.includes(k))return GERR[k];if(/schema cache|does not exist|PGRST20|Could not find|relation/i.test(m))return"جدول‌های گروه هنوز در دیتابیس ساخته نشده‌اند؛ فایل SQL را اجرا کن.";return"انجام نشد؛ دوباره تلاش کن.";}
 const roleFa=r=>r==="owner"?"مالک":r==="admin"?"مدیر":"عضو";
 const roleBadge=r=>r==="owner"?`<span class="badge ow">مالک</span>`:r==="admin"?`<span class="badge">مدیر</span>`:"";
@@ -1140,7 +1173,7 @@ async function refreshSG(){
  const {data,error}=await sb.rpc("my_groups");
  if(error){if(!sgWarn){sgWarn=true;console.warn("my_groups:",error);}return;}
  SG=data.map(r=>({id:"g:"+r.id,gid:r.id,type:"group",title:r.title,desc:r.description,avatar:r.avatar_url,pub:r.is_public,role:r.role,owner:r.owner_id,last:r.last_text||(r.last_at?"📎 رسانه":""),at:r.last_at||r.created_at}));
- if(cur&&cur.gid){const n=SG.find(x=>x.gid===cur.gid);if(!n){cur=null;$("back").click();callToast("دیگر عضو این گروه نیستی.");}else cur.role=n.role;}
+ if(cur&&cur.gid){const n=SG.find(x=>x.gid===cur.gid);if(!n){gpHide();cur=null;$("back").click();callToast("دیگر عضو این گروه نیستی.");}else cur.role=n.role;}
 }
 const gLab=t=>t==="image"?"🖼️ عکس":t==="video"?"🎬 ویدیو":"";
 async function loadGM(gid){
@@ -1149,11 +1182,11 @@ async function loadGM(gid){
  if(r.error&&gMediaOk&&/media_url|media_type|42703|PGRST204/.test((r.error.code||"")+(r.error.message||""))){gMediaOk=false;r=await qq();}
  const {data,error}=r;
  if(error){console.error(error);return false;}
- GM[gid]=data.reverse();await profs(GM[gid].map(m=>m.sender_id));
+ GM[gid]=data.reverse();await profs(GM[gid].map(m=>m.sender_id));loadPin(gid);
  const c=SG.find(x=>x.gid===gid),l=GM[gid][GM[gid].length-1];if(c&&l){c.last=l.text||gLab(l.media_type);c.at=l.created_at;}
  return true;}
 async function loadMembers(gid){
- const {data,error}=await sb.from("group_members").select("user_id,role,joined_at").eq("group_id",gid);
+ let {data,error}=await sb.from("group_members").select("user_id,role,joined_at,perms").eq("group_id",gid);if(error&&/perms|42703/.test((error.code||"")+(error.message||""))){({data,error}=await sb.from("group_members").select("user_id,role,joined_at").eq("group_id",gid));}
  if(error){console.error(error);return null;}
  await profs(data.map(r=>r.user_id));
  const map={};data.forEach(r=>map[r.user_id]=r.role);GMEM[gid]=map;GMR[gid]=data;
@@ -1172,37 +1205,77 @@ async function sendGM(text,media,g){
  const {data,error}=r;
  if(error){console.error(error);if(!media)alert(navigator.onLine?"ارسال پیام ناموفق بود؛ دوباره تلاش کن.":"اتصال اینترنت برقرار نیست.");else prevSt(navigator.onLine?"دیتابیس این پیام رسانه را نپذیرفت؛ فایل SQL را اجرا کن.":"اتصال اینترنت برقرار نیست.","err");return false;}
  addGM(data);return true;}
-function canDelG(m){const r=cur&&cur.role;if(m.mine||r==="owner")return true;return r==="admin"&&((GMEM[cur.gid]||{})[m.uid]==="member");}
+const PERMS=[["delete_messages","حذف پیام‌ها","حذف پیام اعضا"],["invite_members","دعوت اعضا","افزودن کاربر با نام کاربری"],["ban_members","اخراج و مسدودکردن اعضا","حذف عضو و جلوگیری از بازگشت"],["pin_messages","سنجاق پیام","سنجاق و برداشتن سنجاق"],["edit_info","تغییر اطلاعات گروه","نام و توضیحات گروه"],["add_admins","افزودن مدیران","ارتقای عضو به مدیر"]];
+function myPerm(k){const r=cur&&cur.role;if(r==="owner")return true;if(r!=="admin")return false;const x=(GMR[cur.gid]||[]).find(q=>q.user_id===ME.id);return !!(x&&x.perms&&x.perms[k]);}
+function canDelG(m){const r=cur&&cur.role;if(m.mine||r==="owner")return true;return r==="admin"&&myPerm("delete_messages")&&((GMEM[cur.gid]||{})[m.uid]==="member");}
 async function delGM(m){
  if(!confirm("این پیام برای همه حذف شود؟"))return;const gid=cur.gid;
  const {data,error}=await sb.from("group_messages").delete().eq("id",m.id).select("id");
  if(error||!data||!data.length){callToast("اجازهٔ حذف این پیام را نداری.");return;}
  GM[gid]=(GM[gid]||[]).filter(x=>String(x.id)!==String(m.id));renderMsgs(true);renderList();}
 async function gAct(a,u){
- const gid=cur.gid;if(a==="remove"&&!confirm("این عضو از گروه حذف شود؟"))return;
- const {error}=a==="remove"?await sb.rpc("remove_group_member",{p_gid:gid,p_uid:u}):await sb.rpc("set_group_role",{p_gid:gid,p_uid:u,p_role:a==="promote"?"admin":"member"});
+ const gid=cur.gid;if(a==="perms")return openPerms(gid,u);if(a==="ban"&&!confirm("تأیید نهایی: این عضو از گروه حذف و به فهرست سیاه همین گروه اضافه شود؟ تا رفع مسدودیت نمی‌تواند برگردد."))return;if(a==="demote"&&!confirm("این مدیر عزل شود و همه اختیاراتش گرفته شود؟"))return;if(a==="rm")return removeDlg(gid,u);
+ const {error}=a==="ban"?await sb.rpc("ban_group_member",{p_gid:gid,p_uid:u}):a==="remove"?await sb.rpc("remove_group_member",{p_gid:gid,p_uid:u}):await sb.rpc("set_group_role",{p_gid:gid,p_uid:u,p_role:a==="promote"?"admin":"member"});
  if(error){if($("gaM"))$("gaM").textContent=gErr(error);return;}
- await loadMembers(gid);renderMsgs(true);renderList();openGroupInfo();}
-function openGroupInfo(){
+ await loadMembers(gid);renderMsgs(true);renderList();if(a==="promote"&&cur.role==="owner")openPerms(gid,u);else openGroupInfo();}
+function openPerms(gid,uid){const row=(GMR[gid]||[]).find(r=>r.user_id===uid);if(!row||row.role!=="admin"){openGroupInfo();return;}
+ const p=P[uid]||{},pm=row.perms||{};
+ modal(`<button type="button" class="gm-b" id="pgB">‹ بازگشت به گروه</button><div class="gm-row" style="margin-top:10px">${avHtml(p.avatar_url,pName(p),"s")}<div class="gm-i"><div class="gm-n">${esc(pName(p))}</div><div class="gm-u">اختیارات این مدیر</div></div></div><div class="pm-list">${PERMS.map(([k,t,d])=>`<label class="pm-it"><span><b>${t}</b><small>${d}</small></span><input type="checkbox" class="pm-sw" data-k="${k}" ${pm[k]?"checked":""}></label>`).join("")}</div><button type="button" class="btn g" id="pgD">عزل از مدیریت</button><div class="msg" id="gaM"></div>`);
+ $("pgB").onclick=openGroupInfo;$("pgD").onclick=()=>gAct("demote",uid);
+ $("mdBody").querySelectorAll(".pm-sw").forEach(sw=>sw.onchange=async()=>{const all={};$("mdBody").querySelectorAll(".pm-sw").forEach(x=>all[x.dataset.k]=x.checked);
+  const {error}=await sb.rpc("set_admin_perms",{p_gid:gid,p_uid:uid,p_perms:all});
+  if(error){sw.checked=!sw.checked;$("gaM").textContent=gErr(error);return;}row.perms=Object.assign({},row.perms,all);$("gaM").textContent="ذخیره شد ✓";});}
+function editInfo(gid){const c=SG.find(x=>x.gid===gid)||cur;
+ modal(`<h3>ویرایش اطلاعات گروه</h3><label>نام گروه</label><input type="text" id="eiT" maxlength="60" value="${esc(c.title||"")}"><label>توضیحات</label><textarea id="eiD" maxlength="300" rows="3">${esc(c.desc||"")}</textarea><button type="button" class="btn" id="eiGo">ذخیره</button><div class="msg" id="gaM"></div>`);
+ $("eiGo").onclick=async()=>{const t=$("eiT").value.trim(),d=$("eiD").value.trim();if(!t){$("gaM").textContent="نام گروه نمی‌تواند خالی باشد.";return;}
+  const {error}=await sb.rpc("update_group_info",{p_gid:gid,p_title:t,p_desc:d});if(error){$("gaM").textContent=gErr(error);return;}
+  c.title=t;c.desc=d;if(cur&&cur.gid===gid){cur.title=t;cur.desc=d;$("hNm").textContent=t;}renderList();openGroupInfo();};}
+const PIN={},PINM={};
+const pinSnip=m=>m?(m.text||(m.media_type==="image"?"🖼️ عکس":m.media_type==="video"?"🎬 ویدیو":"پیام")):"";
+function renderPin(){const b=$("pinbar"),g=cur&&cur.gid,id=g&&PIN[g];if(!id){b.style.display="none";return;}
+ const m=(GM[g]||[]).find(x=>String(x.id)===id)||PINM[g];
+ b.innerHTML=`<span class="pn-ic">📌</span><div class="pn-t"><b>پیام سنجاق‌شده</b><span>${esc(pinSnip(m))}</span></div>${myPerm("pin_messages")?`<button type="button" class="pn-x" aria-label="برداشتن سنجاق" title="برداشتن سنجاق">✕</button>`:""}`;b.style.display="flex";
+ b.onclick=e=>{if(e.target.closest(".pn-x"))return;const r=$("msgs").querySelector(`[data-mid="${id}"]`);if(r){r.scrollIntoView({block:"center"});r.classList.add("hl");setTimeout(()=>r.classList.remove("hl"),1400);}};
+ const x=b.querySelector(".pn-x");if(x)x.onclick=async()=>{const {error}=await sb.rpc("pin_group_message",{p_gid:g,p_mid:null});if(error){callToast(gErr(error));return;}PIN[g]=null;renderPin();};}
+async function loadPin(gid){const {data,error}=await sb.rpc("get_group_pin",{p_gid:gid});if(error)return;PIN[gid]=data==null?null:String(data);
+ if(PIN[gid]&&!(GM[gid]||[]).some(x=>String(x.id)===PIN[gid])){const r=await sb.from("group_messages").select("id,text,media_type").eq("id",PIN[gid]).maybeSingle();PINM[gid]=r.data||null;}
+ renderPin();}
+async function openBans(gid){const {data,error}=await sb.rpc("list_group_bans",{p_gid:gid});
+ if(error){if($("gaM"))$("gaM").textContent=gErr(error);return;}await profs((data||[]).map(r=>r.user_id));
+ modal(`<button type="button" class="gm-b" id="bnB">‹ بازگشت به گروه</button><h3 style="margin-top:10px">کاربران مسدودشده</h3><div class="gm-list">${(data||[]).map(r=>{const p=P[r.user_id]||{};return `<div class="gm-row" data-u="${esc(r.user_id)}">${avHtml(p.avatar_url,pName(p),"s")}<div class="gm-i"><div class="gm-n">${esc(pName(p))}</div><div class="gm-u">@${esc(p.username||"")}</div></div><div class="gm-a"><button type="button" class="gm-b" data-a="unban">رفع مسدودیت</button></div></div>`;}).join("")||'<div class="empty">کاربر مسدودی وجود ندارد.</div>'}</div><div class="msg" id="gaM"></div>`);
+ $("bnB").onclick=openGroupInfo;
+ $("mdBody").querySelectorAll('[data-a=unban]').forEach(b=>b.onclick=async()=>{const {error:e}=await sb.rpc("unban_group_member",{p_gid:gid,p_uid:b.closest(".gm-row").dataset.u});if(e){$("gaM").textContent=gErr(e);return;}openBans(gid);});}
+function gpHide(){$("gp").classList.remove("open");}
+function removeDlg(gid,uid){const p=P[uid]||{};
+ modal(`<h3>حذف عضو از گروه</h3><p class="rm-t">می‌خواهید این عضو فقط از گروه حذف شود یا دسترسی او به عضویت مجدد را هم مسدود کنید؟</p><div class="gm-row" style="margin-bottom:12px">${avHtml(p.avatar_url,pName(p),"s")}<div class="gm-i"><div class="gm-n">${esc(pName(p))}</div><div class="gm-u">@${esc(p.username||"")}</div></div></div><button type="button" class="rm-o" id="rmA"><b>حذف از گروه</b><small>عضو فوراً خارج می‌شود و می‌تواند دوباره عضو شود؛ پیام‌های قبلی‌اش می‌مانند.</small></button><button type="button" class="rm-o d" id="rmB"><b>حذف و افزودن به فهرست سیاه</b><small>تا زمانی که مسدودیت رفع نشود، نمی‌تواند به این گروه برگردد.</small></button><button type="button" class="btn g" id="rmX">انصراف</button><div class="msg" id="gaM"></div>`);
+ $("rmA").onclick=()=>gAct("remove",uid);$("rmB").onclick=()=>gAct("ban",uid);$("rmX").onclick=close;}
+function openGroupInfo(fresh){
  const c=cur;if(!c||!c.gid)return;const gid=c.gid,me=c.role,ord={owner:0,admin:1,member:2},rows=(GMR[gid]||[]).slice();
  rows.sort((a,b)=>(ord[a.role]-ord[b.role])||pName(P[a.user_id]).localeCompare(pName(P[b.user_id])));
- const li=rows.map(r=>{const p=P[r.user_id]||{},self=r.user_id===ME.id;let a="";
-  if(me==="owner"&&r.role==="member")a+=`<button type="button" class="gm-b" data-a="promote">ارتقا به مدیر</button>`;
-  if(me==="owner"&&r.role==="admin")a+=`<button type="button" class="gm-b" data-a="demote">عزل از مدیریت</button>`;
-  if(!self&&((me==="owner"&&r.role!=="owner")||(me==="admin"&&r.role==="member")))a+=`<button type="button" class="gm-b d" data-a="remove">حذف از گروه</button>`;
-  return `<div class="gm-row" data-u="${esc(r.user_id)}">${avHtml(p.avatar_url,pName(p),"s")}<div class="gm-i"><div class="gm-n">${esc(pName(p))}${self?" (تو)":""} ${r.role==="member"?`<span class="gm-m">عضو</span>`:roleBadge(r.role)}</div><div class="gm-u">@${esc(p.username||"")}</div></div>${a?`<div class="gm-a">${a}</div>`:""}</div>`;}).join("");
- const canAdd=me==="owner"||me==="admin";
- modal(`<div style="display:flex;justify-content:center;margin-bottom:12px">${avHtml(c.avatar,c.title,"xl")}</div><h3 style="text-align:center;overflow-wrap:anywhere">${esc(c.title)}</h3><p style="color:var(--mu);font-size:13px;line-height:2;text-align:center;overflow-wrap:anywhere">گروه ${c.pub===false?"خصوصی":"عمومی"}${c.desc?`<br>${esc(c.desc)}`:""}<br>نقش تو: ${roleFa(me)}</p><label>اعضا (${rows.length.toLocaleString("fa-IR")})</label><div class="gm-list">${li||'<div class="empty">در حال بارگذاری...</div>'}</div>${canAdd?`<label>افزودن عضو (نام کاربری)</label><div class="gm-add"><input type="text" id="gaU" dir="ltr" maxlength="24" autocomplete="off" autocapitalize="off"><button type="button" class="btn" id="gaB">افزودن</button></div>`:""}<button class="btn g" id="gLv">${me==="owner"?"حذف گروه":"خروج از گروه"}</button><div class="msg" id="gaM"></div>`);
- $("mdBody").querySelectorAll(".gm-b").forEach(b=>b.onclick=()=>gAct(b.dataset.a,b.closest(".gm-row").dataset.u));
+ const row=r=>{const p=P[r.user_id]||{},self=r.user_id===ME.id;let a="";
+  if((me==="owner"||(me==="admin"&&myPerm("add_admins")))&&r.role==="member")a+=`<button type="button" class="gm-b" data-a="promote">ارتقا به مدیر</button>`;
+  if(me==="owner"&&r.role==="admin")a+=`<button type="button" class="gm-b" data-a="perms">اختیارات</button><button type="button" class="gm-b d" data-a="demote">عزل</button>`;
+  if(!self&&((me==="owner"&&r.role!=="owner")||(me==="admin"&&r.role==="member"&&myPerm("ban_members"))))a+=`<button type="button" class="gm-b d" data-a="rm">حذف عضو</button>`;
+  return `<div class="gm-row" data-u="${esc(r.user_id)}">${avHtml(p.avatar_url,pName(p),"s")}<div class="gm-i"><div class="gm-n">${esc(pName(p))}${self?" (تو)":""} ${r.role==="member"?`<span class="gm-m">عضو</span>`:roleBadge(r.role)}</div><div class="gm-u">@${esc(p.username||"")}</div></div>${a?`<div class="gm-a">${a}</div>`:""}</div>`;};
+ const staff=rows.filter(r=>r.role!=="member"),mem=rows.filter(r=>r.role==="member"),n=x=>x.toLocaleString("fa-IR");
+ const canAdd=me==="owner"||myPerm("invite_members"),canEd=me==="owner"||myPerm("edit_info"),canBn=myPerm("ban_members"),gp=$("gp"),was=gp.classList.contains("open");
+ close();
+ $("gpBody").innerHTML=`<div class="gp-top"><button type="button" class="gp-back" id="gpB">‹ بازگشت به گفتگو</button></div><div class="gp-hero">${avHtml(c.avatar,c.title,"xl")}<h2>${esc(c.title)}</h2><div class="gp-sub">گروه ${c.pub===false?"خصوصی":"عمومی"} · ${n(rows.length)} عضو</div>${c.desc?`<p class="gp-d">${esc(c.desc)}</p>`:""}<div class="gp-sub">نقش تو: ${roleFa(me)}</div></div>${canEd||canBn?`<div class="gp-card"><label>تنظیمات گروه</label>${canEd?`<button type="button" class="gp-set" id="gEd"><span>ویرایش اطلاعات گروه</span><span>›</span></button>`:""}${canBn?`<button type="button" class="gp-set" id="gBn"><span>اعضای مسدودشده</span><span>›</span></button>`:""}</div>`:""}${canAdd?`<div class="gp-card"><label>افزودن عضو (نام کاربری)</label><div class="gm-add"><input type="text" id="gaU" dir="ltr" maxlength="24" autocomplete="off" autocapitalize="off"><button type="button" class="btn" id="gaB">افزودن</button></div></div>`:""}<div class="gp-card"><label>مالک و مدیران (${n(staff.length)})</label><div class="gm-list">${staff.map(row).join("")||'<div class="empty">در حال بارگذاری...</div>'}</div></div><div class="gp-card"><label>اعضا (${n(mem.length)})</label><div class="gm-list">${mem.map(row).join("")||'<div class="empty">عضو دیگری وجود ندارد.</div>'}</div></div><button class="btn g" id="gLv">${me==="owner"?"حذف گروه":"خروج از گروه"}</button><div class="msg" id="gaM"></div>`;
+ gp.classList.add("open");if(!was)gp.scrollTop=0;
+ $("gpB").onclick=gpHide;
+ $("gpBody").querySelectorAll(".gm-b").forEach(b=>b.onclick=()=>gAct(b.dataset.a,b.closest(".gm-row").dataset.u));
+ $("gpBody").querySelectorAll(".gm-row").forEach(r=>r.querySelectorAll(".av,.gm-n").forEach(el=>{el.classList.add("lnk");el.onclick=()=>openProfile(r.dataset.u);}));
+ if($("gEd"))$("gEd").onclick=()=>editInfo(gid);if($("gBn"))$("gBn").onclick=()=>openBans(gid);
  if($("gaB"))$("gaB").onclick=async()=>{const n=$("gaU").value.trim().replace(/^@/,"");if(!UNRE.test(n)){$("gaM").textContent="نام کاربری معتبر نیست.";return;}
   const {data}=await sb.from("profiles").select("id,username,display_name,avatar_url").ilike("username",likeEsc(n)).limit(1);const p=data&&data[0];
   if(!p){$("gaM").textContent="کاربری با این نام پیدا نشد.";return;}P[p.id]=p;
   const {error}=await sb.rpc("add_group_member",{p_gid:gid,p_uid:p.id});if(error){$("gaM").textContent=gErr(error);return;}
-  await loadMembers(gid);openGroupInfo();};
+  await loadMembers(gid);openGroupInfo(false);};
  $("gLv").onclick=async()=>{if(!confirm(me==="owner"?"گروه برای همه حذف شود؟ این کار برگشت‌پذیر نیست.":"از گروه خارج می‌شوی؟"))return;
   const {error}=me==="owner"?await sb.rpc("delete_group",{p_gid:gid}):await sb.rpc("leave_group",{p_gid:gid});
   if(error){$("gaM").textContent=gErr(error);return;}
-  SG=SG.filter(x=>x.gid!==gid);delete GM[gid];delete GMR[gid];delete GMEM[gid];close();$("back").click();};
+  SG=SG.filter(x=>x.gid!==gid);delete GM[gid];delete GMR[gid];delete GMEM[gid];gpHide();close();$("back").click();};
+ if(fresh!==false)loadMembers(gid).then(r=>{if(r&&$("gp").classList.contains("open")&&cur&&cur.gid===gid)openGroupInfo(false);});
 }
 // همگام‌سازی گروه‌ها: با Realtime فعال فقط هر ۱۵ ثانیه پیام‌های گروه باز و هر ۳۰ ثانیه فهرست/شمارنده (پشتیبان)؛ بدون Realtime مثل قبل هر ۵ ثانیه.
 setInterval(()=>{if(!ME||document.hidden)return;gTick++;if(grtOk&&gTick%3)return;gSync(!grtOk||gTick%6===0);},5000);
