@@ -881,10 +881,10 @@ $("md").onclick=e=>{if(e.target===$("md"))close();};
 function newChat(kind){
  let av=null,avB=null;
  modal(`<h3>${kind==="group"?"گروه جدید":"کانال جدید"}</h3><label>نام</label><input type="text" id="nN" maxlength="60"><label>توضیحات</label><textarea id="nD" rows="2" maxlength="300"></textarea><label>تصویر</label><input type="file" id="nF" accept="image/*"><label class="chk"><input type="checkbox" id="nP" checked> عمومی (در جست‌وجو دیده شود)</label><button class="btn" id="nGo">ساخت</button><div class="msg" id="nM"></div>`);
- $("nF").onchange=async()=>{const f=$("nF").files[0];if(f)try{avB=await resize(f,200,true);av=await b2d(avB);}catch{}};
+ $("nF").onchange=async()=>{const f=$("nF").files[0];if(f)try{$("nM").textContent="";avB=await resize(f,200,true);av=await b2d(avB);}catch{avB=null;av=null;$("nM").textContent="عکس قابل خواندن نبود؛ عکس دیگری انتخاب کن.";}};
  $("nGo").onclick=async()=>{const t=$("nN").value.trim();if(!t){$("nM").textContent="نام را وارد کن.";return;}
   if(kind==="group"){const b=$("nGo");b.disabled=true;$("nM").textContent="";try{
-   let url=null;if(avB){try{const k=ME.id+"/g"+Date.now()+".jpg",u=await sb.storage.from(AVB).upload(k,avB,{contentType:"image/jpeg"});if(!u.error)url=sb.storage.from(AVB).getPublicUrl(k).data.publicUrl;}catch{}}
+   let url=null;if(avB){const k=ME.id+"/g"+Date.now()+".jpg";let up;try{up=await sb.storage.from(AVB).upload(k,avB,{contentType:"image/jpeg"});}catch(e){up={error:e};}if(up.error){console.error(up.error);$("nM").textContent="آپلود عکس گروه ناموفق بود"+(navigator.onLine?"؛ دوباره تلاش کن یا گروه را بدون عکس بساز.":" (اتصال اینترنت قطع است).");b.disabled=false;return;}url=sb.storage.from(AVB).getPublicUrl(k).data.publicUrl;}
    const {data,error}=await sb.rpc("create_group",{p_title:t,p_desc:$("nD").value.trim(),p_avatar:url,p_pub:$("nP").checked});
    if(error)throw error;await refreshSG();close();openChat("g:"+data);
   }catch(e){console.error(e);$("nM").textContent=gErr(e);b.disabled=false;}return;}
@@ -1225,11 +1225,25 @@ function openPerms(gid,uid){const row=(GMR[gid]||[]).find(r=>r.user_id===uid);if
  $("mdBody").querySelectorAll(".pm-sw").forEach(sw=>sw.onchange=async()=>{const all={};$("mdBody").querySelectorAll(".pm-sw").forEach(x=>all[x.dataset.k]=x.checked);
   const {error}=await sb.rpc("set_admin_perms",{p_gid:gid,p_uid:uid,p_perms:all});
   if(error){sw.checked=!sw.checked;$("gaM").textContent=gErr(error);return;}row.perms=Object.assign({},row.perms,all);$("gaM").textContent="ذخیره شد ✓";});}
-function editInfo(gid){const c=SG.find(x=>x.gid===gid)||cur;
- modal(`<h3>ویرایش اطلاعات گروه</h3><label>نام گروه</label><input type="text" id="eiT" maxlength="60" value="${esc(c.title||"")}"><label>توضیحات</label><textarea id="eiD" maxlength="300" rows="3">${esc(c.desc||"")}</textarea><button type="button" class="btn" id="eiGo">ذخیره</button><div class="msg" id="gaM"></div>`);
+function avErr(e){const m=String((e&&e.message)||e||"");if(/FORBIDDEN/.test(m))return"اجازهٔ تغییر عکس این گروه را نداری.";if(/BAD_AVATAR/.test(m))return"آدرس عکس معتبر نیست.";if(/PGRST202|42883|Could not find the function|schema cache/i.test((e&&e.code||"")+m))return"ذخیرهٔ عکس گروه هنوز در دیتابیس فعال نیست؛ فایل SQL را اجرا کن.";return navigator.onLine?"ذخیرهٔ عکس گروه ناموفق بود؛ دوباره تلاش کن.":"اتصال اینترنت برقرار نیست.";}
+function editInfo(gid){const c=SG.find(x=>x.gid===gid)||cur;let nb=null;
+ modal(`<h3>ویرایش اطلاعات گروه</h3><label>عکس گروه</label><div style="display:flex;align-items:center;gap:12px;margin-bottom:6px"><div id="eiAv">${avHtml(c.avatar,c.title,"s")}</div><input type="file" id="eiF" accept="image/*" style="flex:1;min-width:0"></div><label>نام گروه</label><input type="text" id="eiT" maxlength="60" value="${esc(c.title||"")}"><label>توضیحات</label><textarea id="eiD" maxlength="300" rows="3">${esc(c.desc||"")}</textarea><button type="button" class="btn" id="eiGo">ذخیره</button><div class="msg" id="gaM"></div>`);
+ $("eiF").onchange=async()=>{const f=$("eiF").files[0];if(!f)return;$("gaM").textContent="";try{if(!f.type.startsWith("image/"))throw 0;nb=await resize(f,256,true);if(nb.size>MAXIO)throw 0;$("eiAv").innerHTML=avHtml(await b2d(nb),"","s");}catch{nb=null;$("eiF").value="";$("gaM").textContent="عکس قابل خواندن نبود؛ عکس دیگری انتخاب کن.";}};
  $("eiGo").onclick=async()=>{const t=$("eiT").value.trim(),d=$("eiD").value.trim();if(!t){$("gaM").textContent="نام گروه نمی‌تواند خالی باشد.";return;}
-  const {error}=await sb.rpc("update_group_info",{p_gid:gid,p_title:t,p_desc:d});if(error){$("gaM").textContent=gErr(error);return;}
-  c.title=t;c.desc=d;if(cur&&cur.gid===gid){cur.title=t;cur.desc=d;$("hNm").textContent=t;}renderList();openGroupInfo();};}
+  const bt=$("eiGo");bt.disabled=true;$("gaM").textContent="";let k=null,url=null;
+  try{
+   if(nb){k=ME.id+"/g-"+gid+"-"+Date.now()+".jpg";let u;try{u=await sb.storage.from(AVB).upload(k,nb,{contentType:"image/jpeg"});}catch(e){u={error:e};}
+    if(u.error){console.error(u.error);k=null;$("gaM").textContent="آپلود عکس گروه ناموفق بود"+(navigator.onLine?"؛ دوباره تلاش کن.":" (اتصال اینترنت قطع است).");bt.disabled=false;return;}
+    url=sb.storage.from(AVB).getPublicUrl(k).data.publicUrl;}
+   const r1=await sb.rpc("update_group_info",{p_gid:gid,p_title:t,p_desc:d});
+   if(r1.error){if(k)Promise.resolve(sb.storage.from(AVB).remove([k])).catch(()=>{});$("gaM").textContent=gErr(r1.error);bt.disabled=false;return;}
+   c.title=t;c.desc=d;if(cur&&cur.gid===gid){cur.title=t;cur.desc=d;$("hNm").textContent=t;}
+   if(url){const r2=await sb.rpc("set_group_avatar",{p_gid:gid,p_url:url});
+    if(r2.error){console.error(r2.error);Promise.resolve(sb.storage.from(AVB).remove([k])).catch(()=>{});renderList();$("gaM").textContent="نام و توضیحات ذخیره شد، اما "+avErr(r2.error);bt.disabled=false;return;}
+    const old=c.avatar;c.avatar=url;if(cur&&cur.gid===gid){cur.avatar=url;setAv($("hAv"),url,t);}
+    const P0=PUB+"avatars/";if(typeof old==="string"&&old.startsWith(P0)){let op="";try{op=decodeURIComponent(old.slice(P0.length).split("?")[0]);}catch{}if(op&&op.split("/")[0]===ME.id)Promise.resolve(sb.storage.from(AVB).remove([op])).catch(()=>{});}}
+   renderList();openGroupInfo();
+  }catch(e){console.error(e);$("gaM").textContent=navigator.onLine?"ذخیره ناموفق بود؛ دوباره تلاش کن.":"اتصال اینترنت برقرار نیست.";bt.disabled=false;}};}
 const PIN={},PINM={};
 const pinSnip=m=>m?(m.text||(m.media_type==="image"?"🖼️ عکس":m.media_type==="video"?"🎬 ویدیو":"پیام")):"";
 function renderPin(){const b=$("pinbar"),g=cur&&cur.gid,id=g&&PIN[g];if(!id){b.style.display="none";return;}
