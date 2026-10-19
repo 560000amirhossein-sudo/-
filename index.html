@@ -84,6 +84,8 @@ button{cursor:pointer;border:0;background:none}
 .who span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .badge{flex-shrink:0;font-size:9px;font-weight:700;color:#fff;background:var(--gr);border-radius:8px;padding:1px 7px}
 .pic{display:block;width:100%;height:auto;max-height:320px;object-fit:cover;border-radius:12px;margin-top:6px;cursor:zoom-in;background:#0006}
+.aud{display:block;width:min(280px,65vw);max-width:100%;height:42px;margin-top:6px;filter:saturate(.85)}
+.voice-rec{color:#fecaca!important;animation:bdpop .8s infinite alternate}
 .bub>.pic:first-child{margin-top:0}
 .mt{font-size:10px;color:#ffffff80;margin-top:2px;display:flex;gap:10px;justify-content:flex-end;align-items:center}
 .me .mt{color:#ffffffb8}
@@ -496,6 +498,44 @@ body{font-family:Vazirmatn,Vazir,Tahoma,"Segoe UI",system-ui,sans-serif;-webkit-
 .rm-t{color:var(--mu);font-size:14px;line-height:2}
 .rm-o{display:block;width:100%;text-align:start;margin-bottom:10px;padding:13px 14px;border-radius:14px;color:#fff;background:#a855f71f;border:1px solid #a855f755}
 .rm-o b{display:block;font-size:14px}.rm-o small{display:block;margin-top:2px;color:#d9ccf5;font-size:12px;line-height:1.9}.rm-o.d{background:#dc262622;border-color:#dc262677}
+
+/* --- پیام صوتی: دکمه، نوار ضبط و پخش‌کننده --- */
+#voiceB{color:#c4b5fd;background:linear-gradient(135deg,#a855f72b,#6366f12b);box-shadow:inset 0 0 0 1px #a855f766;transition:.2s}
+#voiceB:hover{color:#fff;box-shadow:inset 0 0 0 1px #c084fc,0 0 14px #a855f777}
+#voiceB:active{transform:scale(.92)}
+.recbar{position:absolute;inset:0;display:none;align-items:center;gap:8px;padding:0 6px;border-radius:26px;background:linear-gradient(135deg,#2b1556,#171053);z-index:4}
+.recbar.on{display:flex;animation:recIn .2s ease-out}
+@keyframes recIn{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:none}}
+.recbar .rb{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;flex-shrink:0;color:#fff;transition:.15s}
+.recbar .rb svg{width:20px;height:20px}
+.recbar .rb:active{transform:scale(.92)}
+.rb-x{background:#ffffff14;color:#fca5a5!important}
+.rb-ok{background:linear-gradient(135deg,#a855f7,#6366f1);box-shadow:0 0 16px #8b5cf6aa}
+.rec-dot{width:10px;height:10px;border-radius:50%;background:#ef4444;flex-shrink:0;box-shadow:0 0 10px #ef4444;animation:recDot 1s ease-in-out infinite}
+@keyframes recDot{50%{opacity:.25;transform:scale(.75)}}
+.rec-t{font-size:14px;font-weight:600;color:#fff;min-width:38px;direction:ltr;text-align:center;font-variant-numeric:tabular-nums}
+.rec-w{flex:1;height:32px;display:flex;align-items:center;justify-content:flex-end;gap:2px;direction:ltr;overflow:hidden}
+.rec-w i{flex:1;max-width:4px;height:3px;border-radius:3px;background:linear-gradient(#c084fc,#818cf8);transition:height .08s}
+.vp{display:flex;align-items:center;gap:10px;margin-top:6px;width:100%;min-width:190px;direction:ltr}
+.vp-b{width:40px;height:40px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;background:linear-gradient(135deg,#a855f7,#6366f1);color:#fff;box-shadow:0 2px 10px #7c3aed66;transition:transform .15s}
+.vp-b:active{transform:scale(.92)}
+.vp-b svg{width:18px;height:18px}
+.vp .i-pause{display:none}.vp.pl .i-pause{display:block}.vp.pl .i-play{display:none}
+.vp.pl .vp-b{animation:vpRing 1.6s ease-out infinite}
+@keyframes vpRing{0%{box-shadow:0 0 0 0 #a855f799}100%{box-shadow:0 0 0 10px #a855f700}}
+.vp-m{flex:1;min-width:0}
+.vp-w{display:flex;align-items:center;gap:2px;height:30px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.vp-w i{flex:1;min-height:3px;border-radius:3px;background:#ffffff40;transition:background .12s}
+.vp-w i.on{background:#c084fc}
+.me .vp-w i.on{background:#fff}
+.vp-t{display:flex;justify-content:space-between;font-size:11px;color:#ffffffb8;margin-top:1px;font-variant-numeric:tabular-nums}
+#vpPrevW{display:none;flex:1;min-width:0}
+.prev.aud>span{display:none}
+.prev.aud #vpPrevW{display:block}
+.prev.aud .vp{margin-top:0;min-width:0}
+.prev.aud.up>span,.prev.aud.err>span{display:block}
+.prev.aud.up #vpPrevW,.prev.aud.err #vpPrevW{display:none}
+@media(prefers-reduced-motion:reduce){.rec-dot,.vp.pl .vp-b,.recbar.on{animation:none}}
 </style>  <meta property="og:image" content="https://bolt.new/static/og_default.png">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:image" content="https://bolt.new/static/og_default.png">
@@ -533,15 +573,17 @@ body{font-family:Vazirmatn,Vazir,Tahoma,"Segoe UI",system-ui,sans-serif;-webkit-
    <div id="pinbar" style="display:none"></div>
    <div class="msgs" id="msgs"></div>
    <div class="rprev" id="rprev"><div class="rprev-bar"></div><span class="rprev-ic">↩</span><div class="rprev-body"><div class="rprev-name" id="rprevName"></div><div class="rprev-text" id="rprevText"></div></div><button class="rprev-x" id="rprevX" type="button" aria-label="لغو پاسخ">✕</button></div>
-   <div class="prev" id="prev"><img id="prevImg" alt=""><span style="flex:1">عکس آماده ارسال</span><button class="ib" id="prevX" aria-label="لغو ارسال فایل" title="لغو">✕</button><i class="upb" id="upb"></i></div>
+   <div class="prev" id="prev"><img id="prevImg" alt=""><span style="flex:1">عکس آماده ارسال</span><div id="vpPrevW"></div><button class="ib" id="prevX" aria-label="لغو ارسال فایل" title="لغو">✕</button><i class="upb" id="upb"></i></div>
    <div class="comp" id="comp">
     <div class="emo" id="emo"></div>
     <div class="atm" id="atm"><button id="atI" type="button">🖼️ تصویر</button><button id="atV" type="button">🎬 ویدیو</button></div>
     <button class="ib" id="emoB" aria-label="ایموجی" title="ایموجی">😊</button>
+    <button class="ib" id="voiceB" type="button" title="ضبط پیام صوتی" aria-label="ضبط پیام صوتی"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
     <button class="ib" id="attB" title="ارسال عکس یا ویدیو" aria-label="ارسال عکس یا ویدیو">📎</button>
     <input type="file" id="file" accept="image/*,video/*" hidden>
     <textarea id="txt" rows="1" maxlength="1000" placeholder="پیام بنویس..."></textarea>
     <button class="ib send" id="sendB" aria-label="ارسال پیام" title="ارسال"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 3 10 14M21 3l-7 18-4-7-7-4z"/></svg></button>
+    <div class="recbar" id="recBar" role="group" aria-label="ضبط پیام صوتی"><button class="rb rb-x" id="recX" type="button" aria-label="لغو ضبط" title="لغو ضبط"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg></button><i class="rec-dot"></i><span class="rec-t" id="recT">0:00</span><div class="rec-w" id="recW" aria-hidden="true"></div><button class="rb rb-ok" id="recOk" type="button" aria-label="پایان ضبط و پیش‌شنوی" title="پایان ضبط و پیش‌شنوی"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="6.5" width="11" height="11" rx="3" fill="currentColor"/></svg></button></div>
    </div>
    <div class="joinbar" id="joinbar" style="display:none"></div>
   </div>
@@ -631,10 +673,12 @@ D=D||{me:{name:"مهمان"+(1000+Math.floor(Math.random()*9000)),avatar:null},c
 if(!D.chats.some(c=>c.id===DEF))D.chats.unshift({id:DEF,type:"group",title:"NIGHT CHAT عمومی",desc:"گروه عمومی همه‌ی اعضا",role:"member",pub:true});
 const save=()=>{try{localStorage.setItem(LSK,JSON.stringify(D));}catch{alert("حافظه‌ی مرورگر پر شد.");}};save();
 const PUB="https://jpsttfuajyfvysqydqqj.supabase.co/storage/v1/object/public/",BUCKET="chat-media",MAXV=20*1024*1024,MAXI=15*1024*1024,MAXIO=5*1024*1024,SBK="sb_publishable_D_D03bZTtXlKxPgz74MYfQ_Vvpmjn3x";
-let mediaOk=true,replyOk=true,replyOkP=true,pendingKind="image",pendingFile=null,upDone=null,upBusy=false,upXhr=null;
+let mediaOk=true,replyOk=true,replyOkP=true,pmMediaOk=true,pendingKind="image",pendingFile=null,upDone=null,upBusy=false,upXhr=null;
+let voiceRecorder=null,voiceStream=null,voiceParts=[],voiceStarted=0,voiceTimer=null,voiceCtx=null,voiceAn=null,voicePk=[],voiceCancel=false,voiceStarting=false,pvUrl=null,pendingDur=0,pendingPeaks=null;
+const VP={a:null,url:null,el:null};
 const safeM=u=>typeof u==="string"&&u.startsWith(PUB)?u:"";
-async function upload(blob,ext,type){const p=Date.now()+"-"+Math.random().toString(36).slice(2,8)+"."+ext;const {error}=await sb.storage.from(BUCKET).upload(p,blob,{contentType:type});if(error)throw error;return sb.storage.from(BUCKET).getPublicUrl(p).data.publicUrl;}
-function clearPending(){pending=null;pendingFile=null;pendingKind="image";upDone=null;$("prev").classList.remove("show","err","up");$("upb").style.width="0";$("prevImg").style.display="";$("prev").querySelector("span").textContent="عکس آماده ارسال";}
+async function upload(blob,ext,type,dur){const p=Date.now()+"-"+Math.random().toString(36).slice(2,8)+(dur?"-d"+dur:"")+"."+ext;const {error}=await sb.storage.from(BUCKET).upload(p,blob,{contentType:type});if(error)throw error;return sb.storage.from(BUCKET).getPublicUrl(p).data.publicUrl;}
+function clearPending(){pending=null;pendingFile=null;pendingKind="image";upDone=null;$("prev").classList.remove("show","err","up");$("upb").style.width="0";$("prevImg").style.display="";$("prev").querySelector("span").textContent="عکس آماده ارسال";vpPrevReset();pendingDur=0;pendingPeaks=null;}
 let cur=null,tab="all",query="",pending=null,pubMsgs=[],pubErr=false,sig="";
 let pubKnown=null,ncReady=false,pubLoaded=false,pcLoaded=false,UN={};
 const UCNT={},POP={},NK=new Set();
@@ -653,7 +697,7 @@ function resize(file,max,square){return new Promise((ok,no)=>{const u=URL.create
 
 // ---- ابزارهای پیش‌نمایش و شمارنده ----
 const clip=(s,n=70)=>{const a=[...String(s??"").replace(/\s+/g," ").trim()];return a.length>n?a.slice(0,n).join("")+"…":a.join("");};
-const mLab=t=>t==="image"?"🖼️ عکس جدید":t==="video"?"🎬 ویدئوی جدید":t?"📎 رسانه جدید":"";
+const mLab=t=>t==="image"?"🖼️ عکس جدید":t==="video"?"🎬 ویدئوی جدید":t==="audio"?"🎙️ پیام صوتی":t?"📎 رسانه جدید":"";
 const pubPrev=l=>{const t=clip(l.text,80)||mLab(l.media_type);if(!t)return"";const w=l.name===D.me.name?"شما":l.name;return(w?w+": ":"")+t;};
 const unc=c=>UN[c.peer]?UN[c.peer].size:0;
 const chkReady=()=>{if(pubLoaded&&pcLoaded)ncReady=true;};
@@ -663,9 +707,9 @@ function view(){return D.chats.map(c=>{
  if(c.id===DEF){const l=pubMsgs[pubMsgs.length-1];return{...c,last:l?pubPrev(l):"",at:l?.created_at||"",unread:pubMsgs.filter(m=>m.created_at>D.seen&&m.name!==D.me.name).length};}
  return{...c,unread:0,at:c.at||""};}).concat(PC.map(c=>({...c,unread:unc(c),at:c.at||""}))).concat(SG.map(c=>({...c,unread:GU[c.gid]||0,at:c.at||""}))).sort((a,b)=>String(b.at).localeCompare(String(a.at)));}
 function msgsOf(c){
- if(c.id===DEF)return pubMsgs.map(m=>({id:m.id,text:m.text,img:m.media_type==="image"?m.media_url:null,vid:m.media_type==="video"?m.media_url:null,at:m.created_at,mine:m.name===D.me.name,name:m.name,replyTo:m.reply_to_id?findPubReply(m.reply_to_id):null}));
- if(c.gid)return gVis(c.gid).map(m=>({id:m.id,text:m.text,img:m.media_type==="image"?m.media_url:null,vid:m.media_type==="video"?m.media_url:null,at:m.created_at,mine:m.sender_id===ME.id,name:pName(P[m.sender_id]),avatar:(P[m.sender_id]||{}).avatar_url,uid:m.sender_id,replyTo:m.reply_to_id?findGroupReply(c.gid,m.reply_to_id):null}));
- if(c.type==="private")return visPM(c.peer).map(m=>({id:m.id,text:m.text,at:m.created_at,mine:m.sender_id===ME.id,name:pName(P[m.sender_id]),avatar:(P[m.sender_id]||{}).avatar_url,uid:m.sender_id,replyTo:m.reply_to_id?findPMReply(c.peer,m.reply_to_id):null}));
+ if(c.id===DEF)return pubMsgs.map(m=>({id:m.id,text:m.text,img:m.media_type==="image"?m.media_url:null,vid:m.media_type==="video"?m.media_url:null,aud:m.media_type==="audio"?m.media_url:null,at:m.created_at,mine:m.name===D.me.name,name:m.name,replyTo:m.reply_to_id?findPubReply(m.reply_to_id):null}));
+ if(c.gid)return gVis(c.gid).map(m=>({id:m.id,text:m.text,img:m.media_type==="image"?m.media_url:null,vid:m.media_type==="video"?m.media_url:null,aud:m.media_type==="audio"?m.media_url:null,at:m.created_at,mine:m.sender_id===ME.id,name:pName(P[m.sender_id]),avatar:(P[m.sender_id]||{}).avatar_url,uid:m.sender_id,replyTo:m.reply_to_id?findGroupReply(c.gid,m.reply_to_id):null}));
+ if(c.type==="private")return visPM(c.peer).map(m=>({id:m.id,text:m.text,img:m.media_type==="image"?m.media_url:null,vid:m.media_type==="video"?m.media_url:null,aud:m.media_type==="audio"?m.media_url:null,at:m.created_at,mine:m.sender_id===ME.id,name:pName(P[m.sender_id]),avatar:(P[m.sender_id]||{}).avatar_url,uid:m.sender_id,replyTo:m.reply_to_id?findPMReply(c.peer,m.reply_to_id):null}));
  return(D.msgs[c.id]||[]).map(m=>({...m,mine:true,name:D.me.name,avatar:D.me.avatar,replyTo:m.replyTo?findLocalReply(c.id,m.replyTo):null}));}
 // ---- پاسخ به پیام: پیدا کردن پیام اصلی ----
 function findPubReply(rid){const m=pubMsgs.find(x=>String(x.id)===String(rid));return m?{id:m.id,name:m.name,text:m.text,mediaType:m.media_type}:null;}
@@ -715,6 +759,7 @@ $("tabs").onclick=e=>{const b=e.target.closest(".tab");if(!b)return;tab=b.datase
 // ---- گفتگو ----
 function openChat(id){
  if(upBusy&&(!cur||cur.id!==id))abortUp();
+ if(cur&&cur.id!==id){if(voiceRecorder)cancelVoice();if(pendingKind==="audio"&&pending)clearPending();vpStopAll();}
  if(id.startsWith("u:")&&ME&&UUID.test(id.slice(2))&&!view().some(x=>x.id===id))PC.push(mkPC(id.slice(2)));const c=view().find(x=>x.id===id);if(!c)return;cur=c;sig="";ntDrop(c.id);clearReply();
  $("ph").style.display="none";$("chat").style.display="flex";$("app").classList.add("open");callBtns();
  setAv($("hAv"),c.avatar,c.title);$("hNm").textContent=c.title;[$("hAv"),$("hNm")].forEach(e=>e.classList.toggle("lnk",c.type==="private"));
@@ -733,13 +778,13 @@ function renderMsgs(force){
  const priv=cur.type==="private",grp=cur.type==="group",own=!priv&&cur.id!==DEF&&!cur.gid&&cur.role==="owner",frag=document.createDocumentFragment();
  box.innerHTML=data.length?"":`<div class="empty">هنوز پیامی نیست. اولین نفر باش! 👋</div>`;
  for(const m of data){
-  const img=safe(m.img)||safeM(m.img),vid=safeM(m.vid),r=document.createElement("div");r.className="row"+(m.mine?" me":"")+(anim&&!prev.has(String(m.id))?" new":"");
+  const img=safe(m.img)||safeM(m.img),vid=safeM(m.vid),aud=(typeof m.aud==="string"&&(m.aud.startsWith(PUB)||m.aud.startsWith("data:audio/")))?m.aud:"",r=document.createElement("div");r.className="row"+(m.mine?" me":"")+(anim&&!prev.has(String(m.id))?" new":"");
   r.dataset.mid=String(m.id);
-  const isE=!!m.text&&!img&&!vid&&!m.replyTo&&EMJ.test(m.text)&&[...m.text.replace(/\s/g,"")].length<=6;
+  const isE=!!m.text&&!img&&!vid&&!aud&&!m.replyTo&&EMJ.test(m.text)&&[...m.text.replace(/\s/g,"")].length<=6;
   const sgR=cur.gid?((GMEM[cur.gid]||{})[m.uid]||""):"";
   const who=(!m.mine&&grp)||(m.mine&&own)||(cur.gid&&sgR&&sgR!=="member")?`<div class="who"><span>${esc(m.name)}</span>${cur.gid?roleBadge(sgR):m.mine&&own?`<span class="badge">${cur.type==="channel"?"مدیر":"مالک"}</span>`:""}</div>`:"";
   const rqHtml=replyQuoteHtml(m.replyTo);
-  r.innerHTML=(!m.mine&&(priv||grp)?avHtml(m.avatar,m.name,"s"):"")+`<div class="bub${img||vid?" med":""}${isE?" emj":""}">${who}${rqHtml}${m.text?`<div class="tx">${esc(m.text)}</div>`:""}${img?`<img class="pic" src="${img}" alt="" decoding="async">`:""}${vid?`<video class="pic" src="${vid}" controls preload="metadata" playsinline style="cursor:default"></video>`:""}<div class="mt"><span>${fmtM(m.at)}</span>${cur.id!==DEF?`<button class="del" type="button">حذف</button>`:""}</div></div>`;
+  r.innerHTML=(!m.mine&&(priv||grp)?avHtml(m.avatar,m.name,"s"):"")+`<div class="bub${img||vid||aud?" med":""}${isE?" emj":""}">${who}${rqHtml}${m.text?`<div class="tx">${esc(m.text)}</div>`:""}${img?`<img class="pic" src="${img}" alt="" decoding="async">`:""}${vid?`<video class="pic" src="${vid}" controls preload="metadata" playsinline style="cursor:default"></video>`:""}${aud?vpHtml(aud):""}<div class="mt"><span>${fmtM(m.at)}</span>${cur.id!==DEF?`<button class="del" type="button">حذف</button>`:""}</div></div>`;
   const pu=!m.mine&&m.uid||null,pn=!m.mine&&!pu&&cur.id===DEF?m.name:null;
   if(pu||pn)r.querySelectorAll(":scope>.av,.who>span:first-child").forEach(el=>{el.classList.add("lnk");el.tabIndex=0;el.setAttribute("role","button");el.onclick=()=>pu?openProfile(pu):openProfileByName(pn);el.onkeydown=e=>{if(e.key==="Enter")el.click();};});
   const pic=r.querySelector("img.pic");if(pic){pic.onclick=()=>{$("lbImg").src=img;$("lb").classList.add("open");};pic.onload=()=>{if(near)box.scrollTop=box.scrollHeight;};}
@@ -748,7 +793,7 @@ function renderMsgs(force){
   frag.appendChild(r);
  }
  box.appendChild(frag);
- box.scrollTop=near?box.scrollHeight:top;
+ box.scrollTop=near?box.scrollHeight:top;vpSync();
 }
 // ---- پاسخ به پیام: اسکرول و هایلایت ----
 function scrollToMsg(mid){
@@ -797,7 +842,9 @@ async function send(){
    if(pending){
     if(!mediaOk){alert("برای ارسال عکس و ویدیو باید فایل media_setup.sql را در Supabase اجرا کنی.");$("sendB").disabled=false;return;}
     row.media_type=pendingKind;
-    row.media_url=pendingKind==="video"?await upload(pendingFile,pendingFile.type.includes("quicktime")?"mov":pendingFile.type.includes("webm")?"webm":"mp4",pendingFile.type):await upload(pending,"jpg","image/jpeg");
+    const mt=pendingKind==="audio"?(pending.type||"audio/webm"):pendingKind==="video"?(pendingFile.type||"video/mp4"):"image/jpeg";
+    const ext=pendingKind==="audio"?(mt.includes("ogg")?"ogg":mt.includes("mp4")?"m4a":"webm"):pendingKind==="video"?(mt.includes("quicktime")?"mov":mt.includes("webm")?"webm":"mp4"):"jpg";
+    row.media_url=await upload(pendingKind==="audio"?pending:pendingKind==="video"?pendingFile:pending,ext,mt,pendingKind==="audio"?pendingDur:0);
    }
    const {error}=await sb.from("messages").insert(row);if(error)throw error;await pull();
    D.seen=pubMsgs[pubMsgs.length-1]?.created_at||D.seen;
@@ -807,16 +854,109 @@ async function send(){
    if(!await sendPM(text)){$("sendB").disabled=false;return;}
   }else{
    if(pendingKind==="video"){alert("ویدیو فقط در گروه عمومی ارسال می‌شود.");$("sendB").disabled=false;return;}
-   const m={id:"m"+Date.now(),text,img:pending?await b2d(pending):null,at:new Date().toISOString()};
+   const m={id:"m"+Date.now(),text,img:pending&&pendingKind==="image"?await b2d(pending):null,aud:pending&&pendingKind==="audio"?await b2d(pending):null,at:new Date().toISOString()};
    if(replyTo)m.replyTo=replyTo.id;
    (D.msgs[cur.id]=D.msgs[cur.id]||[]).push(m);
-   const c=D.chats.find(x=>x.id===cur.id);c.last=text;c.img=!!m.img;c.at=m.at;
+   const c=D.chats.find(x=>x.id===cur.id);c.last=text|| (m.aud?"🎙️ پیام صوتی":"");c.img=!!m.img;c.at=m.at;
   }
   save();$("txt").value="";$("txt").style.height="";clearPending();clearReply();
   renderMsgs(true);renderList();
- }catch(e){console.error(e);alert("ارسال ناموفق بود؛ مطمئن شو media_setup.sql اجرا شده و حجم ویدیو کمتر از ۲۰ مگابایت است.");}
+ }catch(e){console.error(e);alert("ارسال ناموفق بود. اتصال، مجوز ذخیره‌سازی و وجود ستون‌های رسانه را بررسی کن.");}
  $("sendB").disabled=false;
 }
+// ---- ضبط پیام صوتی ----
+const voiceSupported=!!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia&&window.MediaRecorder);
+const VBARS=32,VBN=30,VMAX=10*60*1000;
+const fmtT=t=>{t=Math.max(0,Math.round(t||0));return Math.floor(t/60)+":"+String(t%60).padStart(2,"0");};
+function endVoice(){clearInterval(voiceTimer);voiceTimer=null;try{voiceCtx&&voiceCtx.close();}catch{}voiceCtx=null;voiceAn=null;stopVoiceTracks();$("recBar").classList.remove("on");}
+function stopVoiceTracks(){if(voiceStream){voiceStream.getTracks().forEach(t=>t.stop());voiceStream=null;}}
+function cancelVoice(){voiceCancel=true;if(voiceRecorder&&voiceRecorder.state!=="inactive"){try{voiceRecorder.stop();}catch{endVoice();voiceRecorder=null;}}else{endVoice();voiceRecorder=null;}}
+function stopVoice(){voiceCancel=false;if(voiceRecorder&&voiceRecorder.state==="recording"){try{voiceRecorder.stop();}catch{endVoice();voiceRecorder=null;}}else{endVoice();voiceRecorder=null;}}
+function recTick(){
+ const t=Date.now()-voiceStarted;$("recT").textContent=fmtT(t/1000);
+ let lvl=.06;if(voiceAn){const b=new Uint8Array(voiceAn.fftSize);voiceAn.getByteTimeDomainData(b);let q=0;for(let i=0;i<b.length;i++){const x=(b[i]-128)/128;q+=x*x;}lvl=Math.min(1,Math.sqrt(q/b.length)*3.5);}
+ voicePk.push(lvl);const w=$("recW").children,n=voicePk.length;
+ for(let i=0;i<w.length;i++){const v=voicePk[n-w.length+i];w[i].style.height=(v==null?3:Math.max(3,Math.round(v*30)))+"px";}
+ if(t>=VMAX){callToast("به حداکثر زمان ضبط (۱۰ دقیقه) رسیدی.");stopVoice();}
+}
+function peaksOf(pk){const out=[],n=pk.length||1;for(let i=0;i<VBARS;i++){const a=Math.floor(i*n/VBARS),b=Math.max(a+1,Math.floor((i+1)*n/VBARS));let m=0;for(let j=a;j<b&&j<n;j++)m=Math.max(m,pk[j]||0);out.push(m);}const mx=Math.max(.2,...out);return out.map(v=>Math.max(.14,Math.min(1,v/mx)));}
+async function startVoice(){
+ if(!voiceSupported){alert("مرورگر این دستگاه ضبط صدا را پشتیبانی نمی‌کند؛ سایت را با Chrome و از طریق HTTPS باز کن.");return;}
+ if(!cur||!canPost()||voiceRecorder||voiceStarting)return;
+ if(cur.type==="private"&&!pmMediaOk){alert("برای پیام صوتی خصوصی ابتدا فایل SQL همراه این تغییر را در Supabase اجرا کن.");return;}
+ if(pending||upBusy){callToast("ابتدا فایل یا ویس آماده‌ی ارسال را بفرست یا لغو کن.");return;}
+ const c0=cur;voiceStarting=true;let stream;
+ try{stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}});}
+ catch(e){voiceStarting=false;console.error(e);alert("دسترسی به میکروفون داده نشد. اجازه‌ی Microphone را برای سایت فعال کن.");return;}
+ voiceStarting=false;
+ if(cur!==c0||pending||upBusy){stream.getTracks().forEach(t=>t.stop());return;}
+ voiceStream=stream;
+ try{
+  const mime=["audio/webm;codecs=opus","audio/webm","audio/ogg;codecs=opus","audio/mp4"].find(t=>MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(t))||"";
+  const rec=new MediaRecorder(stream,mime?{mimeType:mime}:{});voiceRecorder=rec;voiceParts=[];voicePk=[];voiceCancel=false;
+  rec.ondataavailable=e=>{if(e.data&&e.data.size)voiceParts.push(e.data);};
+  rec.onerror=e=>{console.error(e);callToast("ضبط صدا با خطا مواجه شد.");voiceCancel=true;try{if(rec.state!=="inactive")rec.stop();}catch{}endVoice();voiceRecorder=null;};
+  rec.onstop=()=>{
+   const cancelled=voiceCancel,ms=Date.now()-voiceStarted,parts=voiceParts,pk=voicePk;voiceCancel=false;voiceParts=[];voicePk=[];
+   endVoice();voiceRecorder=null;
+   if(cancelled)return;
+   if(ms<800){callToast("ضبط خیلی کوتاه بود؛ دکمه را بزن و کمی بیشتر صحبت کن.");return;}
+   const type=((rec.mimeType||(parts[0]&&parts[0].type)||"audio/webm")+"").split(";")[0]||"audio/webm";
+   const blob=new Blob(parts,{type});
+   if(!blob.size){callToast("صدایی ضبط نشد.");return;}
+   if(blob.size>MAXV){callToast("حجم ویس بیشتر از ۲۰ مگابایت شد؛ کوتاه‌تر ضبط کن.");return;}
+   clearPending();pending=blob;pendingFile=blob;pendingKind="audio";pendingDur=Math.max(1,Math.round(ms/1000));pendingPeaks=peaksOf(pk);
+   $("prevImg").style.display="none";pvUrl=URL.createObjectURL(blob);
+   $("vpPrevW").innerHTML=vpHtml(pvUrl,pendingPeaks,pendingDur);$("prev").classList.add("show","aud");
+  };
+  try{const AC=window.AudioContext||window.webkitAudioContext;voiceCtx=new AC();voiceAn=voiceCtx.createAnalyser();voiceAn.fftSize=256;voiceCtx.createMediaStreamSource(stream).connect(voiceAn);}catch(e){voiceAn=null;}
+  $("emo").classList.remove("open");$("atm").classList.remove("open");
+  const w=$("recW");w.innerHTML="<i></i>".repeat(VBN);$("recT").textContent="0:00";
+  rec.start(250);voiceStarted=Date.now();voiceTimer=setInterval(recTick,80);$("recBar").classList.add("on");
+  try{navigator.vibrate&&navigator.vibrate(15);}catch{}
+ }catch(e){console.error(e);cancelVoice();alert("شروع ضبط ممکن نشد؛ مرورگر یا دسترسی میکروفون را بررسی کن.");}
+}
+$("voiceB").onclick=()=>{if(voiceRecorder)stopVoice();else startVoice();};
+$("recX").onclick=cancelVoice;$("recOk").onclick=stopVoice;
+// ---- پخش‌کننده‌ی ویس ----
+const vpIc='<svg class="i-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg><svg class="i-pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4.2" height="14" rx="1.4"/><rect x="13.8" y="5" width="4.2" height="14" rx="1.4"/></svg>';
+function vpPeaks(url){let h=2166136261;for(let i=0;i<url.length;i++){h^=url.charCodeAt(i);h=Math.imul(h,16777619);}const a=[];for(let i=0;i<VBARS;i++){h=Math.imul(h^(h>>>15),2246822519)>>>0;a.push(.25+((h%1000)/1000)*.75);}return a;}
+function vpDurOf(url){const m=/-d(\d{1,4})\.[a-z0-9]+$/i.exec(String(url).split("?")[0]);return m?+m[1]:0;}
+function vpHtml(src,peaks,dur){const p=peaks||vpPeaks(src),d=dur||vpDurOf(src);return `<div class="vp" data-src="${esc(src)}"${d?` data-dur="${d}"`:""}><button class="vp-b" type="button" aria-label="پخش پیام صوتی">${vpIc}</button><div class="vp-m"><div class="vp-w">${p.map(v=>`<i style="height:${Math.round(v*100)}%"></i>`).join("")}</div><div class="vp-t"><span class="vp-c">0:00</span><span class="vp-d">${d?fmtT(d):"--:--"}</span></div></div></div>`;}
+function vpUI(el,cur,dur,playing){el.classList.toggle("pl",!!playing);const bars=el.querySelectorAll(".vp-w i"),n=dur>0?Math.round(bars.length*Math.min(1,cur/dur)):0;bars.forEach((b,i)=>b.classList.toggle("on",i<n));el.querySelector(".vp-c").textContent=fmtT(cur);if(dur>0)el.querySelector(".vp-d").textContent=fmtT(dur);}
+function vpSync(){
+ if(!VP.a||!VP.url)return;let el=VP.el;
+ if(!el||!el.isConnected){el=[...document.querySelectorAll(".vp")].find(x=>x.dataset.src===VP.url)||null;VP.el=el;}
+ if(!el)return;const a=VP.a,d=+el.dataset.dur||(isFinite(a.duration)&&a.duration>0?a.duration:0);
+ vpUI(el,a.currentTime,d,!a.paused&&!a.ended);
+}
+function vpStopAll(){
+ const a=VP.a,el=VP.el;
+ if(a){a.onplay=a.onpause=a.ontimeupdate=a.onended=a.onerror=null;try{a.pause();}catch{}}
+ VP.a=null;VP.url=null;VP.el=null;
+ if(el&&el.isConnected)vpUI(el,0,+el.dataset.dur||0,false);
+}
+function vpErr(){callToast("پخش ویس ممکن نشد؛ اتصال یا فرمت فایل را بررسی کن.");vpStopAll();}
+function vpToggle(el){
+ const src=el.dataset.src;
+ if(VP.a&&VP.url===src){VP.el=el;if(VP.a.paused){const p=VP.a.play();if(p&&p.catch)p.catch(vpErr);}else VP.a.pause();return;}
+ vpStopAll();const a=new Audio();a.preload="auto";a.src=src;VP.a=a;VP.url=src;VP.el=el;
+ a.onplay=a.onpause=a.ontimeupdate=vpSync;
+ a.onended=()=>{if(isFinite(a.duration)&&a.duration>0&&VP.el&&!VP.el.dataset.dur)VP.el.dataset.dur=Math.round(a.duration);a.currentTime=0;vpSync();};
+ a.onerror=vpErr;
+ const p=a.play();if(p&&p.catch)p.catch(e=>{if(e&&e.name!=="AbortError")vpErr();});vpSync();
+}
+function vpClick(e){
+ const el=e.target.closest(".vp");if(!el)return;e.stopPropagation();
+ const w=e.target.closest(".vp-w");
+ if(w&&VP.a&&VP.el===el){const d=+el.dataset.dur||(isFinite(VP.a.duration)?VP.a.duration:0);if(d>0){const r=w.getBoundingClientRect();VP.a.currentTime=Math.min(d-.05,Math.max(0,(e.clientX-r.left)/r.width*d));vpSync();}return;}
+ if(e.target.closest(".vp-b")||w)vpToggle(el);
+}
+function vpPrevReset(){
+ if(pvUrl){if(VP.url===pvUrl)vpStopAll();URL.revokeObjectURL(pvUrl);pvUrl=null;}
+ const w=$("vpPrevW");if(w)w.innerHTML="";$("prev").classList.remove("aud");
+}
+$("msgs").addEventListener("click",vpClick);$("prev").addEventListener("click",vpClick);
 $("sendB").onclick=send;
 $("txt").onkeydown=e=>{if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing&&matchMedia("(pointer:fine)").matches){e.preventDefault();send();}};
 $("txt").oninput=()=>{$("txt").style.height="auto";$("txt").style.height=Math.min($("txt").scrollHeight,120)+"px";};
@@ -847,7 +987,7 @@ function showMsgMenu(row,x,y){
 function hideMsgMenu(){$("mmenu").classList.remove("open");$("mmenu").style.left="";$("mmenu").style.top="";}
 msgsBox.addEventListener("click",e=>{
  const row=e.target.closest(".row");if(!row)return;
- if(e.target.closest(".del,.lnk,.rquote,img.pic,video,a"))return;
+ if(e.target.closest(".del,.lnk,.rquote,img.pic,video,a,.vp"))return;
  if(String(getSelection()).length)return;
  if($("mmenu").classList.contains("open")&&activeMsgEl===row){hideMsgMenu();return;}
  showMsgMenu(row,e.clientX,e.clientY);
@@ -1087,12 +1227,18 @@ async function refreshPC(poll){if(!ME)return;const {data,error}=await sb.rpc("my
  if(poll)for(const r of data)if(r.last_sender!==ME.id&&r.last_at>(prevAt.get(r.peer_id)||""))ntPM({sender_id:r.peer_id,created_at:r.last_at,text:r.last_text});}
 function markSeen(peer){const a=PM[peer]||[],l=a[a.length-1];(D.pmSeen=D.pmSeen||{})[peer]=l?l.created_at:new Date().toISOString();save();delete UN[peer];}
 async function loadPM(peer){if(!ME||!UUID.test(peer))return;
- let {data,error}=await sb.from("private_messages").select("id,sender_id,recipient_id,text,created_at,reply_to_id").or(`and(sender_id.eq.${ME.id},recipient_id.eq.${peer}),and(sender_id.eq.${peer},recipient_id.eq.${ME.id})`).order("created_at",{ascending:false}).limit(200);
- if(error&&/reply_to_id|PGRST204|42703/.test((error.code||"")+(error.message||""))){replyOkP=false;const r2=await sb.from("private_messages").select("id,sender_id,recipient_id,text,created_at").or(`and(sender_id.eq.${ME.id},recipient_id.eq.${peer}),and(sender_id.eq.${peer},recipient_id.eq.${ME.id})`).order("created_at",{ascending:false}).limit(200);data=r2.data;error=r2.error;}
+ // رسانهٔ خصوصی در صورت وجود ستون‌ها بارگذاری می‌شود؛ نبود ستون‌ها چت متنی را از کار نمی‌اندازد.
+ const pmQ=cols=>sb.from("private_messages").select(cols).or(`and(sender_id.eq.${ME.id},recipient_id.eq.${peer}),and(sender_id.eq.${peer},recipient_id.eq.${ME.id})`).order("created_at",{ascending:false}).limit(200);
+ let cols="id,sender_id,recipient_id,text,created_at,reply_to_id,deleted_for_all"+(pmMediaOk?",media_url,media_type":"");
+ let {data,error}=await pmQ(cols);
+ if(error&&pmMediaOk&&/media_url|media_type|PGRST204|42703/.test((error.code||"")+(error.message||""))){pmMediaOk=false;cols="id,sender_id,recipient_id,text,created_at,reply_to_id,deleted_for_all";({data,error}=await pmQ(cols));}
+ if(error&&/deleted_for_all/.test((error.code||"")+(error.message||""))){cols=cols.replace(",deleted_for_all","");({data,error}=await pmQ(cols));}
+ if(error&&/reply_to_id|PGRST204|42703/.test((error.code||"")+(error.message||""))){replyOkP=false;cols=cols.replace(",reply_to_id","");({data,error}=await pmQ(cols));}
  if(error){console.error(error);PM[peer]=PM[peer]||[];return;}PM[peer]=data.reverse();await loadHides(peer);markSeen(peer);}
-const visPM=peer=>(PM[peer]||[]).filter(m=>!HID.has(String(m.id)));
+const visPM=peer=>(PM[peer]||[]).filter(m=>!m.deleted_for_all&&!HID.has(String(m.id)));
+function dropPM(id){for(const k in PM){const a=PM[k],i=a.findIndex(x=>String(x.id)===String(id));if(i<0)continue;a.splice(i,1);const c=PC.find(x=>x.peer===k),l=visPM(k).slice(-1)[0];if(c)c.last=l?(l.text||mLab(l.media_type)):"";if(cur&&cur.peer===k)renderMsgs(true);renderList();return;}}
 async function loadHides(peer){const {data,error}=await sb.from("private_message_hides").select("message_id").eq("user_id",ME.id).limit(1000);if(error){console.warn("بارگذاری حذف‌های خصوصی:",error);return;}(data||[]).forEach(r=>HID.add(String(r.message_id)));}
-function afterDel(peer){const l=visPM(peer).slice(-1)[0],c=PC.find(x=>x.peer===peer);if(c)c.last=l?l.text:"";renderMsgs(true);renderList();}
+function afterDel(peer){const l=visPM(peer).slice(-1)[0],c=PC.find(x=>x.peer===peer);if(c)c.last=l?(l.text||mLab(l.media_type)):"";renderMsgs(true);renderList();}
 function delPM(m){
  const peer=cur.peer;
  modal(`<h3>حذف پیام</h3><p style="color:var(--mu);font-size:13px;line-height:2">این پیام چطور حذف شود؟</p><button class="btn g" id="dMe">حذف برای من</button>${m.mine?`<button class="btn g" id="dBoth">حذف برای هر دو</button>`:""}<button class="btn g" id="dNo">انصراف</button>`);
@@ -1109,17 +1255,25 @@ function delPM(m){
   PM[peer]=(PM[peer]||[]).filter(x=>String(x.id)!==String(m.id));close();afterDel(peer);};
 }
 function addPM(m){const peer=m.sender_id===ME.id?m.recipient_id:m.sender_id,a=PM[peer]=PM[peer]||[];if(a.some(x=>x.id===m.id))return false;a.push(m);a.sort((x,y)=>x.created_at<y.created_at?-1:1);
- let c=PC.find(x=>x.peer===peer);if(!c){c=mkPC(peer);PC.push(c);}c.last=m.text;c.at=m.created_at;
+ let c=PC.find(x=>x.peer===peer);if(!c){c=mkPC(peer);PC.push(c);}c.last=m.text||mLab(m.media_type);c.at=m.created_at;
  if(cur&&cur.peer===peer&&!document.hidden)markSeen(peer);else if(m.sender_id!==ME.id)(UN[peer]=UN[peer]||new Set()).add(String(m.id));return true;}
 async function sendPM(text){
- if(pending||!text){alert("در پیام خصوصی فقط متن ارسال می‌شود.");return false;}
- const row={sender_id:ME.id,recipient_id:cur.peer,text};
+ if(pending&&pendingKind!=="audio"){alert("در پیام خصوصی فعلاً فقط پیام صوتی و متن ارسال می‌شود.");return false;}
+ if(!text&&!pending)return false;
+ const row={sender_id:ME.id,recipient_id:cur.peer,text:text||null};
  if(replyTo&&replyOkP)row.reply_to_id=replyTo.id;
  if(replyTo&&!replyOkP)callToast("ریپلای ذخیره نشد: ستون reply_to_id در دیتابیس نیست (SQL را اجرا کن).");
- const {data,error}=await sb.from("private_messages").insert(row).select("id,sender_id,recipient_id,text,created_at,reply_to_id").single();
- if(error&&/reply_to_id|PGRST204|42703/.test((error.code||"")+(error.message||""))){replyOkP=false;delete row.reply_to_id;const r2=await sb.from("private_messages").insert(row).select("id,sender_id,recipient_id,text,created_at").single();if(r2.error){console.error(r2.error);alert(navigator.onLine?"ارسال پیام ناموفق بود؛ دوباره تلاش کن.":"اتصال اینترنت برقرار نیست.");return false;}addPM(r2.data);return true;}
- if(error){console.error(error);alert(navigator.onLine?"ارسال پیام ناموفق بود؛ دوباره تلاش کن.":"اتصال اینترنت برقرار نیست.");return false;}
- addPM(data);return true;}
+ if(pending&&pendingKind==="audio"){
+  if(!pmMediaOk){alert("برای پیام صوتی خصوصی ابتدا باید فایل SQL پیوست‌شده را در Supabase اجرا کنی.");return false;}
+  const type=pending.type||"audio/webm",ext=type.includes("ogg")?"ogg":type.includes("mp4")?"m4a":"webm";
+  row.media_type="audio";row.media_url=await upload(pending,ext,type,pendingDur);
+ }
+ const selectCols="id,sender_id,recipient_id,text,created_at,reply_to_id,deleted_for_all"+(pmMediaOk?",media_url,media_type":"");
+ let r=await sb.from("private_messages").insert(row).select(selectCols).single();
+ if(r.error&&pmMediaOk&&/media_(url|type)/.test(r.error.message||"")){pmMediaOk=false;if(row.media_url){alert("ستون‌های پیام صوتی خصوصی در دیتابیس وجود ندارند؛ فایل SQL را اجرا کن.");return false;}r=await sb.from("private_messages").insert(row).select("id,sender_id,recipient_id,text,created_at,reply_to_id,deleted_for_all").single();}
+ if(r.error&&/reply_to_id|PGRST204|42703/.test((r.error.code||"")+(r.error.message||""))){replyOkP=false;delete row.reply_to_id;const cols="id,sender_id,recipient_id,text,created_at,deleted_for_all"+(pmMediaOk?",media_url,media_type":"");r=await sb.from("private_messages").insert(row).select(cols).single();}
+ if(r.error){console.error(r.error);alert(navigator.onLine?"ارسال پیام ناموفق بود؛ جزئیات در کنسول مرورگر است.":"اتصال اینترنت برقرار نیست.");return false;}
+ addPM(r.data);return true;}
 // ---- اعلان پیام جدید ----
 async function loadUnread(){if(!ME)return;
  const snap={};for(const k in UN)snap[k]=new Set(UN[k]);
@@ -1151,15 +1305,15 @@ function notify(n){if(!ME||document.hidden||CALL||INC)return;if(cur&&cur.id===n.
  if(i>=0)NT.q[i]={...n,count:(NT.q[i].count||1)+(n.count||1)};else{NT.q.push(n);if(NT.q.length>3)NT.q.shift();}
  ntNext();}
 function ntPM(m){const k=m.sender_id+"|"+Date.parse(m.created_at);if(NK.has(k))return;NK.add(k);if(NK.size>200)NK.delete(NK.values().next().value);
- const p=P[m.sender_id];notify({id:"u:"+m.sender_id,title:pName(p),avatar:p&&p.avatar_url,text:m.text||"پیام جدید",at:m.created_at,count:1});}
+ const p=P[m.sender_id];notify({id:"u:"+m.sender_id,title:pName(p),avatar:p&&p.avatar_url,text:m.text||mLab(m.media_type)||"پیام جدید",at:m.created_at,count:1});}
 function stopRT(){if(rt){sb.removeChannel(rt);rt=null;}rtOk=false;}
 function startRT(){stopRT();
  const h=async p=>{const m=p.new;await profs([m.sender_id,m.recipient_id]);if(addPM(m)){if(cur&&cur.peer===(m.sender_id===ME.id?m.recipient_id:m.sender_id))renderMsgs();renderList();if(m.sender_id!==ME.id)ntPM(m);}};
  rt=sb.channel("pm-"+ME.id)
   .on("postgres_changes",{event:"INSERT",schema:"public",table:"private_messages",filter:"recipient_id=eq."+ME.id},h)
   .on("postgres_changes",{event:"INSERT",schema:"public",table:"private_messages",filter:"sender_id=eq."+ME.id},h)
-  .on("postgres_changes",{event:"DELETE",schema:"public",table:"private_messages"},p=>{const id=p.old&&p.old.id;if(id==null)return;
-   for(const k in PM){const a=PM[k],i=a.findIndex(x=>String(x.id)===String(id));if(i<0)continue;a.splice(i,1);const c=PC.find(x=>x.peer===k),l=visPM(k).slice(-1)[0];if(c)c.last=l?l.text:"";if(cur&&cur.peer===k)renderMsgs(true);renderList();break;}})
+  .on("postgres_changes",{event:"DELETE",schema:"public",table:"private_messages"},p=>{const id=p.old&&p.old.id;if(id==null)return;dropPM(id);})
+  .on("postgres_changes",{event:"UPDATE",schema:"public",table:"private_messages"},p=>{const m=p.new;if(m&&m.id!=null&&m.deleted_for_all)dropPM(m.id);})
   .subscribe(s=>{rtOk=s==="SUBSCRIBED";});}
 setInterval(async()=>{if(!ME||document.hidden||rtOk)return;await refreshPC(true);if(cur&&cur.peer){await loadPM(cur.peer);renderMsgs();}renderList();},5000);
 
@@ -1179,11 +1333,12 @@ async function refreshSG(){
  for(const c of SG){const a=GM[c.gid];if(a&&a.length&&GHID.has(String(a[a.length-1].id))){const l=gVis(c.gid).slice(-1)[0];c.last=l?(l.text||gLab(l.media_type)):"";}}
  if(cur&&cur.gid){const n=SG.find(x=>x.gid===cur.gid);if(!n){gpHide();cur=null;$("back").click();callToast("دیگر عضو این گروه نیستی.");}else cur.role=n.role;}
 }
-const gLab=t=>t==="image"?"🖼️ عکس":t==="video"?"🎬 ویدیو":"";
-const gHideMissing=e=>/PGRST205|42P01|schema cache|does not exist|Could not find/i.test(String((e&&e.code)||"")+" "+String((e&&e.message)||""));
+const gLab=t=>t==="image"?"🖼️ عکس":t==="video"?"🎬 ویدیو":t==="audio"?"🎙️ پیام صوتی":"";
+const gHideMissing=e=>/PGRST205|42P01|schema cache|Could not find the table|relation .*group_message_hides.* does not exist/i.test(String((e&&e.code)||"")+" "+String((e&&e.message)||""));
 function gVis(gid){return(GM[gid]||[]).filter(m=>!GHID.has(String(m.id)));}
-async function loadGHides(ids){if(!gHideOk||!ids||!ids.length)return;
-  const {data,error}=await sb.from("group_message_hides").select("message_id").in("message_id",ids);
+async function loadGHides(ids){if(!gHideOk||!ME)return;
+  // همان الگوی loadHides چت خصوصی: همه‌ی حذف‌های خود کاربر (RLS: user_id = auth.uid())، بدون فیلتر in روی شناسه‌ها.
+  const {data,error}=await sb.from("group_message_hides").select("message_id").eq("user_id",ME.id).limit(1000);
   if(error){if(gHideMissing(error))gHideOk=false;console.warn("group_message_hides:",error);return;}
   (data||[]).forEach(r=>GHID.add(String(r.message_id)));}
 function afterGDel(gid){const l=gVis(gid).slice(-1)[0],c=SG.find(x=>x.gid===gid);if(c)c.last=l?(l.text||gLab(l.media_type)):"";renderMsgs(true);renderList();}
@@ -1224,17 +1379,17 @@ async function delGM(m){
  modal(`<h3>حذف پیام</h3><p style="color:var(--mu);font-size:13px;line-height:2">این پیام چطور حذف شود؟</p><button class="btn g" id="dMe">حذف برای من</button>${canAll?`<button class="btn g" id="dAll">حذف برای همه</button>`:""}<button class="btn g" id="dNo">انصراف</button>`);
  $("dNo").onclick=close;
  $("dMe").onclick=async()=>{
-  if(!gHideOk){close();callToast("حذف برای من در گروه هنوز در دیتابیس فعال نیست؛ فایل SQL را اجرا کن.");return;}
   $("dMe").disabled=true;
   const {error}=await sb.from("group_message_hides").insert({user_id:ME.id,message_id:m.id});
   if(error&&error.code!=="23505"){console.error(error);if(gHideMissing(error))gHideOk=false;close();callToast(gHideMissing(error)?"حذف برای من در گروه هنوز در دیتابیس فعال نیست؛ فایل SQL را اجرا کن.":(navigator.onLine?"حذف انجام نشد؛ دوباره تلاش کن.":"اتصال اینترنت برقرار نیست."));return;}
   GHID.add(String(m.id));close();afterGDel(gid);};
  if(canAll)$("dAll").onclick=async()=>{
   $("dAll").disabled=true;
-  const {error}=await sb.from("group_messages").delete().eq("id",m.id);
-  if(error){console.error("حذف پیام گروه:",error);close();callToast("حذف گروه ناموفق بود: "+String(error.message||error.code||"خطای دیتابیس").slice(0,130));return;}
+  const {data:delRows,error}=await sb.from("group_messages").delete().eq("id",m.id).select("id");
+  if(error){console.error("حذف پیام گروه:",error);close();callToast("حذف گروه ناموفق بود: "+[error.code,String(error.message||"خطای دیتابیس").slice(0,130)].filter(Boolean).join(" | "));return;}
+  if(!delRows||!delRows.length){console.error("حذف پیام گروه: هیچ ردیفی حذف نشد (RLS یا نبودن سیاست DELETE)",{id:m.id,gid});close();callToast("حذف انجام نشد: دیتابیس هیچ ردیفی را حذف نکرد (سیاست DELETE در RLS اجازه نداده یا وجود ندارد).");return;}
   const reloaded=await loadGM(gid);
-  if(!reloaded||(GM[gid]||[]).some(x=>String(x.id)===String(m.id))){close();callToast("حذف انجام نشد؛ دیتابیس اجازهٔ حذف این پیام را نداده است. جزئیات را در Console بررسی کن.");return;}
+  if(!reloaded||(GM[gid]||[]).some(x=>String(x.id)===String(m.id))){close();callToast("حذف تأیید نشد؛ پیام هنوز در دیتابیس دیده می‌شود. جزئیات را در Console بررسی کن.");return;}
   close();afterGDel(gid);};
 }
 async function gAct(a,u){
@@ -1347,10 +1502,10 @@ async function gSend(text){
  const g=cur;let media=null;
  if(pending){
   if(!gMediaOk){prevSt("ارسال رسانه در گروه هنوز فعال نیست؛ فایل SQL را در Supabase اجرا کن.","err");return false;}
-  const isV=pendingKind==="video",blob=isV?pendingFile:pending,type=isV?(pendingFile.type||"video/mp4"):"image/jpeg";
+  const isV=pendingKind==="video",isA=pendingKind==="audio",blob=isA?pending:isV?pendingFile:pending,type=isA?(pending.type||"audio/webm"):isV?(pendingFile.type||"video/mp4"):"image/jpeg";
   if(upDone&&upDone.src===blob&&String(upDone.gid)===String(g.gid))media=upDone.media;
   else{
-   const ext=isV?(type.includes("quicktime")?"mov":type.includes("webm")?"webm":"mp4"):"jpg",path="g/"+g.gid+"/"+ME.id+"-"+Date.now()+"-"+Math.random().toString(36).slice(2,8)+"."+ext;
+   const ext=isA?(type.includes("ogg")?"ogg":type.includes("mp4")?"m4a":"webm"):isV?(type.includes("quicktime")?"mov":type.includes("webm")?"webm":"mp4"):"jpg",path="g/"+g.gid+"/"+ME.id+"-"+Date.now()+"-"+Math.random().toString(36).slice(2,8)+(isA&&pendingDur?"-d"+pendingDur:"")+"."+ext;
    upBusy=true;prevSt("در حال آپلود… ۰٪","up",0);
    try{await upX(path,blob,type,p=>prevSt("در حال آپلود… "+Math.round(p*100).toLocaleString("fa-IR")+"٪","up",p));}
    catch(e){upBusy=false;if(e&&e.message==="ABORT")return false;console.error(e);prevSt(upErr(e)+" برای تلاش دوباره، ارسال را بزن.","err");return false;}
