@@ -867,13 +867,13 @@ async function send(){
 // ---- ضبط پیام صوتی ----
 const voiceSupported=!!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia&&window.MediaRecorder);
 const VBARS=32,VBN=30,VMAX=10*60*1000;
-const fmtT=t=>{t=Math.max(0,Math.round(t||0));return Math.floor(t/60)+":"+String(t%60).padStart(2,"0");};
+const fmtVT=t=>{t=Math.max(0,Math.round(t||0));return Math.floor(t/60)+":"+String(t%60).padStart(2,"0");};
 function endVoice(){clearInterval(voiceTimer);voiceTimer=null;try{voiceCtx&&voiceCtx.close();}catch{}voiceCtx=null;voiceAn=null;stopVoiceTracks();$("recBar").classList.remove("on");}
 function stopVoiceTracks(){if(voiceStream){voiceStream.getTracks().forEach(t=>t.stop());voiceStream=null;}}
 function cancelVoice(){voiceCancel=true;if(voiceRecorder&&voiceRecorder.state!=="inactive"){try{voiceRecorder.stop();}catch{endVoice();voiceRecorder=null;}}else{endVoice();voiceRecorder=null;}}
 function stopVoice(){voiceCancel=false;if(voiceRecorder&&voiceRecorder.state==="recording"){try{voiceRecorder.stop();}catch{endVoice();voiceRecorder=null;}}else{endVoice();voiceRecorder=null;}}
 function recTick(){
- const t=Date.now()-voiceStarted;$("recT").textContent=fmtT(t/1000);
+ const t=Date.now()-voiceStarted;$("recT").textContent=fmtVT(t/1000);
  let lvl=.06;if(voiceAn){const b=new Uint8Array(voiceAn.fftSize);voiceAn.getByteTimeDomainData(b);let q=0;for(let i=0;i<b.length;i++){const x=(b[i]-128)/128;q+=x*x;}lvl=Math.min(1,Math.sqrt(q/b.length)*3.5);}
  voicePk.push(lvl);const w=$("recW").children,n=voicePk.length;
  for(let i=0;i<w.length;i++){const v=voicePk[n-w.length+i];w[i].style.height=(v==null?3:Math.max(3,Math.round(v*30)))+"px";}
@@ -922,8 +922,8 @@ $("recX").onclick=cancelVoice;$("recOk").onclick=stopVoice;
 const vpIc='<svg class="i-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg><svg class="i-pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4.2" height="14" rx="1.4"/><rect x="13.8" y="5" width="4.2" height="14" rx="1.4"/></svg>';
 function vpPeaks(url){let h=2166136261;for(let i=0;i<url.length;i++){h^=url.charCodeAt(i);h=Math.imul(h,16777619);}const a=[];for(let i=0;i<VBARS;i++){h=Math.imul(h^(h>>>15),2246822519)>>>0;a.push(.25+((h%1000)/1000)*.75);}return a;}
 function vpDurOf(url){const m=/-d(\d{1,4})\.[a-z0-9]+$/i.exec(String(url).split("?")[0]);return m?+m[1]:0;}
-function vpHtml(src,peaks,dur){const p=peaks||vpPeaks(src),d=dur||vpDurOf(src);return `<div class="vp" data-src="${esc(src)}"${d?` data-dur="${d}"`:""}><button class="vp-b" type="button" aria-label="پخش پیام صوتی">${vpIc}</button><div class="vp-m"><div class="vp-w">${p.map(v=>`<i style="height:${Math.round(v*100)}%"></i>`).join("")}</div><div class="vp-t"><span class="vp-c">0:00</span><span class="vp-d">${d?fmtT(d):"--:--"}</span></div></div></div>`;}
-function vpUI(el,cur,dur,playing){el.classList.toggle("pl",!!playing);const bars=el.querySelectorAll(".vp-w i"),n=dur>0?Math.round(bars.length*Math.min(1,cur/dur)):0;bars.forEach((b,i)=>b.classList.toggle("on",i<n));el.querySelector(".vp-c").textContent=fmtT(cur);if(dur>0)el.querySelector(".vp-d").textContent=fmtT(dur);}
+function vpHtml(src,peaks,dur){const p=peaks||vpPeaks(src),d=dur||vpDurOf(src);return `<div class="vp" data-src="${esc(src)}"${d?` data-dur="${d}"`:""}><button class="vp-b" type="button" aria-label="پخش پیام صوتی">${vpIc}</button><div class="vp-m"><div class="vp-w">${p.map(v=>`<i style="height:${Math.round(v*100)}%"></i>`).join("")}</div><div class="vp-t"><span class="vp-c">0:00</span><span class="vp-d">${d?fmtVT(d):"--:--"}</span></div></div></div>`;}
+function vpUI(el,cur,dur,playing){el.classList.toggle("pl",!!playing);const bars=el.querySelectorAll(".vp-w i"),n=dur>0?Math.round(bars.length*Math.min(1,cur/dur)):0;bars.forEach((b,i)=>b.classList.toggle("on",i<n));el.querySelector(".vp-c").textContent=fmtVT(cur);if(dur>0)el.querySelector(".vp-d").textContent=fmtVT(dur);}
 function vpSync(){
  if(!VP.a||!VP.url)return;let el=VP.el;
  if(!el||!el.isConnected){el=[...document.querySelectorAll(".vp")].find(x=>x.dataset.src===VP.url)||null;VP.el=el;}
