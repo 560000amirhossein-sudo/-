@@ -278,6 +278,14 @@ body{background:radial-gradient(60% 50% at 12% 8%,#6d28d955,transparent 62%),rad
 .comp .send,.comp .send:hover{background:linear-gradient(135deg,#a855f7,#6366f1);color:#fff;box-shadow:0 0 16px #8b5cf6aa}
 .comp .send:hover{filter:brightness(1.12)}
 .emo,.atm{background:#17134def;border-color:#4a45b8}
+.emo{width:340px!important;height:340px;flex-direction:column;flex-wrap:nowrap!important;padding:0!important;overflow:hidden;gap:0!important}
+.emo-tabs{display:flex;gap:2px;overflow-x:auto;padding:6px;border-bottom:1px solid var(--bd);flex:none;scrollbar-width:none}
+.emo-tabs::-webkit-scrollbar{display:none}
+.emo .emo-tab{flex:none;width:36px;height:34px;font-size:19px;opacity:.6}
+.emo .emo-tab.on{opacity:1;background:#a855f733}
+.emo-grid{flex:1;overflow-y:auto;padding:6px 8px 10px;display:flex;flex-wrap:wrap;align-content:flex-start;gap:2px;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.emo-h{width:100%;font-size:12px;color:#a5a3c9;padding:4px 4px 6px}
+.emo-grid .emo-b{width:40px;height:40px;font-size:24px}
 .prev{margin:0 12px 8px;border:1px solid #4a45b866;border-radius:16px;background:#17134ddd}
 .joinbar{margin:0 12px max(12px,env(safe-area-inset-bottom));border:1px solid #4a45b8aa;border-radius:18px;background:#17134ddd}
 @media(min-width:761px){
@@ -552,6 +560,7 @@ body{font-family:Vazirmatn,Vazir,Tahoma,"Segoe UI",system-ui,sans-serif;-webkit-
 #vpPrevW{display:none;flex:1;min-width:0}
 .prev.aud>span{display:none}
 .prev.aud #vpPrevW{display:block}
+.prev.aud:not(.up):not(.err) #prevX{display:none}
 .prev.aud .vp{margin-top:0;min-width:0}
 .prev.aud.up>span,.prev.aud.err>span{display:block}
 .prev.aud.up #vpPrevW,.prev.aud.err #vpPrevW{display:none}
@@ -1544,7 +1553,7 @@ function rxHtml(m){if(!exLoaded())return"";const a=EX.re[String(m.id)];if(!a||!a
 function edtHtml(m){return exLoaded()&&EX.ed[String(m.id)]?`<span class="edt">ویرایش‌شده</span>`:"";}
 let rxBusy=false;
 async function reactTo(mid,emoji){
- const c=cur;if(!c||rxBusy)return;const sc=exScope(c);if(!sc)return;
+ const c=cur;if(!c||rxBusy||!Number.isFinite(Number(mid)))return;const sc=exScope(c);if(!sc)return;
  rxBusy=true;
  try{
   const sid=String(mid);
@@ -1597,9 +1606,9 @@ function menuExtras(m,mid){
  const g=!!cur.gid;let pin=false,pinned=false;
  if(g){pin=myPerm("pin_messages");pinned=PIN[cur.gid]===mid;}
  else if(exScope(cur)){pin=cur.id===DEF?(exLoaded()&&EX.canPin):extrasOk;pinned=exLoaded()&&!!EX.pin&&String(EX.pin.id)===mid;}
- $("mmPin").style.display=pin?"":"none";$("mmPin").lastChild.textContent=pinned?"برداشتن سنجاق":"سنجاق پیام";
+ pin=pin&&Number.isFinite(Number(mid));$("mmPin").style.display=pin?"":"none";$("mmPin").lastChild.textContent=pinned?"برداشتن سنجاق":"سنجاق پیام";
  $("mmEdit").style.display=extrasOk&&canEditMsg(m)?"":"none";
- const mine=exLoaded()?((EX.re[mid]||[]).find(r=>r.mine)||{}).e:null,ok=extrasOk&&!!exScope(cur);
+ const mine=exLoaded()?((EX.re[mid]||[]).find(r=>r.mine)||{}).e:null,ok=extrasOk&&!!exScope(cur)&&Number.isFinite(Number(mid));
  $("mmr").style.display=ok?"":"none";
  $("mmWho").style.display=ok&&exLoaded()&&(EX.re[mid]||[]).length?"":"none";
  $("mmr").querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.e===mine));}
@@ -1640,7 +1649,7 @@ async function pinSet(mid){
  loadExtras(true);}
 async function pinToggle(){
  const id=activeMsgEl&&activeMsgEl.dataset.mid;hideMsgMenu();if(!id||!cur)return;
- if(cur.gid){const g=cur.gid,un=PIN[g]===id;const {error}=await sb.rpc("pin_group_message",{p_gid:g,p_mid:un?null:id});if(error){callToast(gErr(error));return;}PIN[g]=un?null:id;PINM[g]=null;renderPin();return;}
+ if(cur.gid){const g=cur.gid,un=PIN[g]===id;const {error}=await sb.rpc("pin_group_message",{p_gid:g,p_mid:un?null:id});if(error){callToast(gErr(error));if(/FORBIDDEN/.test(String(error.message||"")))refreshGroupAccess(g).then(()=>loadPin(g));return;}PIN[g]=un?null:id;PINM[g]=null;renderPin();return;}
  const un=exLoaded()&&!!EX.pin&&String(EX.pin.id)===id;pinSet(un?null:Number(id));}
 function renderPinX(){
  const b=$("pinbar"),p=exLoaded()?EX.pin:null;
@@ -1649,7 +1658,16 @@ function renderPinX(){
  b.innerHTML=`<span class="pn-ic">📌</span><div class="pn-t"><b>پیام سنجاق‌شده</b><span>${esc(pinSnip(p))}</span></div>${can?`<button type="button" class="pn-x" aria-label="برداشتن سنجاق" title="برداشتن سنجاق">✕</button>`:""}`;b.style.display="flex";
  b.onclick=e=>{if(e.target.closest(".pn-x"))return;const r=$("msgs").querySelector(`[data-mid="${p.id}"]`);if(r){r.scrollIntoView({block:"center"});r.classList.add("hl");setTimeout(()=>r.classList.remove("hl"),1400);}};
  const x=b.querySelector(".pn-x");if(x)x.onclick=()=>pinSet(null);}
-setInterval(()=>{if(!ME||document.hidden||!cur)return;loadExtras();},5000);
+async function refreshGroupAccess(gid){
+ if(!ME||!gid)return;
+ let r=await sb.from("group_members").select("user_id,role,perms").eq("group_id",gid).eq("user_id",ME.id).maybeSingle();
+ if(r.error&&/perms|42703/.test((r.error.code||"")+(r.error.message||"")))r=await sb.from("group_members").select("user_id,role").eq("group_id",gid).eq("user_id",ME.id).maybeSingle();
+ if(r.error||!r.data)return;
+ const rows=GMR[gid]=GMR[gid]||[],i=rows.findIndex(q=>q.user_id===ME.id);
+ if(i>=0)rows[i]=Object.assign({},rows[i],r.data);else rows.push(r.data);
+ (GMEM[gid]=GMEM[gid]||{})[ME.id]=r.data.role;
+ const c=SG.find(x=>x.gid===gid);if(c)c.role=r.data.role;if(cur&&cur.gid===gid)cur.role=r.data.role;}
+setInterval(()=>{if(!ME||document.hidden||!cur)return;if(cur.gid){const g=cur.gid;refreshGroupAccess(g).then(()=>loadPin(g));}loadExtras();},5000);
 $("file").onchange=async()=>{
  const f=$("file").files[0];$("file").value="";if(!f)return;
  if(f.type.startsWith("video/")){
@@ -1662,9 +1680,21 @@ $("file").onchange=async()=>{
  try{clearPending();pending=await resize(f,cur&&cur.id===DEF?1024:cur&&cur.gid?1280:640,false);if(cur&&cur.gid&&pending.size>MAXIO){clearPending();callToast("حجم عکس پس از فشرده‌سازی هنوز زیاد است؛ عکس کوچک‌تری انتخاب کن.");return;}$("prevImg").src=URL.createObjectURL(pending);$("prev").classList.add("show");}catch{if(cur&&cur.gid)callToast("عکس قابل خواندن نبود.");else alert("عکس قابل خواندن نبود.");}
 };
 $("prevX").onclick=()=>{if(upBusy){abortUp();return;}clearPending();};
-const EM="😀 😂 🥹 😍 😎 🤩 😭 😡 🥳 😴 🤔 👍 👎 👏 🙏 💜 🔥 ✨ 🎮 🕹️ 👾 🏆 ⚔️ 🛡️ 💀 👑 🌙 ⭐ 💯 🎉 ❤️ 😅 🤝 👀 🫡".split(" ");
-$("emo").innerHTML=EM.map(e=>`<button>${e}</button>`).join("");
-$("emo").onclick=e=>{if(e.target.tagName==="BUTTON"){$("txt").value+=e.target.textContent;$("txt").focus();}};
+const EMD=[{"i":"😀","n":"چهره‌ها","e":["😀","😁","😂","😃","😄","😅","😆","😇","😈","😉","😊","😋","😌","😍","😎","😏","😐","😑","😒","😓","😔","😕","😖","😗","😘","😙","😚","😛","😜","😝","😞","😟","😠","😡","😢","😣","😤","😥","😦","😧","😨","😩","😪","😫","😬","😭","😮","😯","😰","😱","😲","😳","😴","😵","😶","😷","😸","😹","😺","😻","😼","😽","😾","😿","🙀","🙁","🙂","🙃","🙄","🙅","🙆","🙇","🙈","🙉","🙊","🙋","🙌","🙍","🙎","🙏","🤐","🤑","🤒","🤓","🤔","🤕","🤖","🤗","🤘","🤙","🤚","🤛","🤜","🤝","🤞","🤟","🤠","🤡","🤢","🤣","🤤","🤥","🤦","🤧","🤨","🤩","🤪","🤫","🤬","🤭","🤮","🤯","🥰","🥱","🥲","🥳","🥴","🥵","🥶","🥸","🥹","🥺","🧐","💩","👻","👼","👽","👾","👿","💀"]},{"i":"👋","n":"دست و آدم‌ها","e":["👆","👇","👈","👉","👊","👋","👌","👍","👎","👏","👐","🙌","🙏","🖐","🖕","🖖","🤘","🤙","🤚","🤛","🤜","🤝","🤞","🤟","💪","✊️","✋️","✌️","✍️","👀","👁","👂","👃","👄","👅","👦","👧","👨","👩","👪","👫","👬","👭","👮","👯","👰","👱","👲","👳","👴","👵","👶","👷","👸","👹","👺","👻","👼","👽","👾","👿","💀","💁","💂","💃","💄","💅","💆","💇","🧑","🧒","🧓","🧔","🧕","🧖","🧗","🧘","🧙","🧚","🧛","🧜","🧝","🕵","🕺"]},{"i":"🐶","n":"حیوانات و طبیعت","e":["🐀","🐁","🐂","🐃","🐄","🐅","🐆","🐇","🐈","🐉","🐊","🐋","🐌","🐍","🐎","🐏","🐐","🐑","🐒","🐓","🐔","🐕","🐖","🐗","🐘","🐙","🐚","🐛","🐜","🐝","🐞","🐟","🐠","🐡","🐢","🐣","🐤","🐥","🐦","🐧","🐨","🐩","🐪","🐫","🐬","🐭","🐮","🐯","🐰","🐱","🐲","🐳","🐴","🐵","🐶","🐷","🐸","🐹","🐺","🐻","🐼","🐽","🐾","🦀","🦁","🦂","🦃","🦄","🦅","🦆","🦇","🦈","🦉","🦊","🦋","🦌","🦍","🦎","🦏","🦐","🦑","🦒","🦓","🦔","🦕","🦖","🦗","🦘","🦙","🦚","🦛","🦜","🦝","🦞","🦟","🦠","🦡","🦢","🦣","🦤","🦥","🦦","🦧","🦨","🦩","🦪","🦫","🦬","🦭","🦮","🌰","🌱","🌲","🌳","🌴","🌵","🌶","🌷","🌸","🌹","🌺","🌻","🌼","🌽","🌾","🌿","🍀","🍁","🍂","🍃","🍄","💐","🌍","🌎","🌏","🌐","🌑","🌒","🌓","🌔","🌕","🌖","🌗","🌘","🌙","🌚","🌛","🌜","🌝","🌞","🌟","🌠","🔥","💧","🌈","☀️","☁️","☂️","☃️","☄️","⛄️","⛅️","⚡️","❄️"]},{"i":"🍔","n":"غذا و نوشیدنی","e":["🍅","🍆","🍇","🍈","🍉","🍊","🍋","🍌","🍍","🍎","🍏","🍐","🍑","🍒","🍓","🍔","🍕","🍖","🍗","🍘","🍙","🍚","🍛","🍜","🍝","🍞","🍟","🍠","🍡","🍢","🍣","🍤","🍥","🍦","🍧","🍨","🍩","🍪","🍫","🍬","🍭","🍮","🍯","🍰","🍱","🍲","🍳","🍴","🍵","🍶","🍷","🍸","🍹","🍺","🍻","🍼","🍽","🍾","🍿","🥐","🥑","🥒","🥓","🥔","🥕","🥖","🥗","🥘","🥙","🥚","🥛","🥜","🥝","🥞","🥟","🥠","🥡","🥢","🥣","🥤","🥥","🥦","🥧","🥨","🥩","🥪","🥫","🌭","🌮","🌯","🧀","🧁","🧂","☕️","🥬","🥭","🥮","🥯","🥰","🥱","🥲","🥳","🥴","🥵","🥶","🥷","🥸","🥹","🥺","🥻","🥼","🥽","🥾","🥿","🦀","🦁","🦂","🦃","🦄","🦅","🦆","🦇","🦈","🦉","🦊","🦋","🦌","🦍","🦎","🦏","🦐","🦑","🦒","🦓","🦔","🦕","🦖","🦗","🦘","🦙","🦚","🦛","🦜","🦝","🦞","🦟","🦠","🦡","🦢","🦣","🦤","🦥","🦦","🦧","🦨","🦩","🦪","🦫","🦬","🦭","🦮","🦯","🦰","🦱","🦲","🦳","🦴","🦵","🦶","🦷","🦸","🦹","🦺","🦻","🦼","🦽","🦾","🦿","🧃","🧄","🧅","🧆","🧇","🧈","🧉","🧊","🧋"]},{"i":"⚽","n":"فعالیت و بازی","e":["🎠","🎡","🎢","🎣","🎤","🎥","🎦","🎧","🎨","🎩","🎪","🎫","🎬","🎭","🎮","🎯","🎰","🎱","🎲","🎳","🎴","🎵","🎶","🎷","🎸","🎹","🎺","🎻","🎼","🎽","🎾","🎿","🏀","🏁","🏂","🏃","🏄","🏅","🏆","🏇","🏈","🏉","🏊","⚽️","⚾️","🥊","🥋","🥌","🥍","🥎","🥏","🤺","🤻","🤼","🤽","🤾","🤿","🥀","🥁","🥂","🥃","🥄","🥅","🕹","🧩","🧿","♟️","🃏","🀄","👑"]},{"i":"🚗","n":"سفر و مکان‌ها","e":["🚀","🚁","🚂","🚃","🚄","🚅","🚆","🚇","🚈","🚉","🚊","🚋","🚌","🚍","🚎","🚏","🚐","🚑","🚒","🚓","🚔","🚕","🚖","🚗","🚘","🚙","🚚","🚛","🚜","🚝","🚞","🚟","🚠","🚡","🚢","🚣","🚤","🚥","🚦","🚧","🚨","🚩","🚪","🚫","🚬","🚭","🚮","🚯","🚰","🚱","🚲","🚳","🏔","🏕","🏖","🏗","🏘","🏙","🏚","🏛","🏜","🏝","🏞","🏟","🏠","🏡","🏢","🏣","🏤","🏥","🏦","🏧","🏨","🏩","🏪","🏫","🏬","🏭","🏮","🏯","🏰","🗻","🗼","🗽","🗾","🗿","✈️","⛵️","🛰","🛸","🛹","🎡","🎢"]},{"i":"💡","n":"وسایل","e":["💡","💢","💣","💤","💥","💦","💧","💨","💰","💱","💲","💳","💴","💵","💶","💷","💸","💹","💺","💻","💼","💽","💾","💿","📀","📁","📂","📃","📄","📅","📆","📇","📈","📉","📊","📋","📌","📍","📎","📏","📐","📑","📒","📓","📔","📕","📖","📗","📘","📙","📚","📛","📜","📝","📞","📟","📠","📡","📢","📣","📤","📥","📦","📧","📨","📩","📪","📫","📬","📭","📮","📯","📰","📱","📲","📳","📴","📵","📶","📷","📸","📹","📺","📻","📼","🔋","🔌","🔍","🔎","🔏","🔐","🔑","🔒","🔓","🔔","🔕","🔖","🔗","🔘","🔙","🔚","🔛","🔜","🔝","🔞","🔟","🔠","🔡","🔢","🔣","🔤","🔥","🔦","🔧","🔨","🔩","🔪","🔫","🔬","🔭","🔮","🧠","🧡","🧢","🧣","🧤","🧥","🧦","🧧","🧨","🧩","🧪","🧫","🧬","🧭","🧮","🧯","🧰","🧱","🧲","🧳","🧴","🧵","🧶","🧷","🧸","🧹","🧺","🧻","🧼","🛒","🎤","🎥","🎦","🎧","🎨","🎩","🚪","🚫","🚬","⌚️","⌛️","⏰️","⏱️","⏲️","⏳️","✉️","✏️","✐️","✑️","✒️","💉","💊"]},{"i":"❤️","n":"نمادها","e":["💓","💔","💕","💖","💗","💘","💙","💚","💛","💜","💝","💞","💟","❤️","🖤","🤍","🤎","🧡","🟠","🟡","🟢","🟣","🟤","🟥","🟦","🟧","🟨","🟩","🟪","🟫","✅️","❌️","❎️","✨️","💯","💥","💦","💢","💣","💤","❓️","❔️","❕️","❗️","‼️","⁉️","⭐️","⚠️","🚫","🔞","🆕","🆖","🆗","🆘","🆙","🆚","➕️","➖️","➗️","🔁","🔂","🔃","🔄","⬆️","⬇️","➡️","⬅️","🔴","🔵","🔶","🔷","🔸","🔹","🔺","🔻","🔼","🔽","☮️","☯️","♈️","♉️","♊️","♋️","♌️","♍️","♎️","♏️","♐️","♑️","♒️","♓️","♻️","⚛️"]},{"i":"🏁","n":"پرچم‌ها","e":["🏁","🚩","🏴","🏳️","🏳️‍🌈","🇮🇷","🇺🇸","🇬🇧","🇩🇪","🇫🇷","🇮🇹","🇪🇸","🇹🇷","🇦🇪","🇸🇦","🇮🇶","🇦🇫","🇦🇿","🇦🇲","🇹🇲","🇹🇯","🇵🇰","🇮🇳","🇨🇳","🇯🇵","🇰🇷","🇷🇺","🇺🇦","🇨🇦","🇲🇽","🇧🇷","🇦🇷","🇨🇱","🇨🇴","🇵🇪","🇻🇪","🇳🇱","🇧🇪","🇨🇭","🇸🇪","🇳🇴","🇩🇰","🇫🇮","🇵🇱","🇨🇿","🇦🇹","🇬🇷","🇵🇹","🇮🇪","🇭🇺","🇷🇴","🇧🇬","🇷🇸","🇭🇷","🇪🇬","🇿🇦","🇳🇬","🇰🇪","🇲🇦","🇩🇿","🇹🇳","🇱🇾","🇸🇾","🇱🇧","🇯🇴","🇮🇱","🇶🇦","🇰🇼","🇧🇭","🇴🇲","🇾🇪","🇵🇸","🇨🇾","🇬🇪","🇰🇿","🇺🇿","🇰🇬","🇧🇩","🇱🇰","🇳🇵","🇹🇭","🇻🇳","🇮🇩","🇲🇾","🇸🇬","🇵🇭","🇦🇺","🇳🇿","🇨🇺","🇮🇸"]}];
+(function(){
+ const box=$("emo");let rec=[];try{rec=JSON.parse(localStorage.getItem("arya_emoji_recent")||"[]");}catch(e){}
+ const cats=[{i:"🕘",n:"اخیر",e:rec}].concat(EMD);
+ box.innerHTML='<div class="emo-tabs">'+cats.map((c,k)=>`<button type="button" class="emo-tab${k===(rec.length?0:1)?" on":""}" data-k="${k}" title="${c.n}">${c.i}</button>`).join("")+'</div><div class="emo-grid"></div>';
+ const grid=box.querySelector(".emo-grid"),tabs=box.querySelectorAll(".emo-tab");
+ function show(k){tabs.forEach(t=>t.classList.toggle("on",+t.dataset.k===k));const c=cats[k];
+  grid.innerHTML=c.e.length?`<div class="emo-h">${c.n}</div>`+c.e.map(e=>`<button type="button" class="emo-b">${e}</button>`).join(""):`<div class="emo-h">هنوز ایموجی اخیری نداری</div>`;grid.scrollTop=0;}
+ box.onclick=e=>{const t=e.target.closest("button");if(!t)return;e.stopPropagation();
+  if(t.classList.contains("emo-tab")){show(+t.dataset.k);return;}
+  if(t.classList.contains("emo-b")){const x=t.textContent,i=$("txt"),a=i.selectionStart==null?i.value.length:i.selectionStart,b=i.selectionEnd==null?a:i.selectionEnd;
+   i.value=i.value.slice(0,a)+x+i.value.slice(b);i.selectionStart=i.selectionEnd=a+x.length;i.dispatchEvent(new Event("input",{bubbles:true}));i.focus();
+   rec=[x].concat(rec.filter(y=>y!==x)).slice(0,24);cats[0].e=rec;try{localStorage.setItem("arya_emoji_recent",JSON.stringify(rec));}catch(e){}}};
+ show(rec.length?0:1);
+})();
 $("emoB").onclick=()=>{$("atm").classList.remove("open");$("emo").classList.toggle("open");};
 
 // ---- پنجره‌ها ----
@@ -2090,7 +2120,7 @@ function renderPin(){if(cur&&!cur.gid)return renderPinX();const b=$("pinbar"),g=
  const m=(GM[g]||[]).find(x=>String(x.id)===id)||PINM[g];
  b.innerHTML=`<span class="pn-ic">📌</span><div class="pn-t"><b>پیام سنجاق‌شده</b><span>${esc(pinSnip(m))}</span></div>${myPerm("pin_messages")?`<button type="button" class="pn-x" aria-label="برداشتن سنجاق" title="برداشتن سنجاق">✕</button>`:""}`;b.style.display="flex";
  b.onclick=e=>{if(e.target.closest(".pn-x"))return;const r=$("msgs").querySelector(`[data-mid="${id}"]`);if(r){r.scrollIntoView({block:"center"});r.classList.add("hl");setTimeout(()=>r.classList.remove("hl"),1400);}};
- const x=b.querySelector(".pn-x");if(x)x.onclick=async()=>{const {error}=await sb.rpc("pin_group_message",{p_gid:g,p_mid:null});if(error){callToast(gErr(error));return;}PIN[g]=null;renderPin();};}
+ const x=b.querySelector(".pn-x");if(x)x.onclick=async()=>{const {error}=await sb.rpc("pin_group_message",{p_gid:g,p_mid:null});if(error){callToast(gErr(error));if(/FORBIDDEN/.test(String(error.message||"")))refreshGroupAccess(g).then(()=>loadPin(g));return;}PIN[g]=null;renderPin();};}
 async function loadPin(gid){const {data,error}=await sb.rpc("get_group_pin",{p_gid:gid});if(error)return;PIN[gid]=data==null?null:String(data);
  if(PIN[gid]&&!(GM[gid]||[]).some(x=>String(x.id)===PIN[gid])){const r=await sb.from("group_messages").select("id,text,media_type").eq("id",PIN[gid]).maybeSingle();PINM[gid]=r.data||null;}
  renderPin();}
