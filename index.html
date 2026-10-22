@@ -1283,7 +1283,18 @@ let mediaOk=true,replyOk=true,replyOkP=true,pmMediaOk=true,pendingKind="image",p
 let voiceRecorder=null,voiceStream=null,voiceParts=[],voiceStarted=0,voiceTimer=null,voiceCtx=null,voiceAn=null,voicePk=[],voiceCancel=false,voiceStarting=false,pvUrl=null,pendingDur=0,pendingPeaks=null;
 const VP={a:null,url:null,el:null};
 const safeM=u=>typeof u==="string"&&u.startsWith(PUB)?u:"";
-async function upload(blob,ext,type,dur){const p=Date.now()+"-"+Math.random().toString(36).slice(2,8)+(dur?"-d"+dur:"")+"."+ext;const {error}=await sb.storage.from(BUCKET).upload(p,blob,{contentType:type});if(error)throw error;return sb.storage.from(BUCKET).getPublicUrl(p).data.publicUrl;}
+async function upload(blob,ext,type,dur){
+ if(upDone&&upDone.src===blob&&upDone.url)return upDone.url;
+ const p=(ME?ME.id+"/":"")+Date.now()+"-"+Math.random().toString(36).slice(2,8)+(dur?"-d"+dur:"")+"."+ext;
+ const {error}=await sb.storage.from(BUCKET).upload(p,blob,{contentType:type});if(error)throw error;
+ const url=sb.storage.from(BUCKET).getPublicUrl(p).data.publicUrl;upDone={src:blob,url};return url;}
+function sendErr(e){const m=String((e&&e.message)||e||""),st=Number((e&&(e.statusCode||e.status))||0);
+ if(!navigator.onLine||/Failed to fetch|NetworkError|NETWORK/i.test(m))return"اتصال اینترنت برقرار نیست؛ ویس ارسال نشد. دوباره تلاش کن.";
+ if(st===401||st===403||/row-level|policy|unauthor|jwt/i.test(m))return"اجازهٔ آپلود/ارسال نداری؛ وارد حساب شو و دوباره تلاش کن.";
+ if(st===413||/too large|exceed|maximum|payload/i.test(m))return"حجم فایل بیشتر از حد مجاز است.";
+ if(/mime|not supported|invalid.*type/i.test(m))return"نوع فایل صوتی توسط سرور پذیرفته نشد.";
+ if(/violates check constraint|23514/i.test(m+String((e&&e.code)||"")))return"دیتابیس این پیام را نپذیرفت (محدودیت داده): "+m.slice(0,120);
+ return"ارسال ناموفق بود"+(m?" ("+m.slice(0,120)+")":"")+". دوباره تلاش کن.";}
 function clearPending(){pending=null;pendingFile=null;pendingKind="image";upDone=null;$("prev").classList.remove("show","err","up");$("upb").style.width="0";$("prevImg").style.display="";$("prev").querySelector("span").textContent="عکس آماده ارسال";vpPrevReset();pendingDur=0;pendingPeaks=null;}
 let cur=null,tab="all",query="",pending=null,pubMsgs=[],pubErr=false,sig="";
 let pubKnown=null,ncReady=false,pubLoaded=false,pcLoaded=false,UN={};
@@ -1303,6 +1314,7 @@ function resize(file,max,square){return new Promise((ok,no)=>{const u=URL.create
 
 // ---- ابزارهای پیش‌نمایش و شمارنده ----
 const clip=(s,n=70)=>{const a=[...String(s??"").replace(/\s+/g," ").trim()];return a.length>n?a.slice(0,n).join("")+"…":a.join("");};
+const VPH="🎙️ پیام صوتی";
 const mLab=t=>t==="image"?"🖼️ عکس جدید":t==="video"?"🎬 ویدئوی جدید":t==="audio"?"🎙️ پیام صوتی":t?"📎 رسانه جدید":"";
 const pubPrev=l=>{const t=clip(l.text,80)||mLab(l.media_type);if(!t)return"";const w=l.name===D.me.name?"شما":l.name;return(w?w+": ":"")+t;};
 const unc=c=>UN[c.peer]?UN[c.peer].size:0;
@@ -1315,7 +1327,7 @@ function view(){return D.chats.map(c=>{
 function msgsOf(c){
  if(c.id===DEF)return pubMsgs.map(m=>({id:m.id,text:m.text,img:m.media_type==="image"?m.media_url:null,vid:m.media_type==="video"?m.media_url:null,aud:m.media_type==="audio"?m.media_url:null,at:m.created_at,mine:m.name===D.me.name,name:m.name,replyTo:m.reply_to_id?(findPubReply(m.reply_to_id)||rqMiss(m.reply_to_id)):null}));
  if(c.gid)return gVis(c.gid).map(m=>({id:m.id,text:m.text,img:m.media_type==="image"?m.media_url:null,vid:m.media_type==="video"?m.media_url:null,aud:m.media_type==="audio"?m.media_url:null,at:m.created_at,mine:m.sender_id===ME.id,name:pName(P[m.sender_id]),avatar:(P[m.sender_id]||{}).avatar_url,uid:m.sender_id,replyTo:m.reply_to_id?(findGroupReply(c.gid,m.reply_to_id)||rqMiss(m.reply_to_id)):null}));
- if(c.type==="private")return visPM(c.peer).map(m=>({id:m.id,text:m.text,img:m.media_type==="image"?m.media_url:null,vid:m.media_type==="video"?m.media_url:null,aud:m.media_type==="audio"?m.media_url:null,at:m.created_at,mine:m.sender_id===ME.id,name:pName(P[m.sender_id]),avatar:(P[m.sender_id]||{}).avatar_url,uid:m.sender_id,replyTo:m.reply_to_id?(findPMReply(c.peer,m.reply_to_id)||rqMiss(m.reply_to_id)):null}));
+ if(c.type==="private")return visPM(c.peer).map(m=>({id:m.id,text:(m.media_type==="audio"&&m.text===VPH)?"":m.text,img:m.media_type==="image"?m.media_url:null,vid:m.media_type==="video"?m.media_url:null,aud:m.media_type==="audio"?m.media_url:null,at:m.created_at,mine:m.sender_id===ME.id,name:pName(P[m.sender_id]),avatar:(P[m.sender_id]||{}).avatar_url,uid:m.sender_id,replyTo:m.reply_to_id?(findPMReply(c.peer,m.reply_to_id)||rqMiss(m.reply_to_id)):null}));
  return(D.msgs[c.id]||[]).map(m=>({...m,mine:true,name:D.me.name,avatar:D.me.avatar,replyTo:m.replyTo?(findLocalReply(c.id,m.replyTo)||rqMiss(m.replyTo)):null}));}
 // ---- پاسخ به پیام: پیدا کردن پیام اصلی ----
 function findPubReply(rid){const m=pubMsgs.find(x=>String(x.id)===String(rid));return m?{id:m.id,name:m.name,text:m.text,mediaType:m.media_type}:null;}
@@ -1445,6 +1457,11 @@ async function send(){
  if($("sendB").disabled)return;
  if(voiceRecorder){callToast("ابتدا ضبط ویس را تمام یا لغو کن.");return;}
  const text=$("txt").value.trim();if((!text&&!pending)||!canPost())return;
+ if(pending&&pendingKind==="audio"){
+  if(!pending.size){clearPending();callToast("فایل صوتی خالی است؛ دوباره ضبط کن.");return;}
+  if(!/^audio\//.test(pending.type||"")){clearPending();callToast("فرمت فایل صوتی معتبر نیست؛ دوباره ضبط کن.");return;}
+ }
+ const sc=cur.id,sp=pending;
  $("sendB").disabled=true;
  try{
   if(cur.id===DEF){
@@ -1471,9 +1488,10 @@ async function send(){
    (D.msgs[cur.id]=D.msgs[cur.id]||[]).push(m);
    const c=D.chats.find(x=>x.id===cur.id);c.last=text|| (m.aud?"🎙️ پیام صوتی":"");c.img=!!m.img;c.at=m.at;
   }
-  save();$("txt").value="";$("txt").style.height="";clearPending();clearReply();
+  save();
+  if(cur&&cur.id===sc){$("txt").value="";$("txt").style.height="";if(pending===sp)clearPending();clearReply();}
   renderMsgs(true);renderList();
- }catch(e){console.error(e);alert("ارسال ناموفق بود. اتصال، مجوز ذخیره‌سازی و وجود ستون‌های رسانه را بررسی کن.");}
+ }catch(e){console.error(e);if(sp&&pendingKind==="audio")callToast(sendErr(e));else alert("ارسال ناموفق بود. اتصال، مجوز ذخیره‌سازی و وجود ستون‌های رسانه را بررسی کن.");}
  $("sendB").disabled=false;
 }
 // ---- ضبط پیام صوتی ----
@@ -1513,7 +1531,7 @@ async function startVoice(){
    endVoice();voiceRecorder=null;
    if(cancelled)return;
    if(ms<800){callToast("ضبط خیلی کوتاه بود؛ دکمه را بزن و کمی بیشتر صحبت کن.");return;}
-   const type=((rec.mimeType||(parts[0]&&parts[0].type)||"audio/webm")+"").split(";")[0]||"audio/webm";
+   let type=((rec.mimeType||(parts[0]&&parts[0].type)||"audio/webm")+"").split(";")[0]||"audio/webm";if(!/^audio\//.test(type))type=/mp4/.test(type)?"audio/mp4":/ogg/.test(type)?"audio/ogg":"audio/webm";
    const blob=new Blob(parts,{type});
    if(!blob.size){callToast("صدایی ضبط نشد.");return;}
    if(blob.size>MAXV){callToast("حجم ویس بیشتر از ۲۰ مگابایت شد؛ کوتاه‌تر ضبط کن.");return;}
@@ -2133,7 +2151,8 @@ function rmVoiceFile(m){
   const path=decodeURIComponent(m.aud.slice(pre.length).split("?")[0]);
   if(!path||path.includes(".."))return;
   const base=path.split("/").pop();
-  if(path.startsWith("g/")&&!base.startsWith(ME.id+"-"))return;
+  const own=path.startsWith("g/")?base.startsWith(ME.id+"-"):path.startsWith(ME.id+"/");
+  if(!own)return;
   Promise.resolve(sb.storage.from(BUCKET).remove([path])).catch(()=>{});
  }catch{}
 }
@@ -2149,13 +2168,16 @@ function delPM(m){
  if(m.mine)$("dBoth").onclick=async()=>{
   const btn=$("dBoth");btn.disabled=true;btn.textContent="در حال حذف…";
   // تابع اصلی حذف برای همه (شناسه پیام از نوع bigint است).
-  let result=await sb.rpc("delete_private_message_for_all",{p_message_id:Number(m.id)});
+  let result={error:null},done=false;
+  {const dr=await sb.from("private_messages").delete().eq("id",Number(m.id)).select("id");
+   if(!dr.error&&dr.data&&dr.data.length)done=true;else if(dr.error)console.warn("حذف مستقیم پیام خصوصی:",dr.error);}
+  if(!done)result=await sb.rpc("delete_private_message_for_all",{p_message_id:Number(m.id)});
   // سازگاری با دیتابیس‌هایی که هنوز تابع قدیمی دارند.
-  if(result.error){
+  if(!done&&result.error){
    console.warn("delete_private_message_for_all ناموفق بود؛ تلاش با تابع قدیمی:",result.error);
    result=await sb.rpc("delete_private_message",{p_id:String(m.id),p_mode:"all"});
   }
-  if(result.error){console.error("حذف خصوصی برای هر دو:",result.error);alert("حذف برای هر دو انجام نشد: "+(result.error.message||result.error.code||"خطای دیتابیس"));btn.disabled=false;btn.textContent="حذف برای هر دو";return;}
+  if(!done&&result.error){console.error("حذف خصوصی برای هر دو:",result.error);alert("حذف برای هر دو انجام نشد: "+(result.error.message||result.error.code||"خطای دیتابیس"));btn.disabled=false;btn.textContent="حذف برای هر دو";return;}
   await loadPM(peer);
   const stillThere=(PM[peer]||[]).some(x=>String(x.id)===String(m.id)&&!x.deleted_for_all);
   if(stillThere){console.error("حذف برای هر دو تأیید نشد؛ پیام هنوز در دیتابیس وجود دارد.",{id:m.id});alert("درخواست حذف ارسال شد، اما پیام هنوز در دیتابیس دیده می‌شود. تابع SQL حذف برای همه را بررسی کن.");btn.disabled=false;btn.textContent="حذف برای هر دو";return;}
@@ -2168,7 +2190,7 @@ function addPM(m){const peer=m.sender_id===ME.id?m.recipient_id:m.sender_id,a=PM
 async function sendPM(text){
  if(pending&&pendingKind!=="audio"){alert("در پیام خصوصی فعلاً فقط پیام صوتی و متن ارسال می‌شود.");return false;}
  if(!text&&!pending)return false;
- const row={sender_id:ME.id,recipient_id:cur.peer,text:text||null};
+ const row={sender_id:ME.id,recipient_id:cur.peer,text:text||(pending&&pendingKind==="audio"?VPH:null)};
  if(replyTo&&replyOkP)row.reply_to_id=replyTo.id;
  if(replyTo&&!replyOkP)callToast("ریپلای ذخیره نشد: ستون reply_to_id در دیتابیس نیست (SQL را اجرا کن).");
  if(pending&&pendingKind==="audio"){
@@ -2180,7 +2202,7 @@ async function sendPM(text){
  let r=await sb.from("private_messages").insert(row).select(selectCols).single();
  if(r.error&&pmMediaOk&&/media_(url|type)/.test(r.error.message||"")){pmMediaOk=false;if(row.media_url){alert("ستون‌های پیام صوتی خصوصی در دیتابیس وجود ندارند؛ فایل SQL را اجرا کن.");return false;}r=await sb.from("private_messages").insert(row).select("id,sender_id,recipient_id,text,created_at,reply_to_id,deleted_for_all").single();}
  if(r.error&&/reply_to_id|PGRST204|42703/.test((r.error.code||"")+(r.error.message||""))){replyOkP=false;delete row.reply_to_id;const cols="id,sender_id,recipient_id,text,created_at,deleted_for_all"+(pmMediaOk?",media_url,media_type":"");r=await sb.from("private_messages").insert(row).select(cols).single();}
- if(r.error){console.error(r.error);alert(navigator.onLine?"ارسال پیام ناموفق بود؛ جزئیات در کنسول مرورگر است.":"اتصال اینترنت برقرار نیست.");return false;}
+ if(r.error){console.error(r.error);if(pending&&pendingKind==="audio")callToast(sendErr(r.error));else alert(navigator.onLine?"ارسال پیام ناموفق بود؛ جزئیات در کنسول مرورگر است.":"اتصال اینترنت برقرار نیست.");return false;}
  addPM(r.data);return true;}
 // ---- اعلان پیام جدید ----
 async function loadUnread(){if(!ME)return;
@@ -2277,7 +2299,7 @@ async function sendGM(text,media,g){
  let r=await sb.from("group_messages").insert(row).select(sel()).single();
  if(r.error&&!media&&gMediaOk&&/media_url|media_type|42703|PGRST204/.test((r.error.code||"")+(r.error.message||""))){gMediaOk=false;r=await sb.from("group_messages").insert(row).select(sel()).single();}
  const {data,error}=r;
- if(error){console.error(error);if(!media)alert(navigator.onLine?"ارسال پیام ناموفق بود؛ دوباره تلاش کن.":"اتصال اینترنت برقرار نیست.");else prevSt(navigator.onLine?"دیتابیس این پیام رسانه را نپذیرفت؛ فایل SQL را اجرا کن.":"اتصال اینترنت برقرار نیست.","err");return false;}
+ if(error){console.error(error);if(!media)alert(navigator.onLine?"ارسال پیام ناموفق بود؛ دوباره تلاش کن.":"اتصال اینترنت برقرار نیست.");else prevSt(navigator.onLine?"ارسال ویس ناموفق بود: "+String(error.message||error.code||"خطای دیتابیس").slice(0,120)+" — برای تلاش دوباره ارسال را بزن.":"اتصال اینترنت برقرار نیست.","err");return false;}
  addGM(data);return true;}
 const PERMS=[["delete_messages","حذف پیام‌ها","حذف پیام اعضا"],["invite_members","دعوت اعضا","افزودن کاربر با نام کاربری"],["ban_members","اخراج و مسدودکردن اعضا","حذف عضو و جلوگیری از بازگشت"],["pin_messages","سنجاق پیام","سنجاق و برداشتن سنجاق"],["edit_info","تغییر اطلاعات گروه","نام و توضیحات گروه"],["add_admins","افزودن مدیران","ارتقای عضو به مدیر"]];
 function myPerm(k){const r=cur&&cur.role;if(r==="owner")return true;if(r!=="admin")return false;const x=(GMR[cur.gid]||[]).find(q=>q.user_id===ME.id);return !!(x&&x.perms&&x.perms[k]);}
