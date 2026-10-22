@@ -79,6 +79,7 @@ button{cursor:pointer;border:0;background:none}
 .row:not(.me) .bub{border-bottom-left-radius:6px}
 .me .bub{background:linear-gradient(135deg,#8b46f0,#5b21b6);border-color:#c084fc40;border-bottom-right-radius:6px;box-shadow:0 3px 12px #5b21b655}
 .bub.med{width:min(300px,72vw)}
+.bub.vo{width:min(330px,80vw);padding:16px 18px 12px}.bub.vo .vp{margin:12px 0 10px}.bub.vo .vp-t{margin-top:6px}.bub.vo .mt{margin-top:10px}.bub.vo .who{margin-bottom:2px}
 .tx{display:block;white-space:pre-wrap;unicode-bidi:plaintext;text-align:start}
 .bub.emj .tx{font-size:calc(30px*var(--fs,1));line-height:1.4}
 .who{display:flex;align-items:center;gap:6px;font-size:calc(11px*var(--fs,1));color:#c084fc;font-weight:700;margin-bottom:2px;min-width:0}
@@ -1406,7 +1407,7 @@ function renderMsgs(force){
   const sgR=cur.gid?((GMEM[cur.gid]||{})[m.uid]||""):"";
   const who=(!m.mine&&grp)||(m.mine&&own)||(cur.gid&&sgR&&sgR!=="member")?`<div class="who"><span>${esc(m.name)}</span>${cur.gid?roleBadge(sgR):m.mine&&own?`<span class="badge">${cur.type==="channel"?"مدیر":"مالک"}</span>`:""}</div>`:"";
   const rqHtml=replyQuoteHtml(m.replyTo);
-  r.innerHTML=(!m.mine&&(priv||grp)?avHtml(m.avatar,m.name,"s"):"")+`<div class="bub${img||vid||aud?" med":""}${isE?" emj":""}">${who}${rqHtml}${m.text?`<div class="tx">${esc(m.text)}</div>`:""}${img?`<img class="pic" src="${img}" alt="" decoding="async">`:""}${vid?`<video class="pic" src="${vid}" controls preload="metadata" playsinline style="cursor:default"></video>`:""}${aud?vpHtml(aud):""}${rxHtml(m)}<div class="mt"><span>${fmtM(m.at)}</span>${edtHtml(m)}${cur.id!==DEF?`<button class="del" type="button">حذف</button>`:""}</div></div>`;
+  r.innerHTML=(!m.mine&&(priv||grp)?avHtml(m.avatar,m.name,"s"):"")+`<div class="bub${img||vid||aud?" med":""}${aud?" vo":""}${isE?" emj":""}">${who}${rqHtml}${m.text?`<div class="tx">${esc(m.text)}</div>`:""}${img?`<img class="pic" src="${img}" alt="" decoding="async">`:""}${vid?`<video class="pic" src="${vid}" controls preload="metadata" playsinline style="cursor:default"></video>`:""}${aud?vpHtml(aud):""}${rxHtml(m)}<div class="mt"><span>${fmtM(m.at)}</span>${edtHtml(m)}${cur.id!==DEF?`<button class="del" type="button">حذف</button>`:""}</div></div>`;
   const pu=!m.mine&&m.uid||null,pn=!m.mine&&!pu&&cur.id===DEF?m.name:null;
   if(pu||pn)r.querySelectorAll(":scope>.av,.who>span:first-child").forEach(el=>{el.classList.add("lnk");el.tabIndex=0;el.setAttribute("role","button");el.onclick=()=>pu?openProfile(pu):openProfileByName(pn);el.onkeydown=e=>{if(e.key==="Enter")el.click();};});
   const pic=r.querySelector("img.pic");if(pic){pic.onclick=()=>{$("lbImg").src=img;$("lb").classList.add("open");};pic.onload=()=>{if(near)box.scrollTop=box.scrollHeight;};}
