@@ -1280,7 +1280,7 @@ if(!D.chats.some(c=>c.id===DEF))D.chats.unshift({id:DEF,type:"group",title:"NIGH
 const save=()=>{try{localStorage.setItem(LSK,JSON.stringify(D));}catch{alert("حافظه‌ی مرورگر پر شد.");}};save();
 const PUB="https://jpsttfuajyfvysqydqqj.supabase.co/storage/v1/object/public/",BUCKET="chat-media",MAXV=20*1024*1024,MAXI=15*1024*1024,MAXIO=5*1024*1024,SBK="sb_publishable_D_D03bZTtXlKxPgz74MYfQ_Vvpmjn3x";
 let mediaOk=true,replyOk=true,replyOkP=true,pmMediaOk=true,pendingKind="image",pendingFile=null,upDone=null,upBusy=false,upXhr=null;
-let voiceRecorder=null,voiceStream=null,voiceParts=[],voiceStarted=0,voiceTimer=null,voiceCtx=null,voiceAn=null,voicePk=[],voiceCancel=false,voiceStarting=false,pvUrl=null,pendingDur=0,pendingPeaks=null;
+let voiceRecorder=null,voiceStream=null,voiceParts=[],voiceStarted=0,voiceTimer=null,voiceCtx=null,voiceAn=null,voicePk=[],voiceCancel=false,voiceStarting=false,pvUrl=null,pendingDur=0,pendingPeaks=null,voiceAuto=false,voiceArmed=false;
 const VP={a:null,url:null,el:null};
 const safeM=u=>typeof u==="string"&&u.startsWith(PUB)?u:"";
 async function upload(blob,ext,type,dur){
@@ -1453,10 +1453,11 @@ function getActiveMessage(){
 }
 
 // ---- ارسال ----
-async function send(){
+async function send(opts){
  if($("sendB").disabled)return;
  if(voiceRecorder){callToast("ابتدا ضبط ویس را تمام یا لغو کن.");return;}
- const text=$("txt").value.trim();if((!text&&!pending)||!canPost())return;
+ const vo=!!(opts&&opts.voiceOnly&&pending&&pendingKind==="audio");
+ const text=vo?"":$("txt").value.trim();if((!text&&!pending)||!canPost())return;
  if(pending&&pendingKind==="audio"){
   if(!pending.size){clearPending();callToast("فایل صوتی خالی است؛ دوباره ضبط کن.");return;}
   if(!/^audio\//.test(pending.type||"")){clearPending();callToast("فرمت فایل صوتی معتبر نیست؛ دوباره ضبط کن.");return;}
@@ -1489,7 +1490,7 @@ async function send(){
    const c=D.chats.find(x=>x.id===cur.id);c.last=text|| (m.aud?"🎙️ پیام صوتی":"");c.img=!!m.img;c.at=m.at;
   }
   save();
-  if(cur&&cur.id===sc){$("txt").value="";$("txt").style.height="";if(pending===sp)clearPending();clearReply();}
+  if(cur&&cur.id===sc){if(!vo){$("txt").value="";$("txt").style.height="";}if(pending===sp)clearPending();clearReply();}
   renderMsgs(true);renderList();
  }catch(e){console.error(e);if(sp&&pendingKind==="audio")callToast(sendErr(e));else alert("ارسال ناموفق بود. اتصال، مجوز ذخیره‌سازی و وجود ستون‌های رسانه را بررسی کن.");}
  $("sendB").disabled=false;
@@ -1500,37 +1501,39 @@ const VBARS=32,VBN=30,VMAX=10*60*1000;
 const fmtVT=t=>{t=Math.max(0,Math.round(t||0));return Math.floor(t/60)+":"+String(t%60).padStart(2,"0");};
 function endVoice(){clearInterval(voiceTimer);voiceTimer=null;try{voiceCtx&&voiceCtx.close();}catch{}voiceCtx=null;voiceAn=null;stopVoiceTracks();$("recBar").classList.remove("on");}
 function stopVoiceTracks(){if(voiceStream){voiceStream.getTracks().forEach(t=>t.stop());voiceStream=null;}}
-function cancelVoice(){voiceCancel=true;if(voiceRecorder&&voiceRecorder.state!=="inactive"){try{voiceRecorder.stop();}catch{endVoice();voiceRecorder=null;}}else{endVoice();voiceRecorder=null;}}
+function cancelVoice(){voiceCancel=true;voiceAuto=false;if(voiceRecorder&&voiceRecorder.state!=="inactive"){try{voiceRecorder.stop();}catch{endVoice();voiceRecorder=null;}}else{endVoice();voiceRecorder=null;}}
 function stopVoice(){voiceCancel=false;if(voiceRecorder&&voiceRecorder.state==="recording"){try{voiceRecorder.stop();}catch{endVoice();voiceRecorder=null;}}else{endVoice();voiceRecorder=null;}}
 function recTick(){
- const t=Date.now()-voiceStarted;$("recT").textContent=fmtVT(t/1000);
+ const t=Date.now()-voiceStarted;$("recT").textContent=voiceArmed?"رها کن تا لغو شود":fmtVT(t/1000);
  let lvl=.06;if(voiceAn){const b=new Uint8Array(voiceAn.fftSize);voiceAn.getByteTimeDomainData(b);let q=0;for(let i=0;i<b.length;i++){const x=(b[i]-128)/128;q+=x*x;}lvl=Math.min(1,Math.sqrt(q/b.length)*3.5);}
  voicePk.push(lvl);const w=$("recW").children,n=voicePk.length;
  for(let i=0;i<w.length;i++){const v=voicePk[n-w.length+i];w[i].style.height=(v==null?3:Math.max(3,Math.round(v*30)))+"px";}
  if(t>=VMAX){callToast("به حداکثر زمان ضبط (۱۰ دقیقه) رسیدی.");stopVoice();}
 }
 function peaksOf(pk){const out=[],n=pk.length||1;for(let i=0;i<VBARS;i++){const a=Math.floor(i*n/VBARS),b=Math.max(a+1,Math.floor((i+1)*n/VBARS));let m=0;for(let j=a;j<b&&j<n;j++)m=Math.max(m,pk[j]||0);out.push(m);}const mx=Math.max(.2,...out);return out.map(v=>Math.max(.14,Math.min(1,v/mx)));}
-async function startVoice(){
+async function startVoice(hold){
  if(!voiceSupported){alert("مرورگر این دستگاه ضبط صدا را پشتیبانی نمی‌کند؛ سایت را با Chrome و از طریق HTTPS باز کن.");return;}
  if(!cur||!canPost()||voiceRecorder||voiceStarting)return;
  if(cur.type==="private"&&!pmMediaOk){alert("برای پیام صوتی خصوصی ابتدا فایل SQL همراه این تغییر را در Supabase اجرا کن.");return;}
  if(pending||upBusy){callToast("ابتدا فایل یا ویس آماده‌ی ارسال را بفرست یا لغو کن.");return;}
  const c0=cur;voiceStarting=true;let stream;
  try{stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}});}
- catch(e){voiceStarting=false;console.error(e);alert("دسترسی به میکروفون داده نشد. اجازه‌ی Microphone را برای سایت فعال کن.");return;}
+ catch(e){voiceStarting=false;console.error(e);const n=e&&e.name;
+  alert(n==="NotFoundError"||n==="OverconstrainedError"?"میکروفونی روی این دستگاه پیدا نشد.":n==="NotReadableError"?"میکروفون در اختیار برنامهٔ دیگری است یا قابل استفاده نیست.":n==="SecurityError"?"ضبط صدا فقط روی HTTPS مجاز است.":"دسترسی به میکروفون داده نشد. اجازه‌ی Microphone را برای سایت فعال کن.");return;}
  voiceStarting=false;
+ if(hold&&hold.released){stream.getTracks().forEach(t=>t.stop());callToast("برای ضبط ویس، دکمهٔ میکروفون را نگه دار.");return;}
  if(cur!==c0||pending||upBusy){stream.getTracks().forEach(t=>t.stop());return;}
  voiceStream=stream;
  try{
   const mime=["audio/webm;codecs=opus","audio/webm","audio/ogg;codecs=opus","audio/mp4"].find(t=>MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(t))||"";
-  const rec=new MediaRecorder(stream,mime?{mimeType:mime}:{});voiceRecorder=rec;voiceParts=[];voicePk=[];voiceCancel=false;
+  const rec=new MediaRecorder(stream,mime?{mimeType:mime}:{});voiceRecorder=rec;voiceParts=[];voicePk=[];voiceCancel=false;voiceAuto=!!hold;voiceArmed=false;
   rec.ondataavailable=e=>{if(e.data&&e.data.size)voiceParts.push(e.data);};
   rec.onerror=e=>{console.error(e);callToast("ضبط صدا با خطا مواجه شد.");voiceCancel=true;try{if(rec.state!=="inactive")rec.stop();}catch{}endVoice();voiceRecorder=null;};
   rec.onstop=()=>{
-   const cancelled=voiceCancel,ms=Date.now()-voiceStarted,parts=voiceParts,pk=voicePk;voiceCancel=false;voiceParts=[];voicePk=[];
+   const cancelled=voiceCancel,ms=Date.now()-voiceStarted,parts=voiceParts,pk=voicePk,auto=voiceAuto;voiceCancel=false;voiceAuto=false;voiceArmed=false;voiceParts=[];voicePk=[];
    endVoice();voiceRecorder=null;
    if(cancelled)return;
-   if(ms<800){callToast("ضبط خیلی کوتاه بود؛ دکمه را بزن و کمی بیشتر صحبت کن.");return;}
+   if(ms<800){callToast(auto?"برای ضبط ویس، دکمهٔ میکروفون را نگه دار.":"ضبط خیلی کوتاه بود؛ دکمه را بزن و کمی بیشتر صحبت کن.");return;}
    let type=((rec.mimeType||(parts[0]&&parts[0].type)||"audio/webm")+"").split(";")[0]||"audio/webm";if(!/^audio\//.test(type))type=/mp4/.test(type)?"audio/mp4":/ogg/.test(type)?"audio/ogg":"audio/webm";
    const blob=new Blob(parts,{type});
    if(!blob.size){callToast("صدایی ضبط نشد.");return;}
@@ -1538,15 +1541,36 @@ async function startVoice(){
    clearPending();pending=blob;pendingFile=blob;pendingKind="audio";pendingDur=Math.max(1,Math.round(ms/1000));pendingPeaks=peaksOf(pk);
    $("prevImg").style.display="none";pvUrl=URL.createObjectURL(blob);
    $("vpPrevW").innerHTML=vpHtml(pvUrl,pendingPeaks,pendingDur);$("prev").classList.add("show","aud");
+   if(auto){if(cur&&c0&&cur.id===c0.id)send({voiceOnly:true});else clearPending();}
   };
   try{const AC=window.AudioContext||window.webkitAudioContext;voiceCtx=new AC();voiceAn=voiceCtx.createAnalyser();voiceAn.fftSize=256;voiceCtx.createMediaStreamSource(stream).connect(voiceAn);if(voiceCtx.state==="suspended"&&voiceCtx.resume)voiceCtx.resume().catch(()=>{});}catch(e){voiceAn=null;}
   $("emo").classList.remove("open");$("atm").classList.remove("open");
   const w=$("recW");w.innerHTML="<i></i>".repeat(VBN);$("recT").textContent="0:00";
   rec.start(250);voiceStarted=Date.now();voiceTimer=setInterval(recTick,80);$("recBar").classList.add("on");
   try{navigator.vibrate&&navigator.vibrate(15);}catch{}
- }catch(e){console.error(e);cancelVoice();alert("شروع ضبط ممکن نشد؛ مرورگر یا دسترسی میکروفون را بررسی کن.");}
+ }catch(e){console.error(e);cancelVoice();alert("شروع ضبط ممکن نشد"+(e&&e.name==="NotSupportedError"?"؛ فرمت صوتی در این مرورگر پشتیبانی نمی‌شود.":"؛ مرورگر یا دسترسی میکروفون را بررسی کن."));}
 }
-$("voiceB").onclick=()=>{if(voiceRecorder)stopVoice();else startVoice();};
+(function(){
+ // نگه‌داشتن = ضبط، رها کردن = ارسال خودکار؛ کشیدن انگشت بیش از ۹۰ پیکسل = لغو
+ const b=$("voiceB");let H=null;
+ b.style.touchAction="none";b.style.userSelect="none";b.style.webkitUserSelect="none";b.style.webkitTouchCallout="none";
+ b.addEventListener("contextmenu",e=>e.preventDefault());
+ b.addEventListener("pointerdown",e=>{
+  if(e.button>0||H||voiceRecorder||voiceStarting)return;
+  e.preventDefault();H={id:e.pointerId,x:e.clientX,y:e.clientY,released:false};
+  try{b.setPointerCapture(e.pointerId);}catch{}
+  startVoice(H);
+ });
+ b.addEventListener("pointermove",e=>{if(!H||e.pointerId!==H.id)return;voiceArmed=Math.hypot(e.clientX-H.x,e.clientY-H.y)>90;});
+ const up=e=>{
+  if(!H||e.pointerId!==H.id)return;const h=H;H=null;h.released=true;
+  if(voiceRecorder){if(e.type==="pointercancel"||voiceArmed)cancelVoice();else stopVoice();}
+  voiceArmed=false;
+ };
+ ["pointerup","pointercancel","lostpointercapture"].forEach(t=>b.addEventListener(t,up));
+ // کلیک واقعی ماوس/لمس (detail>0) نادیده گرفته می‌شود تا ویس دوبار ارسال نشود؛ فقط کلیک صفحه‌کلید (detail=0) کار می‌کند
+ b.onclick=e=>{if(e.detail!==0)return;if(voiceRecorder)stopVoice();else startVoice(null);};
+})();
 $("recX").onclick=cancelVoice;$("recOk").onclick=stopVoice;
 // ---- پخش‌کننده‌ی ویس ----
 const vpIc='<svg class="i-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg><svg class="i-pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4.2" height="14" rx="1.4"/><rect x="13.8" y="5" width="4.2" height="14" rx="1.4"/></svg>';
@@ -1601,6 +1625,7 @@ document.addEventListener("click",e=>{if(!e.target.closest("#atm"))$("atm").clas
 const msgsBox=$("msgs");
 let pressTimer=null,pressTarget=null;
 function showMsgMenu(row,x,y){
+ if(voiceRecorder)cancelVoice();
  const mid=row.dataset.mid;if(!mid||!cur)return;
  const data=msgsOf(cur);const m=data.find(x=>String(x.id)===mid);if(!m)return;
  activeMsgEl=row;
