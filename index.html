@@ -1369,7 +1369,7 @@ $("tabs").onclick=e=>{const b=e.target.closest(".tab");if(!b)return;tab=b.datase
 // ---- گفتگو ----
 function openChat(id){
  if(upBusy&&(!cur||cur.id!==id))abortUp();
- if(cur&&cur.id!==id){if(voiceRecorder)cancelVoice();if(pendingKind==="audio"&&pending)clearPending();vpStopAll();}
+ if(!cur||cur.id!==id){if(voiceRecorder)cancelVoice();if(pending||upDone)clearPending();vpStopAll();}
  if(id.startsWith("u:")&&ME&&UUID.test(id.slice(2))&&!view().some(x=>x.id===id))PC.push(mkPC(id.slice(2)));const c=view().find(x=>x.id===id);if(!c)return;cur=c;sig="";ntDrop(c.id);clearReply();
  $("ph").style.display="none";$("chat").style.display="flex";$("app").classList.add("open");callBtns();
  setAv($("hAv"),c.avatar,c.title);$("hNm").textContent=c.title;[$("hAv"),$("hNm")].forEach(e=>e.classList.toggle("lnk",c.type==="private"));
@@ -1417,7 +1417,7 @@ function scrollToMsg(mid){
  }
 }
 $("lb").onclick=()=>$("lb").classList.remove("open");
-$("back").onclick=()=>{abortUp();if(voiceRecorder)cancelVoice();vpStopAll();hideRxBar();hideMsgMenu();$("app").classList.remove("open");cur=null;$("chat").style.display="none";$("ph").style.display="grid";clearReply();renderList();};
+$("back").onclick=()=>{abortUp();if(voiceRecorder)cancelVoice();if(pending||upDone)clearPending();vpStopAll();hideRxBar();hideMsgMenu();$("app").classList.remove("open");cur=null;$("chat").style.display="none";$("ph").style.display="grid";clearReply();renderList();};
 
 // ---- پاسخ به پیام: مدیریت وضعیت ----
 let replyTo=null;
@@ -2126,6 +2126,17 @@ const visPM=peer=>(PM[peer]||[]).filter(m=>!m.deleted_for_all&&!HID.has(String(m
 function dropPM(id){for(const k in PM){const a=PM[k],i=a.findIndex(x=>String(x.id)===String(id));if(i<0)continue;a.splice(i,1);const c=PC.find(x=>x.peer===k),l=visPM(k).slice(-1)[0];if(c)c.last=l?(l.text||mLab(l.media_type)):"";if(cur&&cur.peer===k)renderMsgs(true);renderList();return;}}
 async function loadHides(peer){const {data,error}=await sb.from("private_message_hides").select("message_id").eq("user_id",ME.id).limit(1000);if(error){console.warn("بارگذاری حذف‌های خصوصی:",error);return;}(data||[]).forEach(r=>HID.add(String(r.message_id)));}
 function afterDel(peer){const l=visPM(peer).slice(-1)[0],c=PC.find(x=>x.peer===peer);if(c)c.last=l?(l.text||mLab(l.media_type)):"";renderMsgs(true);renderList();}
+function rmVoiceFile(m){
+ try{
+  if(!m||!m.mine||!ME||typeof m.aud!=="string")return;
+  const pre=PUB+BUCKET+"/";if(!m.aud.startsWith(pre))return;
+  const path=decodeURIComponent(m.aud.slice(pre.length).split("?")[0]);
+  if(!path||path.includes(".."))return;
+  const base=path.split("/").pop();
+  if(path.startsWith("g/")&&!base.startsWith(ME.id+"-"))return;
+  Promise.resolve(sb.storage.from(BUCKET).remove([path])).catch(()=>{});
+ }catch{}
+}
 function delPM(m){
  const peer=cur.peer;
  modal(`<h3>حذف پیام</h3><p style="color:var(--mu);font-size:calc(13px*var(--fs,1));line-height:2">این پیام چطور حذف شود؟</p><button class="btn g" id="dMe">حذف برای من</button>${m.mine?`<button class="btn g" id="dBoth">حذف برای هر دو</button>`:""}<button class="btn g" id="dNo">انصراف</button>`);
@@ -2148,7 +2159,7 @@ function delPM(m){
   await loadPM(peer);
   const stillThere=(PM[peer]||[]).some(x=>String(x.id)===String(m.id)&&!x.deleted_for_all);
   if(stillThere){console.error("حذف برای هر دو تأیید نشد؛ پیام هنوز در دیتابیس وجود دارد.",{id:m.id});alert("درخواست حذف ارسال شد، اما پیام هنوز در دیتابیس دیده می‌شود. تابع SQL حذف برای همه را بررسی کن.");btn.disabled=false;btn.textContent="حذف برای هر دو";return;}
-  close();afterDel(peer);
+  rmVoiceFile(m);close();afterDel(peer);
  };
 }
 function addPM(m){const peer=m.sender_id===ME.id?m.recipient_id:m.sender_id,a=PM[peer]=PM[peer]||[];if(a.some(x=>x.id===m.id))return false;a.push(m);a.sort((x,y)=>x.created_at<y.created_at?-1:1);
@@ -2287,7 +2298,7 @@ async function delGM(m){
   if(!delRows||!delRows.length){console.error("حذف پیام گروه: هیچ ردیفی حذف نشد (RLS یا نبودن سیاست DELETE)",{id:m.id,gid});close();callToast("حذف انجام نشد: دیتابیس هیچ ردیفی را حذف نکرد (سیاست DELETE در RLS اجازه نداده یا وجود ندارد).");return;}
   const reloaded=await loadGM(gid);
   if(!reloaded||(GM[gid]||[]).some(x=>String(x.id)===String(m.id))){close();callToast("حذف تأیید نشد؛ پیام هنوز در دیتابیس دیده می‌شود. جزئیات را در Console بررسی کن.");return;}
-  close();afterGDel(gid);};
+  rmVoiceFile(m);close();afterGDel(gid);};
 }
 async function gAct(a,u){
  const gid=cur.gid;if(a==="perms")return openPerms(gid,u);if(a==="ban"&&!confirm("تأیید نهایی: این عضو از گروه حذف و به فهرست سیاه همین گروه اضافه شود؟ تا رفع مسدودیت نمی‌تواند برگردد."))return;if(a==="demote"&&!confirm("این مدیر عزل شود و همه اختیاراتش گرفته شود؟"))return;if(a==="rm")return removeDlg(gid,u);
