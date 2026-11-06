@@ -3291,7 +3291,7 @@ function openPerms(gid,uid,backToAdmins){
   $("gsetDialogCancel").disabled=false;
   if(error){ui.save.disabled=false;groupDialogStatus(ui.status,gErr(error),true);return;}
   row.perms=Object.assign({},row.perms,next);groupDialogStatus(ui.status,"دسترسی‌های مدیر ذخیره شد ✓");
-  setTimeout(()=>openGroupAdmins(gid),450);
+  close();callToast("اختیارات مدیر ذخیره شد.");openGroupAdmins(gid);
  };
 }
 
@@ -3514,7 +3514,7 @@ async function openMemberPerms(gid){
   if(e){ui.save.disabled=false;groupDialogStatus(ui.status,gErr(e),true);return;}
   saved.send_messages=next.send_messages;saved.send_media=next.send_media;ui.save.disabled=true;
   groupDialogStatus(ui.status,"تنظیمات با موفقیت ذخیره شد ✓");
-  setTimeout(()=>openGroupSettings(gid),450);
+  close();callToast("اختیارات اعضا ذخیره شد.");openGroupSettings(gid);
  };
 }
 
@@ -3534,7 +3534,7 @@ function openGroupVisibility(gid){
   $("gsetDialogCancel").disabled=false;
   if(error){ui.save.disabled=false;groupDialogStatus(ui.status,gErr(error),true);return;}
   c.pub=next;if(cur&&cur.gid===gid)cur.pub=next;renderList();groupDialogStatus(ui.status,"نوع گروه ذخیره شد ✓");
-  setTimeout(()=>openGroupSettings(gid),450);
+  close();callToast("نوع گروه ذخیره شد.");openGroupSettings(gid);
  };
 }
 
