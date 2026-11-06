@@ -3462,6 +3462,14 @@ function copyGroupInviteUrl(value,anchor){
 }
 
 
+
+function groupSettingsDialog(title,description,body,onCancel,saveLabel="ذخیره تغییرات"){
+ modal(`<section class="gset-dialog"><header class="gset-dialog-head"><span class="gset-dialog-kicker">ARYA PEYVAND · GROUP</span><h3>${title}</h3><p>${description}</p></header><div class="gset-dialog-body">${body}</div><div class="gset-dialog-status" id="gsetDialogStatus" role="status" aria-live="polite"></div><footer class="gset-dialog-actions"><button type="button" class="gset-dialog-btn secondary" id="gsetDialogCancel">انصراف</button><button type="button" class="gset-dialog-btn primary" id="gsetDialogSave">${saveLabel}</button></footer></section>`);
+ $("gsetDialogCancel").onclick=()=>{if(onCancel)onCancel();else close();};
+ return {save:$("gsetDialogSave"),status:$("gsetDialogStatus")};
+}
+function groupDialogStatus(el,message,error=false){if(!el)return;el.textContent=message||"";el.classList.toggle("error",!!error);}
+
 function openGroupInviteCopyDialog(gid){
  const href=inviteLinkFor(gid);
  if(!href){callToast("لینک دعوت این گروه ساخته نشد؛ صفحه را با HTTPS باز کن و دوباره تلاش کن.");return;}
