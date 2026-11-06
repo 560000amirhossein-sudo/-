@@ -1125,7 +1125,13 @@ html.day-mode .sxa-input{background:#fff;color:#242735;border-color:color-mix(in
 #gsAdmins{--gs:56 189 248}
 #gsMemberPerms{--gs:251 191 36}
 #gsInvite{--gs:232 121 249}
-html.day-mode .gp:has(.gset-page){background:linear-gradient(180deg,#f4f0fd,#e9edf3 65%)}
+/* Group overlay follows the global theme without relying on :has() support. */
+html.day-mode .gp{background:linear-gradient(180deg,#f4f0fd,#e9edf3 65%)!important;color:#29213b}
+html.day-mode .gp .gset-page{color:#29213b}
+html.day-mode .gp .gset-head h2{color:#29213b}
+html.day-mode .gp .gset-profile b{color:#29213b}
+html.day-mode .gp .gset-profile small{color:#665b7d}
+html.day-mode .gp .gset-page .gp-back{color:#6d28d9;background:#efe8ff;border-color:#d9c9f7}
 html.day-mode .gset-page .gp-back{color:#6d28d9;background:#efe8ff;border-color:#d9c9f7}
 html.day-mode .gset-kicker{color:#6d28d9}
 html.day-mode .gset-profile{background:linear-gradient(120deg,#f2eaff,#faf8ff);border-color:#e5d8ff;box-shadow:0 8px 22px #6d28d90c}
