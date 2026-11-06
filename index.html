@@ -3461,34 +3461,25 @@ function copyGroupInviteUrl(value,anchor){
  return Promise.reject(new Error("clipboard copy failed"));
 }
 
+
 function openGroupInviteCopyDialog(gid){
  const href=inviteLinkFor(gid);
  if(!href){callToast("لینک دعوت این گروه ساخته نشد؛ صفحه را با HTTPS باز کن و دوباره تلاش کن.");return;}
- modal(`<div class="inv-box"><div class="inv-ico" aria-hidden="true">🔗</div><h3>لینک دعوت گروه</h3><p class="pg-info">با این لینک، دیگران می‌توانند به همین گروه بپیوندند. برای برداشتن لینک، دکمهٔ «کپی» را بزن.</p><div class="inv-link" id="groupInviteLink" dir="ltr"></div></div><button class="btn" id="groupInviteCopy" type="button">کپی</button><button class="btn g" id="groupInviteCancel" type="button">انصراف</button><div class="msg" id="groupInviteCopyMsg" role="status" aria-live="polite"></div>`);
- const cancel=$("groupInviteCancel"),copy=$("groupInviteCopy"),msg=$("groupInviteCopyMsg"),shown=$("groupInviteLink");
- if(shown)shown.textContent=href;
- // انصراف: فقط پنجره بسته می‌شود؛ چیزی کپی یا تغییر نمی‌کند.
- if(cancel)cancel.onclick=close;
- if(copy)copy.onclick=ev=>{
-  if(copy.dataset.busy==="1")return;copy.dataset.busy="1";copy.disabled=true;if(msg)msg.textContent="";
-  let p;try{p=copyGroupInviteUrl(href,copy);}catch(e){p=Promise.reject(e);}
+ const body=`<section class="gset-dialog-section"><h4 class="gset-dialog-section-title"><i>🔗</i> لینک عضویت گروه</h4><p class="gset-dialog-help">این لینک را فقط با افرادی به اشتراک بگذار که می‌خواهی به گروه بپیوندند.</p><label class="gset-field"><span>لینک دعوت</span><input type="text" id="groupInviteLink" dir="ltr" readonly value="${esc(href)}"></label><div class="gset-dialog-help">با زدن دکمهٔ کپی، لینک کامل در کلیپ‌بورد قرار می‌گیرد.</div></section>`;
+ const ui=groupSettingsDialog("دعوت به گروه","لینک عضویت را با دقت و فقط برای افراد موردنظر ارسال کن.",body,close,"کپی لینک");
+ const shown=$("groupInviteLink");
+ if(shown)shown.onclick=()=>{shown.select();};
+ ui.save.onclick=()=>{
+  if(ui.save.dataset.busy==="1")return;
+  ui.save.dataset.busy="1";ui.save.disabled=true;groupDialogStatus(ui.status,"در حال کپی لینک…");
+  let p;try{p=copyGroupInviteUrl(href,ui.save);}catch(e){p=Promise.reject(e);}
   p.then(()=>{close();callToast("لینک کپی شد");}).catch(e=>{
-   console.warn("copy group invite",e);copy.disabled=false;delete copy.dataset.busy;
-   // پنجره باز می‌ماند و پیام موفقیت نشان داده نمی‌شود؛ لینک برای کپی دستی انتخاب می‌شود.
-   if(msg)msg.textContent="کپی خودکار انجام نشد. لینک بالا را نگه دار و به‌صورت دستی کپی کن.";
-   try{if(shown){const r=document.createRange();r.selectNodeContents(shown);const sel=window.getSelection();sel.removeAllRanges();sel.addRange(r);}}catch(_){}
+   console.warn("copy group invite",e);delete ui.save.dataset.busy;ui.save.disabled=false;
+   if(shown){shown.focus();shown.select();}
+   groupDialogStatus(ui.status,"کپی خودکار انجام نشد. لینک را انتخاب کن و از گزینهٔ کپی مرورگر استفاده کن.",true);
   });
  };
 }
-
-
-
-function groupSettingsDialog(title,description,body,onCancel,saveLabel="ذخیره تغییرات"){
- modal(`<section class="gset-dialog"><header class="gset-dialog-head"><span class="gset-dialog-kicker">ARYA PEYVAND · GROUP</span><h3>${title}</h3><p>${description}</p></header><div class="gset-dialog-body">${body}</div><div class="gset-dialog-status" id="gsetDialogStatus" role="status" aria-live="polite"></div><footer class="gset-dialog-actions"><button type="button" class="gset-dialog-btn secondary" id="gsetDialogCancel">انصراف</button><button type="button" class="gset-dialog-btn primary" id="gsetDialogSave">${saveLabel}</button></footer></section>`);
- $("gsetDialogCancel").onclick=()=>{if(onCancel)onCancel();else close();};
- return {save:$("gsetDialogSave"),status:$("gsetDialogStatus")};
-}
-function groupDialogStatus(el,message,error=false){if(!el)return;el.textContent=message||"";el.classList.toggle("error",!!error);}
 
 
 function openGroupMuteSettings(gid){
