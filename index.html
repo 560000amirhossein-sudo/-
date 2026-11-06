@@ -1524,6 +1524,8 @@ try {
   throw loadError;
 }
 const sb=createClient("https://jpsttfuajyfvysqydqqj.supabase.co","sb_publishable_D_D03bZTtXlKxPgz74MYfQ_Vvpmjn3x",{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+// وضعیت تماس باید پیش از بازیابی نشست و اجرای startCallRT مقداردهی شود.
+let CALL=null,INC=null,callRT=null,callOk=false,ringInt=null,tickT=null,hbT=null,iceCache=null,iceAt=0,audioCtx=null;
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function linkifyMessage(value){const raw=String(value||"");const re=/(https?:\/\/[^\s<>"']+)/gi;let out="",last=0,m;while((m=re.exec(raw))){let url=m[0],clean=url;while(/[),.!?،؛؟]$/.test(clean))clean=clean.slice(0,-1);out+=esc(raw.slice(last,m.index));let href="";try{const u=new URL(clean);if(u.protocol==="https:"||u.protocol==="http:")href=u.href;}catch{}if(href){const invite=/[?&]joinGroup=[0-9a-f-]{30,}/i.test(href);const label=invite?"لینک دعوت گروه · برای عضویت بزن":"";out+=`<a class="msg-link" href="${esc(href)}" rel="noopener noreferrer" title="باز کردن لینک">${label||esc(clean)}</a>`;out+=esc(url.slice(clean.length));}else out+=esc(url);last=m.index+url.length;}out+=esc(raw.slice(last));return out;}
@@ -3764,7 +3766,6 @@ async function openPublicGroup(id,inviteMode=false,preloaded=null){
 
 // ================= تماس صوتی و تصویری (WebRTC) =================
 const STUN=[{urls:["stun:stun.cloudflare.com:3478","stun:stun.l.google.com:19302"]}];
-let CALL=null,INC=null,callRT=null,callOk=false,ringInt=null,tickT=null,hbT=null,iceCache=null,iceAt=0,audioCtx=null;
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 const stopStream=s=>{try{s&&s.getTracks().forEach(t=>t.stop());}catch{}};
 function callToast(t){const d=document.createElement("div");d.className="ctoast";d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),4500);}
