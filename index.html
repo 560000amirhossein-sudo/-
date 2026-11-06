@@ -3099,8 +3099,10 @@ async function loadGroupMessageReads(gid){
 }
 function groupReceiptStats(m){
  if(!m||!cur||!cur.gid)return{read:0,total:0,all:false};
- const members=GMR[cur.gid]||[],sent=new Date(m.created_at||0).getTime();
- const recipients=members.filter(x=>x.user_id!==m.sender_id&&(!x.joined_at||new Date(x.joined_at).getTime()<=sent));
+ // پیام‌های خام دیتابیس sender_id/created_at دارند؛ msgsOf آن‌ها را به uid/at تبدیل می‌کند.
+ const senderId=m.sender_id||m.uid,sent=new Date(m.created_at||m.at||0).getTime();
+ const members=GMR[cur.gid]||[];
+ const recipients=members.filter(x=>x.user_id!==senderId&&(!x.joined_at||new Date(x.joined_at).getTime()<=sent));
  const reads=(GMSGREAD[cur.gid]||{})[String(m.id)]||{};
  const read=recipients.filter(x=>!!reads[x.user_id]).length,total=recipients.length;
  return{read,total,all:total>0&&read>=total};
