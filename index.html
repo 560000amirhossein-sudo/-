@@ -1803,7 +1803,7 @@ function renderMsgs(force,preserve){
   const sgR=cur.gid?((GMEM[cur.gid]||{})[m.uid]||""):"";
   const who=(!m.mine&&(grp||cur.id===DEF))||(m.mine&&own)||(cur.gid&&sgR&&sgR!=="member")?`<div class="who"><span>${esc(m.name)}</span>${cur.gid?roleBadge(sgR):m.mine&&own?`<span class="badge">${cur.type==="channel"?"مدیر":"مالک"}</span>`:""}</div>`:"";
   const rqHtml=replyQuoteHtml(m.replyTo);
-  r.innerHTML=((!m.mine&&priv)||grp||cur.id===DEF?avHtml(m.avatar,m.name,"s"):"")+`<div class="bub${img||vid||aud?" med":""}${isE?" emj":""}">${who}${rqHtml}${m.text?`<div class="tx">${linkifyMessage(m.text)}</div>`:""}${img?`<img class="pic" src="${img}" alt="" loading="lazy" decoding="async">`:""}${vid?`<video class="pic" src="${vid}" controls preload="metadata" playsinline style="cursor:default"></video>`:""}${aud?vpHtml(aud):""}${rxHtml(m)}<div class="mt"><span>${fmtM(m.at)}</span>${priv&&m.mine?`<span class="pm-read" title="${m.read_at?"خوانده‌شده":"ارسال‌شده"}" aria-label="${m.read_at?"خوانده‌شده":"ارسال‌شده"}" style="font-size:12px;font-weight:700;letter-spacing:-2px;color:${m.read_at?"#55d9ff":"currentColor"}">${m.read_at?"✓✓":"✓"}</span>`:grp&&m.mine?`<span class="pm-read" title="${groupMsgRead(m)?"خوانده‌شده":"ارسال‌شده"}" aria-label="${groupMsgRead(m)?"خوانده‌شده":"ارسال‌شده"}" style="font-size:12px;font-weight:700;letter-spacing:-2px;color:${groupMsgRead(m)?"#55d9ff":"currentColor"}">${groupMsgRead(m)?"✓✓":"✓"}</span>`:cur.type==="channel"&&m.mine?`<span class="pm-read" title="ذخیره‌شده در این دستگاه" aria-label="ذخیره‌شده در این دستگاه" style="font-size:12px;font-weight:700">✓</span>`:""}${edtHtml(m)}${cur.id!==DEF?`<button class="del" type="button">حذف</button>`:""}</div></div>`;
+  r.innerHTML=((!m.mine&&priv)||grp||cur.id===DEF?avHtml(m.avatar,m.name,"s"):"")+`<div class="bub${img||vid||aud?" med":""}${isE?" emj":""}">${who}${rqHtml}${m.text?`<div class="tx">${linkifyMessage(m.text)}</div>`:""}${img?`<img class="pic" src="${img}" alt="" loading="lazy" decoding="async">`:""}${vid?`<video class="pic" src="${vid}" controls preload="metadata" playsinline style="cursor:default"></video>`:""}${aud?vpHtml(aud):""}${rxHtml(m)}<div class="mt"><span>${fmtM(m.at)}</span>${priv&&m.mine?`<span class="pm-read" title="${m.read_at?"خوانده‌شده":"ارسال‌شده"}" aria-label="${m.read_at?"خوانده‌شده":"ارسال‌شده"}" style="font-size:12px;font-weight:700;letter-spacing:-2px;color:${m.read_at?"#55d9ff":"currentColor"}">${m.read_at?"✓✓":"✓"}</span>`:grp&&m.mine?`<span class="pm-read group-read-receipt" role="button" tabindex="0" title="${groupReceiptStats(m).read.toLocaleString("fa-IR")} نفر از ${groupReceiptStats(m).total.toLocaleString("fa-IR")} نفر پیام را دیده‌اند" aria-label="نمایش مشاهده‌کنندگان پیام" style="font-size:12px;font-weight:700;letter-spacing:-2px;color:${groupMsgRead(m)?"#55d9ff":"currentColor"}">${groupMsgRead(m)?"✓✓":"✓"}</span>`:cur.type==="channel"&&m.mine?`<span class="pm-read" title="ذخیره‌شده در این دستگاه" aria-label="ذخیره‌شده در این دستگاه" style="font-size:12px;font-weight:700">✓</span>`:""}${edtHtml(m)}${cur.id!==DEF?`<button class="del" type="button">حذف</button>`:""}</div></div>`;
   // لینک‌های داخل پیام باید واقعاً قابل لمس باشند و کلیکشان پنل عملیات پیام را باز نکند.
   r.querySelectorAll("a.msg-link").forEach(a=>{
    a.setAttribute("rel","noopener noreferrer");
@@ -3089,9 +3089,8 @@ async function loadGM(gid){
  const c=SG.find(x=>x.gid===gid),l=gVis(gid).slice(-1)[0];if(c){if(l){c.last=l.text||gLab(l.media_type);c.at=l.created_at;}else if(GM[gid].length)c.last="";}
  return true;}
 async function loadGroupReads(gid){
- if(!ME||gid==null)return;let r=await sb.from("group_reads").select("user_id,last_read_at").eq("group_id",gid).limit(500);
- if(r.error&&/last_read_at|42703|PGRST204/.test((r.error.code||"")+(r.error.message||"")))r=await sb.from("group_reads").select("user_id,read_at").eq("group_id",gid).limit(500);
- if(r.error){GREAD[gid]={};return;}const map={};(r.data||[]).forEach(x=>{const t=x.last_read_at||x.read_at;if(x.user_id&&t)map[x.user_id]=t;});GREAD[gid]=map;
+ // گروه‌ها فقط از رسیدهای دقیق هر پیام استفاده می‌کنند؛ جدول قدیمی group_reads در این پروژه وجود ندارد.
+ if(gid!=null)GREAD[gid]={};
 }
 async function loadGroupMessageReads(gid){
  if(!ME||gid==null)return;const ids=(GM[gid]||[]).map(m=>m.id).filter(x=>x!=null);if(!ids.length){GMSGREAD[gid]={};return;}
@@ -3103,12 +3102,8 @@ function groupReceiptStats(m){
  if(!m||!cur||!cur.gid)return{read:0,total:0,all:false};
  const members=GMR[cur.gid]||[],sent=new Date(m.created_at||0).getTime();
  const recipients=members.filter(x=>x.user_id!==m.sender_id&&(!x.joined_at||new Date(x.joined_at).getTime()<=sent));
- const reads=(GMSGREAD[cur.gid]||{})[String(m.id)]||{},groupReads=GREAD[cur.gid]||{};
- // رسیدهای قدیمی از last_read_at در group_reads می‌آیند؛ رسیدهای جدید در group_message_reads.
- const read=recipients.filter(x=>{
-  if(reads[x.user_id])return true;
-  const last=groupReads[x.user_id];return !!last&&new Date(last).getTime()>=sent;
- }).length,total=recipients.length;
+ const reads=(GMSGREAD[cur.gid]||{})[String(m.id)]||{};
+ const read=recipients.filter(x=>!!reads[x.user_id]).length,total=recipients.length;
  return{read,total,all:total>0&&read>=total};
 }
 function groupMsgRead(m){return groupReceiptStats(m).read>0;}
@@ -3421,9 +3416,10 @@ async function loadGU(){if(!ME)return;
  if(cur&&cur.gid&&!document.hidden)delete n[cur.gid];
  GU=n;}
 function markGroupRead(gid){if(!ME||gid==null)return;delete GU[gid];
- clearTimeout(GMT[gid]);GMT[gid]=setTimeout(async()=>{const a=GM[gid]||[],l=a[a.length-1];
-  const {error}=await sb.rpc("mark_group_read",{p_gid:gid,p_upto:l?l.created_at:null});if(error)console.warn("mark_group_read:",error);else await loadGroupReads(gid);await markGroupMessagesRead(gid);if(cur&&cur.gid===gid){EXV++;renderMsgs(true);}},350);}
-let guT=null;const guSoon=()=>{clearTimeout(guT);guT=setTimeout(async()=>{await loadGU();if(cur&&cur.gid){await loadGroupReads(cur.gid);renderMsgs(true);}renderList();},300);};
+ clearTimeout(GMT[gid]);GMT[gid]=setTimeout(async()=>{
+  if(cur&&String(cur.gid)===String(gid)&&!document.hidden)await markGroupMessagesRead(gid);
+ },350);}
+let guT=null;const guSoon=()=>{clearTimeout(guT);guT=setTimeout(async()=>{await loadGU();if(cur&&cur.gid)renderMsgs(true);renderList();},300);};
 async function gSync(full){
  if(!ME)return;const old={...GU};
  if(full){await refreshSG();await loadGU();if(cur&&cur.gid)await loadMembers(cur.gid);}
@@ -3454,10 +3450,6 @@ function startGRT(){stopGRT();if(!ME)return;
   .subscribe(s=>{const was=grtOk;grtOk=s==="SUBSCRIBED";if(grtOk&&!was)gCatchUp();});
  // همگام‌سازی خوانده‌شدن بین دستگاه‌ها و عضویت‌های جدید (جدا، تا نبودن جدول کانال پیام‌ها را خراب نکند)
  grt2=sb.channel("grr-"+ME.id)
-  .on("postgres_changes",{event:"INSERT",schema:"public",table:"group_reads",filter:"user_id=eq."+ME.id},guSoon)
-  .on("postgres_changes",{event:"UPDATE",schema:"public",table:"group_reads",filter:"user_id=eq."+ME.id},guSoon)
-  .on("postgres_changes",{event:"INSERT",schema:"public",table:"group_reads"},async p=>{const gid=p&&p.new&&p.new.group_id;if(cur&&cur.gid&&String(cur.gid)===String(gid)){await loadGroupReads(gid);EXV++;renderMsgs(true);}})
-  .on("postgres_changes",{event:"UPDATE",schema:"public",table:"group_reads"},async p=>{const gid=p&&p.new&&p.new.group_id;if(cur&&cur.gid&&String(cur.gid)===String(gid)){await loadGroupReads(gid);EXV++;renderMsgs(true);}})
   .on("postgres_changes",{event:"INSERT",schema:"public",table:"group_message_reads"},async p=>{const gid=p&&p.new&&p.new.group_id;if(cur&&cur.gid&&String(cur.gid)===String(gid)){await loadGroupMessageReads(gid);EXV++;renderMsgs(true);}})
   .on("postgres_changes",{event:"UPDATE",schema:"public",table:"group_message_reads"},async p=>{const gid=p&&p.new&&p.new.group_id;if(cur&&cur.gid&&String(cur.gid)===String(gid)){await loadGroupMessageReads(gid);EXV++;renderMsgs(true);}})
   .on("postgres_changes",{event:"INSERT",schema:"public",table:"group_members",filter:"user_id=eq."+ME.id},()=>{gCatchUp();})
