@@ -1797,7 +1797,7 @@ function renderMsgs(force,preserve){
   const sgR=cur.gid?((GMEM[cur.gid]||{})[m.uid]||""):"";
   const who=(!m.mine&&(grp||cur.id===DEF))||(m.mine&&own)||(cur.gid&&sgR&&sgR!=="member")?`<div class="who"><span>${esc(m.name)}</span>${cur.gid?roleBadge(sgR):m.mine&&own?`<span class="badge">${cur.type==="channel"?"مدیر":"مالک"}</span>`:""}</div>`:"";
   const rqHtml=replyQuoteHtml(m.replyTo);
-  r.innerHTML=((!m.mine&&priv)||grp||cur.id===DEF?avHtml(m.avatar,m.name,"s"):"")+`<div class="bub${img||vid||aud?" med":""}${isE?" emj":""}">${who}${rqHtml}${m.text?`<div class="tx">${linkifyMessage(m.text)}</div>`:""}${img?`<img class="pic" src="${img}" alt="" loading="lazy" decoding="async">`:""}${vid?`<video class="pic" src="${vid}" controls preload="metadata" playsinline style="cursor:default"></video>`:""}${aud?vpHtml(aud):""}${rxHtml(m)}<div class="mt"><span>${fmtM(m.at)}</span>${priv&&m.mine?`<span class="pm-read" title="${m.read_at?"خوانده‌شده":"ارسال‌شده"}" aria-label="${m.read_at?"خوانده‌شده":"ارسال‌شده"}" style="font-size:12px;font-weight:700;letter-spacing:-2px;color:${m.read_at?"#55d9ff":"currentColor"}">${m.read_at?"✓✓":"✓"}</span>`:grp&&m.mine?`<button type="button" class="pm-read group-read-receipt" data-gmid="${esc(String(m.id))}" title="${groupReceiptStats(m).read.toLocaleString("fa-IR")} نفر از ${groupReceiptStats(m).total.toLocaleString("fa-IR")} نفر دیده‌اند" aria-label="نمایش مشاهده‌کنندگان پیام" style="border:0;background:transparent;padding:0;cursor:pointer;font:inherit;font-size:12px;font-weight:700;letter-spacing:-2px;color:${groupMsgRead(m)?"#55d9ff":"currentColor"}">${groupMsgRead(m)?"✓✓":"✓"}<small style="letter-spacing:0;font-size:10px;margin-right:4px">${groupReceiptStats(m).read}/${groupReceiptStats(m).total}</small></button>`:cur.type==="channel"&&m.mine?`<span class="pm-read" title="ذخیره‌شده در این دستگاه" aria-label="ذخیره‌شده در این دستگاه" style="font-size:12px;font-weight:700">✓</span>`:""}${edtHtml(m)}${cur.id!==DEF?`<button class="del" type="button">حذف</button>`:""}</div></div>`;
+  r.innerHTML=((!m.mine&&priv)||grp||cur.id===DEF?avHtml(m.avatar,m.name,"s"):"")+`<div class="bub${img||vid||aud?" med":""}${isE?" emj":""}">${who}${rqHtml}${m.text?`<div class="tx">${linkifyMessage(m.text)}</div>`:""}${img?`<img class="pic" src="${img}" alt="" loading="lazy" decoding="async">`:""}${vid?`<video class="pic" src="${vid}" controls preload="metadata" playsinline style="cursor:default"></video>`:""}${aud?vpHtml(aud):""}${rxHtml(m)}<div class="mt"><span>${fmtM(m.at)}</span>${priv&&m.mine?`<span class="pm-read" title="${m.read_at?"خوانده‌شده":"ارسال‌شده"}" aria-label="${m.read_at?"خوانده‌شده":"ارسال‌شده"}" style="font-size:12px;font-weight:700;letter-spacing:-2px;color:${m.read_at?"#55d9ff":"currentColor"}">${m.read_at?"✓✓":"✓"}</span>`:grp&&m.mine?`<span class="pm-read" title="${groupMsgRead(m)?"خوانده‌شده":"ارسال‌شده"}" aria-label="${groupMsgRead(m)?"خوانده‌شده":"ارسال‌شده"}" style="font-size:12px;font-weight:700;letter-spacing:-2px;color:${groupMsgRead(m)?"#55d9ff":"currentColor"}">${groupMsgRead(m)?"✓✓":"✓"}</span>`:cur.type==="channel"&&m.mine?`<span class="pm-read" title="ذخیره‌شده در این دستگاه" aria-label="ذخیره‌شده در این دستگاه" style="font-size:12px;font-weight:700">✓</span>`:""}${edtHtml(m)}${cur.id!==DEF?`<button class="del" type="button">حذف</button>`:""}</div></div>`;
   // لینک‌های داخل پیام باید واقعاً قابل لمس باشند و کلیکشان پنل عملیات پیام را باز نکند.
   r.querySelectorAll("a.msg-link").forEach(a=>{
    a.setAttribute("rel","noopener noreferrer");
@@ -3039,7 +3039,7 @@ function ntPM(m){const k=m.sender_id+"|"+Date.parse(m.created_at);if(NK.has(k))r
  const p=P[m.sender_id];notify({id:"u:"+m.sender_id,title:pName(p),avatar:p&&p.avatar_url,text:m.text||mLab(m.media_type)||"پیام جدید",at:m.created_at,count:1});}
 function stopRT(){if(rt){sb.removeChannel(rt);rt=null;}rtOk=false;}
 function startRT(){stopRT();
- const h=async p=>{const m=p.new;await profs([m.sender_id,m.recipient_id]);if(addPM(m)){if(cur&&cur.peer===(m.sender_id===ME.id?m.recipient_id:m.sender_id))renderMsgs();renderList();if(m.sender_id!==ME.id)ntPM(m);}};
+ const h=async p=>{const m=p.new;await profs([m.sender_id,m.recipient_id]);if(addPM(m)){const peer=m.sender_id===ME.id?m.recipient_id:m.sender_id;const isOpen=!!(cur&&cur.peer===peer);if(isOpen){renderMsgs();if(m.sender_id!==ME.id&&!document.hidden)markSeen(peer);}renderList();if(m.sender_id!==ME.id)ntPM(m);}};
  rt=sb.channel("pm-"+ME.id)
   .on("postgres_changes",{event:"INSERT",schema:"public",table:"private_messages",filter:"recipient_id=eq."+ME.id},h)
   .on("postgres_changes",{event:"INSERT",schema:"public",table:"private_messages",filter:"sender_id=eq."+ME.id},h)
@@ -3100,7 +3100,7 @@ function groupReceiptStats(m){
  const reads=(GMSGREAD[cur.gid]||{})[String(m.id)]||{};const read=recipients.filter(x=>!!reads[x.user_id]).length,total=recipients.length;
  return{read,total,all:total>0&&read>=total};
 }
-function groupMsgRead(m){return groupReceiptStats(m).all;}
+function groupMsgRead(m){return groupReceiptStats(m).read>0;}
 async function markGroupMessagesRead(gid){
  if(!ME||gid==null||!cur||String(cur.gid)!==String(gid)||document.hidden)return;
  const ids=gVis(gid).filter(m=>m.sender_id!==ME.id).map(m=>m.id).filter(x=>x!=null);
@@ -3448,6 +3448,7 @@ function startGRT(){stopGRT();if(!ME)return;
   .on("postgres_changes",{event:"INSERT",schema:"public",table:"group_reads"},async p=>{const gid=p&&p.new&&p.new.group_id;if(cur&&cur.gid&&String(cur.gid)===String(gid)){await loadGroupReads(gid);EXV++;renderMsgs(true);}})
   .on("postgres_changes",{event:"UPDATE",schema:"public",table:"group_reads"},async p=>{const gid=p&&p.new&&p.new.group_id;if(cur&&cur.gid&&String(cur.gid)===String(gid)){await loadGroupReads(gid);EXV++;renderMsgs(true);}})
   .on("postgres_changes",{event:"INSERT",schema:"public",table:"group_message_reads"},async p=>{const gid=p&&p.new&&p.new.group_id;if(cur&&cur.gid&&String(cur.gid)===String(gid)){await loadGroupMessageReads(gid);EXV++;renderMsgs(true);}})
+  .on("postgres_changes",{event:"UPDATE",schema:"public",table:"group_message_reads"},async p=>{const gid=p&&p.new&&p.new.group_id;if(cur&&cur.gid&&String(cur.gid)===String(gid)){await loadGroupMessageReads(gid);EXV++;renderMsgs(true);}})
   .on("postgres_changes",{event:"INSERT",schema:"public",table:"group_members",filter:"user_id=eq."+ME.id},()=>{gCatchUp();})
   .subscribe();}
 // ---- پیوستن به گروه عمومی ----
