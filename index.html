@@ -1413,65 +1413,33 @@ html.day-mode .ap-drawer-panel{background:#fff;color:#17212b}
 html.day-mode .ap-drawer-actions button:hover{background:#edf3f8}
 html.day-mode .ap-drawer-sep,html.day-mode .ap-drawer footer{border-color:#dce3e9;background-color:transparent}
 </style><style>
-/* ===== نمای موبایل آریا پیوند، الهام از چیدمان تلگرام ===== */
-.mobile-search{display:none}
+/* فقط نوار پایین موبایل، بدون تغییر در سایر بخش‌های سایت */
 @media(max-width:760px){
- html,body{background:var(--bg)}
- .app{height:100dvh;min-height:0}
- .side{position:relative;width:100%;height:100%;min-height:0;background:var(--pn);display:flex;flex-direction:column}
- .top{direction:ltr;min-height:66px;padding:10px 17px;gap:13px;border-bottom:0;background:var(--pn)}
- .top #meAv,.top #dayModeToggle{display:none!important}
- .brand{direction:ltr;display:flex;align-items:center;gap:9px;min-width:0;font-size:0;letter-spacing:0}
- .brand .ar-logo{font-size:0;display:flex;align-items:center;gap:9px}
- .brand .ar-row,.brand .ar-tag{display:none!important}
- .brand .ar-logo:after{content:"آریا پیوند";direction:rtl;unicode-bidi:plaintext;font-size:24px;font-weight:800;letter-spacing:-.5px;color:#299bd7;white-space:nowrap}
- .brand:before{content:"➤";display:grid;place-items:center;width:42px;height:42px;flex:0 0 42px;border-radius:50%;color:white;background:linear-gradient(145deg,#43c3e8,#1688c8);font-size:23px;transform:rotate(-18deg);box-shadow:0 2px 5px #1688c833}
- .mobile-search{width:40px;height:40px;flex:0 0 40px;display:grid;place-items:center;border-radius:50%;color:var(--tx)}
- .mobile-search svg{width:25px;height:25px}
- .top .st-open{width:36px;height:40px;border:0;background:transparent!important;border-radius:10px;color:var(--tx)!important}
- .top .st-open svg{display:none}
- .top .st-open:after{content:"⋮";font-size:29px;line-height:1}
- .search-line{display:none;padding:3px 16px 9px;gap:7px}\n .side.search-open .search-line{display:flex}
- .sbox{margin:0;flex:1}
- .sbox input{min-height:40px;border-radius:22px;padding:9px 38px;font-size:13px}
- .sbox .ic{font-size:15px}
- .tabs{margin:3px 14px 10px;padding:5px;gap:4px;border-radius:28px;border:1px solid var(--bd);background:var(--pn);box-shadow:0 2px 9px #0000000d;scrollbar-width:none}
- .tabs::-webkit-scrollbar{display:none}
- .tab{flex:1 0 auto;min-height:39px;padding:8px 15px;border-radius:23px;background:transparent;color:var(--mu);font-size:13px;font-weight:700}
- .tab.on{background:#dceef9;color:#268fc4;box-shadow:none}
- .list{padding:0 9px 105px;overscroll-behavior:contain}
- .it{min-height:76px;gap:12px;padding:9px 8px;border-radius:0;border-bottom:1px solid color-mix(in srgb,var(--bd) 58%,transparent);background:transparent!important}
- .it:hover,.it.on{background:transparent!important}
- .av{width:58px;height:58px;flex-basis:58px}
- .im{align-self:stretch;display:flex;flex-direction:column;justify-content:center;gap:4px}
- .r1,.r2{gap:7px}
- .nm{font-size:15px;font-weight:700}
- .tm{font-size:11px;color:var(--mu)}
- .lt{font-size:12px;line-height:1.6}
- .bd{min-width:24px;height:24px;border:0;box-shadow:none;background:#9aa3ad;color:#fff;font-size:11px}
- .unr .bd{background:#299bd7}
- .bn{position:fixed;z-index:20;left:14px;right:14px;bottom:calc(7px + env(safe-area-inset-bottom,0px));width:auto;margin:0;padding:6px 8px;border-radius:34px;grid-template-columns:repeat(4,minmax(0,1fr));gap:3px;background:var(--pn)!important;border:1px solid var(--bd)!important;box-shadow:0 3px 18px #00000018!important;backdrop-filter:blur(16px)}
- .bi{height:58px;border-radius:28px;color:var(--mu);gap:3px}
- .bi .bic{width:25px;height:25px}
- .bl{font-size:11px;color:inherit}
- .bi.on{background:#e4f2fb!important;color:#258fc4!important;box-shadow:none!important}
- .bi.on:before{display:none}
- .bi.on .bic svg{color:inherit!important;filter:none!important}
- #bnav .bi[data-n="new"]{position:fixed;left:20px;bottom:calc(102px + env(safe-area-inset-bottom,0px));z-index:25;display:grid;width:56px;height:56px;margin:0;border-radius:50%;background:#299bd7;color:#fff;border:0;box-shadow:0 5px 16px #299bd755}
- #bnav .bi[data-n="search"]{order:2}
- #bnav .bi[data-n="settings"]{order:3}
- #bnav .bi[data-n="profile"]{order:4}
- #bnav .bi[data-n="chats"]{order:1}
- .fab{bottom:calc(91px + env(safe-area-inset-bottom,0px));inset-inline-start:17px}
- .fab .fb{width:54px;height:54px;background:#299bd7;box-shadow:0 5px 16px #299bd755}
+ .bn{
+  position:fixed!important;z-index:30!important;
+  left:14px!important;right:14px!important;
+  bottom:calc(7px + env(safe-area-inset-bottom,0px))!important;
+  width:auto!important;margin:0!important;
+  display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:3px!important;padding:6px 8px!important;
+  border-radius:34px!important;
+  background:#fff!important;border:1px solid #e5e9ef!important;
+  box-shadow:0 3px 18px #00000018!important;
+  -webkit-backdrop-filter:blur(16px)!important;backdrop-filter:blur(16px)!important;
+ }
+ .bn .bi{height:58px!important;border-radius:28px!important;gap:3px!important;color:#202631!important;background:transparent!important;box-shadow:none!important}
+ .bn .bi .bic{width:25px!important;height:25px!important}
+ .bn .bi .bic svg{color:currentColor!important;filter:none!important}
+ .bn .bi .bl{font-size:11px!important;color:inherit!important}
+ .bn .bi.on{background:#e5f2fa!important;color:#278fc3!important;box-shadow:none!important}
+ .bn .bi.on:before,.bn .bi.on:after{display:none!important}
+ .bn .bi[data-n="new"]{display:none!important}
+ .bn .bi[data-n="chats"]{order:1}
+ .bn .bi[data-n="search"]{order:2}
+ .bn .bi[data-n="settings"]{order:3}
+ .bn .bi[data-n="profile"]{order:4}
+ .side{padding-bottom:76px}
 }
-html.day-mode .mobile-search{color:#252b36}
-html.day-mode .brand .ar-logo:after{color:#299bd7!important}
-html.day-mode .tabs{background:#fff!important;border-color:#e5e9ef!important}
-html.day-mode .tab.on{background:#e5f2fa!important;color:#278fc3!important}
-html.day-mode .it{border-bottom-color:#e8edf2}
-html.day-mode .bn{background:#fff!important;border-color:#e5e9ef!important}
-html.day-mode .bi.on{background:#e5f2fa!important;color:#278fc3!important}
 </style>
 </head><body>
 <script>
@@ -1489,8 +1457,7 @@ try{var F=parseInt(localStorage.getItem("arya_text_scale_v1"),10);if(F>=85&&F<=1
   <div class="top">
    <button class="av s" id="meAv" title="پروفایل و تنظیمات" aria-label="پروفایل و تنظیمات من"></button>
    <div class="brand" id="brand"><div class="ar-logo" role="img" aria-label="آریا پیوند — جایی برای پیوند آدم‌ها"><span class="ar-row"><span class="ar-w">آریا</span><svg class="ar-sw" viewBox="12 0 60 284" aria-hidden="true" focusable="false"><g fill="#f5d58a"><rect x="36.25" y="1.5" width="11.5" height="49" rx="5.75"/><rect x="13" y="42.75" width="58" height="8" rx="4"/><rect x="40.75" y="50" width="2.5" height="165"/></g><rect x="34.75" y="61" width="1.5" height="142" fill="#fff" opacity=".7"/><path d="M30.1 214.1 H53.9 L42 276.4 Z" fill="#d9e2f2" stroke="#f5d58a" stroke-width="2.2" stroke-linejoin="miter" stroke-miterlimit="10"/></svg><span class="ar-w">پیوند</span></span><div class="ar-tag">جایی برای پیوند آدم‌ها</div></div></div>
-  <button type="button" id="mobileSearch" class="mobile-search" aria-label="جست‌وجو" title="جست‌وجو"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="10.8" cy="10.8" r="7.2"/><path d="m16.2 16.2 5 5"/></svg></button>
-   <button type="button" id="dayModeToggle" title="حالت روز / شب" aria-label="تغییر حالت روز و شب"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg></button>
+  <button type="button" id="dayModeToggle" title="حالت روز / شب" aria-label="تغییر حالت روز و شب"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg></button>
    <button type="button" class="st-open" id="stOpen" title="تنظیمات" aria-label="تنظیمات" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
   </div>
 <div class="search-line" id="searchLine">
@@ -4180,7 +4147,6 @@ $("bnav").onclick=e=>{const b=e.target.closest(".bi");if(!b)return;const n=b.dat
  else if(n==="groups")navTab("group");
  else if(n==="search")$("q").focus();
  else if(n==="profile")$("meAv").click();};
-$("mobileSearch").onclick=()=>{const side=$("mobileSearch").closest(".side");side.classList.toggle("search-open");if(side.classList.contains("search-open"))$("q").focus();else{$("q").value="";query="";renderList();$("q").blur();}};
 $("q").addEventListener("focus",navMark);$("q").addEventListener("blur",navMark);
 new MutationObserver(navMark).observe($("md"),{attributes:true,attributeFilter:["class"]});
 // وقتی صفحه‌کلید باز است (فوکوس روی کادر متن)، منو پنهان می‌شود تا روی کادر ارسال و صفحه‌کلید نیفتد
