@@ -1972,6 +1972,92 @@ function forwardModal(sourceItems){
 @media(max-width:520px){#mdBody.card:has(.lcs-head){padding:21px 15px 16px;border-radius:23px}.lcs-head h3{font-size:21px!important}.gp-in{padding-inline:12px}.gp-card{padding:12px}.gp-hero{padding-top:20px}}
 
 
+
+/* ===== Arya Peyvand premium group settings dialogs ===== */
+#mdBody.card:has(.gset-dialog){padding:0!important;overflow:hidden;max-width:min(560px,calc(100vw - 24px));border:1px solid #a78bfa44;background:linear-gradient(155deg,#17152a,#100f1d 70%);box-shadow:0 24px 80px #000b,0 0 0 1px #ffffff08}
+#mdBody.card:has(.gset-dialog)>.mx{z-index:5;top:12px;inset-inline-end:12px;background:#ffffff12;border:1px solid #ffffff1c;color:#eee}
+.gset-dialog{--gd-accent:#a78bfa;color:var(--tx);max-height:min(82vh,760px);display:flex;flex-direction:column;overflow:hidden}
+.gset-dialog-head{padding:22px 22px 16px;background:radial-gradient(ellipse at 90% 0%,#8b5cf733,transparent 62%),linear-gradient(135deg,#a78bfa12,#38bdf80a);border-bottom:1px solid #ffffff12}
+.gset-dialog-kicker{font-size:9px;letter-spacing:1.8px;font-weight:900;color:#c4b5fd}
+.gset-dialog-head h3{margin:5px 0 3px!important;font-size:20px!important;font-weight:900;color:#fff}
+.gset-dialog-head p{margin:0;color:#b8b2ca;font-size:12px;line-height:1.9}
+.gset-dialog-body{padding:17px 20px 8px;overflow:auto;overscroll-behavior:contain}
+.gset-dialog-section{margin:0 0 13px;padding:13px;border:1px solid #ffffff15;border-radius:17px;background:linear-gradient(145deg,#ffffff0b,#ffffff04);box-shadow:inset 0 1px 0 #ffffff08}
+.gset-dialog-section-title{display:flex;align-items:center;gap:9px;margin:0 0 10px;font-size:13px;font-weight:900;color:#f4efff}
+.gset-dialog-section-title i{width:29px;height:29px;display:grid;place-items:center;border-radius:10px;background:#a78bfa20;color:#d8b4fe;font-style:normal}
+.gset-dialog-help{margin:0 0 12px;color:#aaa4bb;font-size:11px;line-height:1.9}
+.gset-dialog .pm-list{margin:0;border:1px solid #ffffff14;background:#ffffff08}
+.gset-dialog .pm-it{min-height:61px;padding:12px 13px;border-color:#ffffff12}
+.gset-dialog .pm-it b{color:#f4f0ff;font-size:13px}
+.gset-dialog .pm-it small{display:block;margin-top:3px;color:#aaa4bb;font-size:10.5px;line-height:1.7}
+.gset-dialog input[type=checkbox],.gset-dialog input[type=radio]{accent-color:#a78bfa}
+.gset-switch{appearance:none;-webkit-appearance:none;flex:0 0 46px;width:46px;height:26px;border-radius:20px;background:#ffffff25;position:relative;margin:0;cursor:pointer;transition:background .18s}
+.gset-switch:before{content:"";position:absolute;top:3px;inset-inline-start:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 4px #0005;transition:transform .18s}
+.gset-switch:checked{background:linear-gradient(135deg,#8b5cf6,#4f46e5)}
+.gset-switch:checked:before{transform:translateX(-20px)}
+.gset-dialog-actions{display:flex;gap:9px;padding:13px 18px max(13px,env(safe-area-inset-bottom));border-top:1px solid #ffffff13;background:#141321;position:sticky;bottom:0}
+.gset-dialog-btn{flex:1;min-height:45px;border-radius:13px;padding:10px 14px;font:inherit;font-size:13px;font-weight:850;cursor:pointer;transition:transform .15s,opacity .15s}
+.gset-dialog-btn:active{transform:scale(.98)}
+.gset-dialog-btn.primary{color:#fff;background:linear-gradient(135deg,#8b5cf6,#6254e8 70%,#4f46e5);border:1px solid #c4b5fd66;box-shadow:0 7px 18px #7c3aed35}
+.gset-dialog-btn.secondary{color:#e5def5;background:#ffffff0a;border:1px solid #ffffff20}
+.gset-dialog-btn:disabled{opacity:.48;cursor:not-allowed}
+.gset-dialog-status{padding:0 20px 12px;min-height:4px;color:#a7f3d0;font-size:11px;line-height:1.8}
+.gset-dialog-status.error{color:#fda4af}
+.gset-field{display:flex;flex-direction:column;gap:7px;margin:0 0 13px}
+.gset-field>span{font-size:12px;font-weight:800;color:#e9e3f5}
+.gset-field input,.gset-field textarea,.gset-dialog input[type=search]{width:100%;box-sizing:border-box;border:1px solid #ffffff22;border-radius:13px;background:#0d0c19;color:#fff;padding:12px 13px;font:inherit;font-size:13px;outline:none}
+.gset-field textarea{resize:vertical;min-height:92px;line-height:1.8}
+.gset-field input:focus,.gset-field textarea:focus,.gset-dialog input[type=search]:focus{border-color:#a78bfa;box-shadow:0 0 0 3px #8b5cf633}
+.gset-image-row{display:flex;align-items:center;gap:13px;padding:12px;border:1px dashed #a78bfa55;border-radius:15px;background:#a78bfa0c}
+.gset-image-row .av{width:54px;height:54px;flex:0 0 54px}
+.gset-image-row input{min-width:0;flex:1;color:#cfc8dc;font-size:11px}
+.gset-admin-list{display:flex;flex-direction:column;gap:8px}
+.gset-admin-list .gm-row{padding:10px;background:#ffffff09;border-color:#ffffff14}
+.gset-admin-list .gm-a{width:auto;margin-inline-start:auto}
+.gset-empty{padding:20px 12px;text-align:center;border:1px dashed #ffffff22;border-radius:14px;color:#aaa4bb;font-size:12px;line-height:1.9}
+.gset-dialog .lcs-head{border:0;margin:0;padding:0 0 12px}
+.gset-dialog .lcs-kicker{color:#c4b5fd}
+.gset-dialog .ga-results{max-height:36vh}
+html.day-mode #mdBody.card:has(.gset-dialog){background:linear-gradient(155deg,#fff,#f0f5fc);border-color:#d8c8f8}
+html.day-mode .gset-dialog-head{background:radial-gradient(ellipse at 90% 0%,#d9c8ff99,transparent 65%),linear-gradient(135deg,#f5efff,#edf6ff);border-color:#e3d9f4}
+html.day-mode .gset-dialog-head h3{color:#28243a}
+html.day-mode .gset-dialog-head p,.day-mode .gset-dialog-help{color:#66758a}
+html.day-mode .gset-dialog-section{background:linear-gradient(145deg,#fff,#f5f7fc);border-color:#dfe5ee;box-shadow:0 4px 15px #34445a0a}
+html.day-mode .gset-dialog-section-title,html.day-mode .gset-dialog .pm-it b,html.day-mode .gset-field>span{color:#26364b}
+html.day-mode .gset-dialog .pm-list{background:#fff;border-color:#dce4ee}
+html.day-mode .gset-dialog .pm-it{border-color:#e8edf4}
+html.day-mode .gset-dialog .pm-it small{color:#697b90}
+html.day-mode .gset-dialog-actions{background:#f7f9fd;border-color:#e0e6ef}
+html.day-mode .gset-dialog-btn.secondary{background:#fff;color:#42536a;border-color:#d8e0eb}
+html.day-mode .gset-dialog-status{color:#087a58}
+html.day-mode .gset-dialog-status.error{color:#be123c}
+html.day-mode .gset-field input,html.day-mode .gset-field textarea,html.day-mode .gset-dialog input[type=search]{background:#fff;color:#20364c;border-color:#d3ddea}
+html.day-mode .gset-image-row{background:#f5f0ff;border-color:#d7c8f4}
+html.day-mode .gset-image-row input{color:#52657a}
+html.day-mode .gset-admin-list .gm-row{background:#fff;border-color:#e0e7ef}
+html.day-mode .gset-empty{color:#64748b;border-color:#cbd5e1}
+@media(max-width:480px){
+ #mdBody.card:has(.gset-dialog){max-width:calc(100vw - 16px)}
+ .gset-dialog{max-height:86vh}
+ .gset-dialog-head{padding:19px 17px 13px}
+ .gset-dialog-body{padding:13px 13px 6px}
+ .gset-dialog-actions{padding:11px 13px max(11px,env(safe-area-inset-bottom))}
+ .gset-dialog-btn{min-height:43px}
+}
+@media(prefers-reduced-motion:reduce){.gset-dialog *{transition:none!important}}
+
+
+.gset-head-sub{display:block;margin-top:3px;color:var(--mu);font-size:11px}
+.gset-section-label{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:17px 3px 9px;color:var(--tx);font-size:12px;font-weight:900}
+.gset-section-label small{color:var(--mu);font-size:10px;font-weight:500}
+.gset-profile-avatar{flex:0 0 52px}
+.gset-profile-copy{flex:1;min-width:0}
+.gset-role-pill{padding:5px 9px;border-radius:10px;background:#a78bfa20;border:1px solid #a78bfa40;color:#c4b5fd;font-size:10px;font-weight:900}
+.gset-footer-note{display:flex;align-items:center;gap:8px;margin:17px 2px 0;padding:11px 12px;border:1px solid #a78bfa20;border-radius:13px;background:#a78bfa0a;color:var(--mu);font-size:10px;line-height:1.8}
+#gsVisibility{--gs:56 189 248}
+html.day-mode .gset-role-pill{color:#6d28d9;background:#eee7ff;border-color:#d9c9f7}
+html.day-mode .gset-footer-note{background:#f5f0ff;border-color:#e5d8ff;color:#60758a}
+
 </style><div class="fwd-head">${avHtml(sourceChat.avatar,forwardLabel(sourceChat),"")}<div><h3>فوروارد پیام‌ها</h3><div class="fwd-muted">از ${esc(forwardLabel(sourceChat))} · ${items.length.toLocaleString("fa-IR")} پیام</div></div></div><div class="fwd-muted">پیش‌نمایش پیام‌ها</div><div class="fwd-preview">${preview}${more}</div><label class="fwd-muted" for="forwardSearch">گفت‌وگوی مقصد را انتخاب کن</label><input id="forwardSearch" class="fwd-search" type="search" placeholder="جست‌وجوی نام گروه یا کاربر…" autocomplete="off"><div id="forwardTargets" class="fwd-targets">${targetCards}</div><div id="forwardNone" class="fwd-empty" style="display:none">مقصدی با این نام پیدا نشد.</div><button class="btn" id="forwardGo" type="button" style="margin-top:12px" disabled>انتخاب مقصد</button><button class="btn g" id="forwardNo" type="button">انصراف</button>`);
  let selectedTargetId="";
  const cards=[...$("mdBody").querySelectorAll(".fwd-target")];
@@ -3189,32 +3275,71 @@ async function gAct(a,u){
  const {error}=a==="ban"?await sb.rpc("ban_group_member",{p_gid:gid,p_uid:u}):a==="remove"?await sb.rpc("remove_group_member",{p_gid:gid,p_uid:u}):await sb.rpc("set_group_role",{p_gid:gid,p_uid:u,p_role:a==="promote"?"admin":"member"});
  if(error){if($("gaM"))$("gaM").textContent=gErr(error);return;}
  await loadMembers(gid);renderMsgs(true);renderList();if(a==="promote"&&cur.role==="owner")openPerms(gid,u);else openGroupInfo();}
-function openPerms(gid,uid,backToAdmins){const row=(GMR[gid]||[]).find(r=>r.user_id===uid);if(!row||row.role!=="admin"){openGroupInfo();return;}
- const p=P[uid]||{},pm=row.perms||{};
- modal(`<button type="button" class="gm-b" id="pgB">‹ بازگشت به گروه</button><div class="gm-row" style="margin-top:10px">${avHtml(p.avatar_url,pName(p),"s")}<div class="gm-i"><div class="gm-n">${esc(pName(p))}</div><div class="gm-u">اختیارات این مدیر</div></div></div><div class="pm-list">${PERMS.map(([k,t,d])=>`<label class="pm-it"><span><b>${t}</b><small>${d}</small></span><input type="checkbox" class="pm-sw" data-k="${k}" ${pm[k]?"checked":""}></label>`).join("")}</div><button type="button" class="btn g" id="pgD">عزل از مدیریت</button><div class="msg" id="gaM"></div>`);
- $("pgB").onclick=()=>backToAdmins?openGroupAdmins(gid):openGroupInfo();$("pgD").onclick=()=>gAct("demote",uid);
- $("mdBody").querySelectorAll(".pm-sw").forEach(sw=>sw.onchange=async()=>{const all={};$("mdBody").querySelectorAll(".pm-sw").forEach(x=>all[x.dataset.k]=x.checked);
-  const {error}=await sb.rpc("set_admin_perms",{p_gid:gid,p_uid:uid,p_perms:all});
-  if(error){sw.checked=!sw.checked;$("gaM").textContent=gErr(error);return;}row.perms=Object.assign({},row.perms,all);$("gaM").textContent="ذخیره شد ✓";});}
+
+function openPerms(gid,uid,backToAdmins){
+ const row=(GMR[gid]||[]).find(r=>r.user_id===uid);if(!row||row.role!=="admin"||!cur||cur.gid!==gid||cur.role!=="owner"){callToast("فقط مالک گروه می‌تواند اختیارات مدیر را تغییر دهد.");return;}
+ const p=P[uid]||{},saved=Object.fromEntries(PERMS.map(([k])=>[k,!!(row.perms||{})[k]]));
+ const body=`<section class="gset-dialog-section"><div class="gm-row" style="margin-bottom:12px">${avHtml(p.avatar_url,pName(p),"s")}<div class="gm-i"><div class="gm-n">${esc(pName(p))}</div><div class="gm-u">مدیریت دسترسی‌های این مدیر</div></div></div><p class="gset-dialog-help">فقط دسترسی‌هایی را روشن کن که این مدیر واقعاً برای انجام وظایفش نیاز دارد.</p><div class="pm-list">${PERMS.map(([k,t,d])=>`<label class="pm-it"><span><b>${t}</b><small>${d}</small></span><input class="gset-switch pm-sw" type="checkbox" data-k="${k}" ${saved[k]?"checked":""}></label>`).join("")}</div></section>`;
+ const ui=groupSettingsDialog("اختیارات مدیر","دسترسی مدیر را دقیق و جداگانه تنظیم کن.",body,()=>openGroupAdmins(gid));
+ const current=()=>Object.fromEntries(PERMS.map(([k])=>[k,!!$("mdBody").querySelector('.pm-sw[data-k="'+k+'"]')?.checked]));
+ const dirty=()=>{const x=current();ui.save.disabled=PERMS.every(([k])=>x[k]===saved[k]);groupDialogStatus(ui.status,ui.save.disabled?"تغییری برای ذخیره وجود ندارد.":"تغییرات ذخیره‌نشده است.");};
+ $("mdBody").querySelectorAll(".pm-sw").forEach(sw=>sw.onchange=dirty);dirty();
+ ui.save.onclick=async()=>{
+  if(!cur||cur.gid!==gid||cur.role!=="owner"){groupDialogStatus(ui.status,"دسترسی مالک تأیید نشد.",true);return;}
+  const next=current();ui.save.disabled=true;$("gsetDialogCancel").disabled=true;groupDialogStatus(ui.status,"در حال ذخیره دسترسی‌ها…");
+  const {error}=await sb.rpc("set_admin_perms",{p_gid:gid,p_uid:uid,p_perms:next});
+  $("gsetDialogCancel").disabled=false;
+  if(error){ui.save.disabled=false;groupDialogStatus(ui.status,gErr(error),true);return;}
+  row.perms=Object.assign({},row.perms,next);groupDialogStatus(ui.status,"دسترسی‌های مدیر ذخیره شد ✓");
+  setTimeout(()=>openGroupAdmins(gid),450);
+ };
+}
+
 function avErr(e){const m=String((e&&e.message)||e||"");if(/FORBIDDEN/.test(m))return"اجازهٔ تغییر عکس این گروه را نداری.";if(/BAD_AVATAR/.test(m))return"آدرس عکس معتبر نیست.";if(/PGRST202|42883|Could not find the function|schema cache/i.test((e&&e.code||"")+m))return"ذخیرهٔ عکس گروه هنوز در دیتابیس فعال نیست؛ فایل SQL را اجرا کن.";return navigator.onLine?"ذخیرهٔ عکس گروه ناموفق بود؛ دوباره تلاش کن.":"اتصال اینترنت برقرار نیست.";}
-function editInfo(gid){const c=SG.find(x=>x.gid===gid)||cur;let nb=null;
- modal(`<h3>ویرایش اطلاعات گروه</h3><label>عکس گروه</label><div style="display:flex;align-items:center;gap:12px;margin-bottom:6px"><div id="eiAv">${avHtml(c.avatar,c.title,"s")}</div><input type="file" id="eiF" accept="image/*" style="flex:1;min-width:0"></div><label>نام گروه</label><input type="text" id="eiT" maxlength="60" value="${esc(c.title||"")}"><label>توضیحات</label><textarea id="eiD" maxlength="300" rows="3">${esc(c.desc||"")}</textarea><button type="button" class="btn" id="eiGo">ذخیره</button><div class="msg" id="gaM"></div>`);
- $("eiF").onchange=async()=>{const f=$("eiF").files[0];if(!f)return;$("gaM").textContent="";try{if(!f.type.startsWith("image/"))throw 0;nb=await resize(f,256,true);if(nb.size>MAXIO)throw 0;$("eiAv").innerHTML=avHtml(await b2d(nb),"","s");}catch{nb=null;$("eiF").value="";$("gaM").textContent="عکس قابل خواندن نبود؛ عکس دیگری انتخاب کن.";}};
- $("eiGo").onclick=async()=>{const t=$("eiT").value.trim(),d=$("eiD").value.trim();if(!t){$("gaM").textContent="نام گروه نمی‌تواند خالی باشد.";return;}
-  const bt=$("eiGo");bt.disabled=true;$("gaM").textContent="";let k=null,url=null;
+
+function editInfo(gid){
+ const c=SG.find(x=>x.gid===gid)||cur;if(!c||!cur||cur.gid!==gid)return;
+ let nb=null;
+ const body=`<section class="gset-dialog-section"><h4 class="gset-dialog-section-title"><i>🖼️</i> تصویر گروه</h4><div class="gset-image-row"><div id="eiAv">${avHtml(c.avatar,c.title,"s")}</div><input type="file" id="eiF" accept="image/*"></div><p class="gset-dialog-help">تصویر به اندازهٔ مناسب فشرده می‌شود تا بارگذاری سریع‌تر باشد.</p></section><section class="gset-dialog-section"><h4 class="gset-dialog-section-title"><i>✏️</i> مشخصات گروه</h4><label class="gset-field"><span>نام گروه</span><input type="text" id="eiT" maxlength="60" value="${esc(c.title||"")}" autocomplete="off"></label><label class="gset-field"><span>توضیحات گروه</span><textarea id="eiD" maxlength="300" rows="3">${esc(c.desc||"")}</textarea></label></section>`;
+ const ui=groupSettingsDialog("ویرایش گروه","اطلاعات گروه را تغییر بده و در پایان ذخیره کن.",body,()=>openGroupSettings(gid));
+ ui.save.disabled=true;
+ const dirty=()=>{const changed=$("eiT").value.trim()!==(c.title||"")||$("eiD").value.trim()!==(c.desc||"")||!!nb;ui.save.disabled=!changed;};
+ $("eiT").oninput=dirty;$("eiD").oninput=dirty;
+ $("eiF").onchange=async()=>{
+  const file=$("eiF").files&&$("eiF").files[0];if(!file)return;
+  groupDialogStatus(ui.status,"در حال آماده‌سازی تصویر…");
+  try{if(!file.type.startsWith("image/"))throw new Error("invalid image");nb=await resize(file,256,true);if(nb.size>MAXIO)throw new Error("too large");$("eiAv").innerHTML=avHtml(await b2d(nb),$("eiT").value.trim()||c.title,"s");groupDialogStatus(ui.status,"تصویر آمادهٔ ذخیره است.");dirty();}
+  catch(e){nb=null;$("eiF").value="";groupDialogStatus(ui.status,"تصویر قابل خواندن نیست یا حجم آن زیاد است. تصویر دیگری انتخاب کن.",true);dirty();}
+ };
+ ui.save.onclick=async()=>{
+  const t=$("eiT").value.trim(),d=$("eiD").value.trim();if(!t){groupDialogStatus(ui.status,"نام گروه نمی‌تواند خالی باشد.",true);return;}
+  if(!cur||cur.gid!==gid||!(cur.role==="owner"||myPerm("edit_info"))){groupDialogStatus(ui.status,"اجازهٔ ویرایش گروه تأیید نشد.",true);return;}
+  ui.save.disabled=true;$("gsetDialogCancel").disabled=true;groupDialogStatus(ui.status,"در حال ذخیره تغییرات…");
+  let k=null,url=null;
   try{
-   if(nb){k=ME.id+"/g-"+gid+"-"+Date.now()+".jpg";let u;try{u=await sb.storage.from(AVB).upload(k,nb,{contentType:"image/jpeg"});}catch(e){u={error:e};}
-    if(u.error){console.error(u.error);k=null;$("gaM").textContent="آپلود عکس گروه ناموفق بود"+(navigator.onLine?"؛ دوباره تلاش کن.":" (اتصال اینترنت قطع است).");bt.disabled=false;return;}
-    url=sb.storage.from(AVB).getPublicUrl(k).data.publicUrl;}
+   if(nb){
+    k=ME.id+"/g-"+gid+"-"+Date.now()+".jpg";
+    const u=await sb.storage.from(AVB).upload(k,nb,{contentType:"image/jpeg",upsert:false});
+    if(u.error)throw u.error;
+    url=sb.storage.from(AVB).getPublicUrl(k).data.publicUrl;
+   }
    const r1=await sb.rpc("update_group_info",{p_gid:gid,p_title:t,p_desc:d});
-   if(r1.error){if(k)Promise.resolve(sb.storage.from(AVB).remove([k])).catch(()=>{});$("gaM").textContent=gErr(r1.error);bt.disabled=false;return;}
+   if(r1.error)throw r1.error;
    c.title=t;c.desc=d;if(cur&&cur.gid===gid){cur.title=t;cur.desc=d;$("hNm").textContent=t;}
-   if(url){const r2=await sb.rpc("set_group_avatar",{p_gid:gid,p_url:url});
-    if(r2.error){console.error(r2.error);Promise.resolve(sb.storage.from(AVB).remove([k])).catch(()=>{});renderList();$("gaM").textContent="نام و توضیحات ذخیره شد، اما "+avErr(r2.error);bt.disabled=false;return;}
+   if(url){
+    const r2=await sb.rpc("set_group_avatar",{p_gid:gid,p_url:url});
+    if(r2.error){Promise.resolve(sb.storage.from(AVB).remove([k])).catch(()=>{});k=null;renderList();$("gsetDialogCancel").disabled=false;ui.save.disabled=false;groupDialogStatus(ui.status,"نام و توضیحات ذخیره شد، اما تصویر ذخیره نشد: "+avErr(r2.error),true);return;}
     const old=c.avatar;c.avatar=url;if(cur&&cur.gid===gid){cur.avatar=url;setAv($("hAv"),url,t);}
-    const P0=PUB+"avatars/";if(typeof old==="string"&&old.startsWith(P0)){let op="";try{op=decodeURIComponent(old.slice(P0.length).split("?")[0]);}catch{}if(op&&op.split("/")[0]===ME.id)Promise.resolve(sb.storage.from(AVB).remove([op])).catch(()=>{});}}
-   renderList();openGroupInfo();
-  }catch(e){console.error(e);$("gaM").textContent=navigator.onLine?"ذخیره ناموفق بود؛ دوباره تلاش کن.":"اتصال اینترنت برقرار نیست.";bt.disabled=false;}};}
+    const P0=PUB+"avatars/";if(typeof old==="string"&&old.startsWith(P0)){let op="";try{op=decodeURIComponent(old.slice(P0.length).split("?")[0]);}catch{}if(op&&op.split("/")[0]===ME.id)Promise.resolve(sb.storage.from(AVB).remove([op])).catch(()=>{});}
+   }
+   renderList();groupDialogStatus(ui.status,"اطلاعات گروه ذخیره شد ✓");setTimeout(()=>openGroupInfo(),450);
+  }catch(e){
+   if(k)Promise.resolve(sb.storage.from(AVB).remove([k])).catch(()=>{});
+   $("gsetDialogCancel").disabled=false;ui.save.disabled=false;groupDialogStatus(ui.status,gErr(e),true);
+  }
+ };
+}
+
 const PIN={},PINM={};
 const pinSnip=m=>m?(m.text||(m.media_type==="image"?"🖼️ عکس":m.media_type==="video"?"🎬 ویدیو":"پیام")):"";
 function renderPin(){if(cur&&!cur.gid)return renderPinX();const b=$("pinbar"),g=cur&&cur.gid,id=g&&PIN[g];if(!id){b.style.display="none";return;}
@@ -3225,36 +3350,79 @@ function renderPin(){if(cur&&!cur.gid)return renderPinX();const b=$("pinbar"),g=
 async function loadPin(gid){const {data,error}=await sb.rpc("get_group_pin",{p_gid:gid});if(error)return;PIN[gid]=data==null?null:String(data);
  if(PIN[gid]&&!(GM[gid]||[]).some(x=>String(x.id)===PIN[gid])){const r=await sb.from("group_messages").select("id,text,media_type").eq("id",PIN[gid]).maybeSingle();PINM[gid]=r.data||null;}
  renderPin();}
-async function openBans(gid,backToSettings){const {data,error}=await sb.rpc("list_group_bans",{p_gid:gid});
- if(error){if($("gaM"))$("gaM").textContent=gErr(error);return;}await profs((data||[]).map(r=>r.user_id));
- modal(`<button type="button" class="gm-b" id="bnB">‹ بازگشت به گروه</button><h3 style="margin-top:10px">کاربران مسدودشده</h3><div class="gm-list">${(data||[]).map(r=>{const p=P[r.user_id]||{};return `<div class="gm-row" data-u="${esc(r.user_id)}">${avHtml(p.avatar_url,pName(p),"s")}<div class="gm-i"><div class="gm-n">${esc(pName(p))}</div><div class="gm-u">@${esc(p.username||"")}</div></div><div class="gm-a"><button type="button" class="gm-b" data-a="unban">رفع مسدودیت</button></div></div>`;}).join("")||'<div class="empty">کاربر مسدودی وجود ندارد.</div>'}</div><div class="msg" id="gaM"></div>`);
- $("bnB").onclick=()=>backToSettings?openGroupSettings(gid):openGroupInfo();
- $("mdBody").querySelectorAll('[data-a=unban]').forEach(b=>b.onclick=async()=>{const {error:e}=await sb.rpc("unban_group_member",{p_gid:gid,p_uid:b.closest(".gm-row").dataset.u});if(e){$("gaM").textContent=gErr(e);return;}openBans(gid);});}
+
+async function openBans(gid,backToSettings){
+ const {data,error}=await sb.rpc("list_group_bans",{p_gid:gid});
+ if(error){callToast(gErr(error));return;}
+ await profs((data||[]).map(r=>r.user_id));
+ const rows=(data||[]);
+ const body=`<section class="gset-dialog-section"><h4 class="gset-dialog-section-title"><i>🚫</i> فهرست مسدودشدگان <span class="gp-count">${rows.length.toLocaleString("fa-IR")} نفر</span></h4><p class="gset-dialog-help">افراد این فهرست تا زمان رفع مسدودیت نمی‌توانند دوباره به گروه بپیوندند.</p><div class="gset-admin-list">${rows.map(r=>{const p=P[r.user_id]||{};return `<div class="gm-row" data-u="${esc(r.user_id)}">${avHtml(p.avatar_url,pName(p),"s")}<div class="gm-i"><div class="gm-n">${esc(pName(p))}</div><div class="gm-u">@${esc(p.username||"")}</div></div><div class="gm-a"><button type="button" class="gm-b" data-a="unban">رفع مسدودیت</button></div></div>`;}).join("")||'<div class="gset-empty">هنوز کاربری مسدود نشده است.</div>'}</div></section>`;
+ const ui=groupSettingsDialog("کاربران مسدودشده","مدیریت دسترسی دوبارهٔ کاربران به گروه.",body,()=>backToSettings?openGroupSettings(gid):openGroupInfo(),"بستن");
+ ui.save.onclick=close;ui.save.textContent="بستن";
+ $("mdBody").querySelectorAll('[data-a="unban"]').forEach(b=>b.onclick=async()=>{
+  const row=b.closest(".gm-row");if(!row)return;b.disabled=true;b.textContent="در حال انجام…";
+  const {error:e}=await sb.rpc("unban_group_member",{p_gid:gid,p_uid:row.dataset.u});
+  if(e){b.disabled=false;b.textContent="رفع مسدودیت";groupDialogStatus(ui.status,gErr(e),true);return;}
+  row.remove();const left=$("mdBody").querySelectorAll(".gset-admin-list .gm-row").length;
+  const count=$("mdBody").querySelector(".gp-count");if(count)count.textContent=left.toLocaleString("fa-IR")+" نفر";
+  if(!left)$("mdBody").querySelector(".gset-admin-list").innerHTML='<div class="gset-empty">فهرست مسدودشدگان خالی است.</div>';
+  groupDialogStatus(ui.status,"مسدودیت کاربر برداشته شد ✓");
+ });
+}
+
 function gpHide(){$("gp").classList.remove("open");}
 function removeDlg(gid,uid){const p=P[uid]||{};
  modal(`<h3>حذف عضو از گروه</h3><p class="rm-t">می‌خواهید این عضو فقط از گروه حذف شود یا دسترسی او به عضویت مجدد را هم مسدود کنید؟</p><div class="gm-row" style="margin-bottom:12px">${avHtml(p.avatar_url,pName(p),"s")}<div class="gm-i"><div class="gm-n">${esc(pName(p))}</div><div class="gm-u">@${esc(p.username||"")}</div></div></div><button type="button" class="rm-o" id="rmA"><b>حذف از گروه</b><small>عضو فوراً خارج می‌شود و می‌تواند دوباره عضو شود؛ پیام‌های قبلی‌اش می‌مانند.</small></button><button type="button" class="rm-o d" id="rmB"><b>حذف و افزودن به فهرست سیاه</b><small>تا زمانی که مسدودیت رفع نشود، نمی‌تواند به این گروه برگردد.</small></button><button type="button" class="btn g" id="rmX">انصراف</button><div class="msg" id="gaM"></div>`);
  $("rmA").onclick=()=>gAct("remove",uid);$("rmB").onclick=()=>gAct("ban",uid);$("rmX").onclick=close;}
+async 
 async function openGroupAddMember(gid){
- const canAdd=cur&&cur.role==="owner"||myPerm("invite_members");if(!canAdd){callToast("اجازه افزودن عضو را نداری.");return;}
- modal(`<div class="lcs-head"><div class="lcs-kicker">ARYA PEYVAND · GROUP</div><h3>افزودن عضو</h3><p>نام نمایشی یا نام کاربری را جست‌وجو کن.</p></div><input type="search" id="gAddSearch" dir="auto" maxlength="60" autocomplete="off" placeholder="نام یا نام کاربری…"><button type="button" class="btn" id="gAddFind">جست‌وجو</button><div class="ga-results" id="gAddResults"><div class="ga-hint">برای شروع، حداقل دو حرف بنویس.</div></div><button type="button" class="btn g" id="gAddBack">بازگشت به تنظیمات</button>`);
- const input=$("gAddSearch"),box=$("gAddResults");$("gAddBack").onclick=()=>openGroupSettings(gid);
- const search=async()=>{const q=input.value.trim().replace(/^@/,"");if(q.length<2){box.innerHTML='<div class="ga-hint">حداقل دو حرف وارد کن.</div>';return;}box.innerHTML='<div class="ga-hint">در حال جست‌وجو…</div>';
-  try{const pattern="%"+likeEsc(q)+"%",cols="id,username,display_name,avatar_url";const rs=await Promise.all([sb.from("profiles").select(cols).ilike("username",pattern).limit(10),sb.from("profiles").select(cols).ilike("display_name",pattern).limit(10)]);const err=rs.find(x=>x.error);if(err&&rs.every(x=>x.error))throw err.error;
-   const existing=new Set((GMR[gid]||[]).map(x=>String(x.user_id))),seen=new Set(),list=[];rs.forEach(x=>(x.data||[]).forEach(p=>{if(!p||!p.id||p.id===ME.id||existing.has(String(p.id))||seen.has(String(p.id)))return;seen.add(String(p.id));P[p.id]=p;list.push(p);}));
-   if(!list.length){box.innerHTML='<div class="ga-hint">کاربر جدیدی پیدا نشد.</div>';return;}box.innerHTML=list.slice(0,12).map(p=>`<div class="ga-hit">${avHtml(p.avatar_url,pName(p),"s")}<div class="ga-hit-info"><b>${esc(pName(p))}</b><small>@${esc(p.username||"")}</small></div><button type="button" class="ga-add" data-add-uid="${esc(p.id)}">افزودن</button></div>`).join("");
-   box.querySelectorAll("[data-add-uid]").forEach(btn=>btn.onclick=async()=>{btn.disabled=true;btn.textContent="در حال افزودن…";const {error}=await sb.rpc("add_group_member",{p_gid:gid,p_uid:btn.dataset.addUid});if(error){callToast(gErr(error));btn.disabled=false;btn.textContent="افزودن";return;}await loadMembers(gid);callToast("عضو به گروه اضافه شد.");openGroupInfo(false);});
-  }catch(e){console.error(e);box.innerHTML=`<div class="ga-hint">${esc(gErr(e))}</div>`;}};
+ const canAdd=cur&&cur.gid===gid&&(cur.role==="owner"||myPerm("invite_members"));if(!canAdd){callToast("اجازه افزودن عضو را نداری.");return;}
+ const body=`<section class="gset-dialog-section"><h4 class="gset-dialog-section-title"><i>👥</i> پیدا کردن عضو جدید</h4><p class="gset-dialog-help">نام نمایشی یا نام کاربری را وارد کن. فقط حساب‌هایی نمایش داده می‌شوند که هنوز عضو گروه نیستند.</p><input type="search" id="gAddSearch" dir="auto" maxlength="60" autocomplete="off" placeholder="نام یا نام کاربری…"><div class="ga-results" id="gAddResults"><div class="gset-empty">برای شروع، حداقل دو حرف بنویس.</div></div></section>`;
+ const ui=groupSettingsDialog("افزودن عضو","کاربر موردنظر را جست‌وجو و سپس به گروه اضافه کن.",body,()=>openGroupSettings(gid),"بازگشت");
+ ui.save.onclick=()=>openGroupSettings(gid);
+ const input=$("gAddSearch"),box=$("gAddResults");
+ let request=0;
+ const search=async()=>{
+  const q=input.value.trim().replace(/^@/,"");if(q.length<2){box.innerHTML='<div class="gset-empty">حداقل دو حرف وارد کن.</div>';return;}
+  const seq=++request;box.innerHTML='<div class="gset-empty">در حال جست‌وجو…</div>';
+  try{
+   const pattern="%"+likeEsc(q)+"%",cols="id,username,display_name,avatar_url";
+   const rs=await Promise.all([sb.from("profiles").select(cols).ilike("username",pattern).limit(8),sb.from("profiles").select(cols).ilike("display_name",pattern).limit(8)]);
+   if(seq!==request)return;
+   const err=rs.find(x=>x.error);if(err&&rs.every(x=>x.error))throw err.error;
+   const existing=new Set((GMR[gid]||[]).map(x=>String(x.user_id))),seen=new Set(),list=[];
+   rs.forEach(x=>(x.data||[]).forEach(p=>{if(!p||!p.id||p.id===ME.id||existing.has(String(p.id))||seen.has(String(p.id)))return;seen.add(String(p.id));P[p.id]=p;list.push(p);}));
+   if(!list.length){box.innerHTML='<div class="gset-empty">کاربر جدیدی پیدا نشد.</div>';return;}
+   box.innerHTML=list.slice(0,12).map(p=>`<div class="ga-hit">${avHtml(p.avatar_url,pName(p),"s")}<div class="ga-hit-info"><b>${esc(pName(p))}</b><small>@${esc(p.username||"")}</small></div><button type="button" class="ga-add" data-add-uid="${esc(p.id)}">افزودن</button></div>`).join("");
+   box.querySelectorAll("[data-add-uid]").forEach(btn=>btn.onclick=async()=>{
+    if(!cur||cur.gid!==gid||!(cur.role==="owner"||myPerm("invite_members"))){groupDialogStatus(ui.status,"اجازه افزودن عضو تأیید نشد.",true);return;}
+    btn.disabled=true;btn.textContent="در حال افزودن…";
+    const {error:e}=await sb.rpc("add_group_member",{p_gid:gid,p_uid:btn.dataset.addUid});
+    if(e){groupDialogStatus(ui.status,gErr(e),true);btn.disabled=false;btn.textContent="افزودن";return;}
+    await loadMembers(gid);callToast("عضو به گروه اضافه شد.");openGroupInfo(false);
+   });
+  }catch(e){if(seq===request)box.innerHTML=`<div class="gset-empty">${esc(gErr(e))}</div>`;}
+ };
  $("gAddFind").onclick=search;input.onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();search();}};
 }
+
+
 function openGroupAdmins(gid){
- const rows=(GMR[gid]||[]).slice(),staff=rows.filter(r=>r.role==="owner"||r.role==="admin"),members=rows.filter(r=>r.role==="member"),canPromote=cur.role==="owner"||myPerm("add_admins");
+ const rows=(GMR[gid]||[]).slice(),staff=rows.filter(r=>r.role==="owner"||r.role==="admin"),members=rows.filter(r=>r.role==="member"),canPromote=cur&&cur.gid===gid&&(cur.role==="owner"||myPerm("add_admins"));
  const item=r=>{const p=P[r.user_id]||{},self=r.user_id===ME.id;return `<div class="gm-row" data-u="${esc(r.user_id)}">${avHtml(p.avatar_url,pName(p),"s")}<div class="gm-i"><div class="gm-n">${esc(pName(p))}${self?" (تو)":""}</div><div class="gm-u">@${esc(p.username||"")} · ${roleFa(r.role)}</div></div><div class="gm-a">${r.role==="admin"&&cur.role==="owner"?`<button type="button" class="gm-b" data-admin-perms="${esc(r.user_id)}">اختیارات</button><button type="button" class="gm-b d" data-admin-demote="${esc(r.user_id)}">عزل</button>`:""}</div></div>`;};
- modal(`<button type="button" class="gm-b" id="gAdminsBack">‹ بازگشت به تنظیمات</button><div class="lcs-head" style="margin-top:12px"><h3>مدیران گروه</h3><p>مدیران و سطح دسترسی هرکدام را مدیریت کن.</p></div><div class="gp-card"><label>مدیران فعلی <span class="gp-count">${staff.length.toLocaleString("fa-IR")} نفر</span></label><div class="gm-list">${staff.map(item).join("")||'<div class="empty">هنوز مدیری تعیین نشده است.</div>'}</div></div>${canPromote?`<div class="gp-card"><label>ارتقای عضو به مدیریت</label><div class="gm-list">${members.map(r=>{const p=P[r.user_id]||{};return `<div class="gm-row">${avHtml(p.avatar_url,pName(p),"s")}<div class="gm-i"><div class="gm-n">${esc(pName(p))}</div><div class="gm-u">@${esc(p.username||"")}</div></div><div class="gm-a"><button type="button" class="gm-b" data-admin-promote="${esc(r.user_id)}">ارتقا</button></div></div>`;}).join("")||'<div class="empty">عضو عادی برای ارتقا وجود ندارد.</div>'}</div></div>`:""}`);
- $("gAdminsBack").onclick=()=>openGroupSettings(gid);
+ const body=`<section class="gset-dialog-section"><h4 class="gset-dialog-section-title"><i>🛡️</i> مدیران فعلی <span class="gp-count">${staff.length.toLocaleString("fa-IR")} نفر</span></h4><div class="gset-admin-list">${staff.map(item).join("")||'<div class="gset-empty">هنوز مدیری تعیین نشده است.</div>'}</div></section>${canPromote?`<section class="gset-dialog-section"><h4 class="gset-dialog-section-title"><i>⬆️</i> ارتقای عضو به مدیریت</h4><p class="gset-dialog-help">مدیر جدید می‌تواند فقط دسترسی‌هایی را داشته باشد که مالک برایش فعال کند.</p><div class="gset-admin-list">${members.map(r=>{const p=P[r.user_id]||{};return `<div class="gm-row">${avHtml(p.avatar_url,pName(p),"s")}<div class="gm-i"><div class="gm-n">${esc(pName(p))}</div><div class="gm-u">@${esc(p.username||"")}</div></div><div class="gm-a"><button type="button" class="gm-b" data-admin-promote="${esc(r.user_id)}">ارتقا</button></div></div>`;}).join("")||'<div class="gset-empty">عضو عادی برای ارتقا وجود ندارد.</div>'}</div></section>`:""}`;
+ const ui=groupSettingsDialog("مدیران گروه","نقش‌ها و سطح دسترسی مدیران را مدیریت کن.",body,()=>openGroupSettings(gid),"بازگشت");
+ ui.save.onclick=()=>openGroupSettings(gid);
  $("mdBody").querySelectorAll("[data-admin-perms]").forEach(b=>b.onclick=()=>openPerms(gid,b.dataset.adminPerms,true));
  $("mdBody").querySelectorAll("[data-admin-demote]").forEach(b=>b.onclick=()=>{close();gAct("demote",b.dataset.adminDemote);});
- $("mdBody").querySelectorAll("[data-admin-promote]").forEach(b=>b.onclick=async()=>{b.disabled=true;const {error}=await sb.rpc("set_group_role",{p_gid:gid,p_uid:b.dataset.adminPromote,p_role:"admin"});if(error){callToast(gErr(error));b.disabled=false;return;}await loadMembers(gid);openGroupAdmins(gid);});
+ $("mdBody").querySelectorAll("[data-admin-promote]").forEach(b=>b.onclick=async()=>{
+  if(!cur||cur.gid!==gid||cur.role!=="owner"){groupDialogStatus(ui.status,"فقط مالک می‌تواند مدیر جدید تعیین کند.",true);return;}
+  b.disabled=true;const {error}=await sb.rpc("set_group_role",{p_gid:gid,p_uid:b.dataset.adminPromote,p_role:"admin"});
+  if(error){groupDialogStatus(ui.status,gErr(error),true);b.disabled=false;return;}
+  await loadMembers(gid);openGroupAdmins(gid);
+ });
 }
+
 function inviteLinkFor(gid){
  // لینک دعوت از آدرس واقعی سایت ساخته می‌شود؛ اگر فایل محلی باز شده باشد، از نشانی عمومی GitHub Pages استفاده می‌کنیم.
  const id=String(gid||"").trim();if(!UUID.test(id))return"";
@@ -3314,40 +3482,71 @@ function openGroupInviteCopyDialog(gid){
 }
 
 
-function openGroupMuteSettings(gid){
- const key="g:"+String(gid),muted=!!GROUP_MUTES[key];
- modal(`<h3>اعلان‌های گروه</h3><p class="pg-info">این گزینه فقط اعلان‌های داخل برنامه را روی همین دستگاه بی‌صدا می‌کند.</p><label class="pm-it"><span><b>بی‌صدا کردن اعلان‌های این گروه</b><small>هر زمان بخواهی می‌توانی دوباره روشنش کنی.</small></span><input type="checkbox" id="gNotifMute" ${muted?"checked":""}></label><div class="msg" id="gNotifMsg" role="status" aria-live="polite"></div><button type="button" class="btn g" id="gNotifClose">بستن</button>`);
- $("gNotifClose").onclick=close;
- $("gNotifMute").onchange=()=>{if($("gNotifMute").checked)GROUP_MUTES[key]=true;else delete GROUP_MUTES[key];try{localStorage.setItem(GROUP_MUTES_KEY,JSON.stringify(GROUP_MUTES));$("gNotifMsg").textContent="تنظیم اعلان ذخیره شد ✓";}catch(e){$("gNotifMsg").textContent="ذخیره در این دستگاه انجام نشد؛ فضای مرورگر را بررسی کن.";};};
+
+function groupSettingsDialog(title,description,body,onCancel,saveLabel="ذخیره تغییرات"){
+ modal(`<section class="gset-dialog"><header class="gset-dialog-head"><span class="gset-dialog-kicker">ARYA PEYVAND · GROUP</span><h3>${title}</h3><p>${description}</p></header><div class="gset-dialog-body">${body}</div><div class="gset-dialog-status" id="gsetDialogStatus" role="status" aria-live="polite"></div><footer class="gset-dialog-actions"><button type="button" class="gset-dialog-btn secondary" id="gsetDialogCancel">انصراف</button><button type="button" class="gset-dialog-btn primary" id="gsetDialogSave">${saveLabel}</button></footer></section>`);
+ $("gsetDialogCancel").onclick=()=>{if(onCancel)onCancel();else close();};
+ return {save:$("gsetDialogSave"),status:$("gsetDialogStatus")};
 }
+function groupDialogStatus(el,message,error=false){if(!el)return;el.textContent=message||"";el.classList.toggle("error",!!error);}
+
+
+function openGroupMuteSettings(gid){
+ const key="g:"+String(gid),initial=!!GROUP_MUTES[key];
+ const body=`<section class="gset-dialog-section"><h4 class="gset-dialog-section-title"><i>🔔</i> اعلان‌های این گروه</h4><p class="gset-dialog-help">این تنظیم فقط روی همین دستگاه ذخیره می‌شود و روی اعلان‌های حساب‌های دیگر اثر ندارد.</p><div class="pm-list"><label class="pm-it"><span><b>بی‌صدا کردن اعلان‌ها</b><small>اعلان پیام‌های تازهٔ این گروه نمایش داده نشود.</small></span><input class="gset-switch" type="checkbox" id="gNotifMute" ${initial?"checked":""}></label></div></section>`;
+ const ui=groupSettingsDialog("اعلان‌های گروه","مدیریت اعلان‌ها با یک انتخاب ساده و قابل بازگشت.",body,close);
+ ui.save.disabled=true;
+ $("gNotifMute").onchange=()=>{ui.save.disabled=$("gNotifMute").checked===initial;groupDialogStatus(ui.status,$("gNotifMute").checked===initial?"تغییری برای ذخیره وجود ندارد.":"تغییرات ذخیره‌نشده است.");};
+ ui.save.onclick=()=>{
+  const next=$("gNotifMute").checked;
+  try{if(next)GROUP_MUTES[key]=true;else delete GROUP_MUTES[key];localStorage.setItem(GROUP_MUTES_KEY,JSON.stringify(GROUP_MUTES));close();callToast("تنظیم اعلان ذخیره شد.");}
+  catch(e){groupDialogStatus(ui.status,"ذخیره در این دستگاه ممکن نشد. فضای مرورگر را بررسی کن.",true);}
+ };
+}
+
+
 async function openMemberPerms(gid){
- if(!cur||cur.role!=="owner"){callToast("فقط مالک گروه می‌تواند اختیارات اعضا را تغییر دهد.");return;}
+ if(!cur||cur.gid!==gid||cur.role!=="owner"){callToast("فقط مالک گروه می‌تواند اختیارات اعضا را تغییر دهد.");return;}
  const {data,error}=await sb.from("groups").select("member_perms").eq("id",gid).single();
  if(error){callToast(gErr(error));return;}
- let saved=Object.assign({send_messages:true,send_media:true},data&&data.member_perms||{});
- const html=()=>`<button type="button" class="gm-b" id="gMemberPermBack">‹ بازگشت</button><h3 style="margin-top:12px">اختیارات اعضای عادی</h3><p class="pg-info">این دسترسی‌ها برای همه اعضای عادی گروه اعمال می‌شود. مالک و مدیران تحت تأثیر این دو گزینه نیستند.</p><div class="pm-list"><label class="pm-it"><span><b>ارسال پیام متنی</b><small>اجازه نوشتن و فرستادن پیام</small></span><input type="checkbox" class="g-member-perm" data-k="send_messages" ${saved.send_messages!==false?"checked":""}></label><label class="pm-it"><span><b>ارسال رسانه</b><small>اجازه فرستادن عکس، ویدیو و فایل صوتی</small></span><input type="checkbox" class="g-member-perm" data-k="send_media" ${saved.send_media!==false?"checked":""}></label></div><div class="msg" id="gMemberPermMsg" role="status" aria-live="polite"></div>`;
- modal(html());
- $("gMemberPermBack").onclick=()=>openGroupSettings(gid);
- $("mdBody").querySelectorAll(".g-member-perm").forEach(sw=>sw.onchange=async()=>{
-  const next={...saved};$("mdBody").querySelectorAll(".g-member-perm").forEach(x=>next[x.dataset.k]=x.checked);
+ const saved={send_messages:data?.member_perms?.send_messages!==false,send_media:data?.member_perms?.send_media!==false};
+ const body=`<section class="gset-dialog-section"><h4 class="gset-dialog-section-title"><i>🔐</i> دسترسی اعضای عادی</h4><p class="gset-dialog-help">این تنظیمات فقط روی اعضای عادی اثر دارد. مالک و مدیران همچنان دسترسی مدیریتی خود را حفظ می‌کنند.</p><div class="pm-list"><label class="pm-it"><span><b>ارسال پیام متنی</b><small>اعضا بتوانند پیام متنی در گروه بفرستند.</small></span><input class="gset-switch" type="checkbox" id="gPermMessages" ${saved.send_messages?"checked":""}></label><label class="pm-it"><span><b>ارسال رسانه</b><small>اعضا بتوانند عکس، ویدیو و فایل صوتی ارسال کنند.</small></span><input class="gset-switch" type="checkbox" id="gPermMedia" ${saved.send_media?"checked":""}></label></div></section>`;
+ const ui=groupSettingsDialog("اختیارات اعضا","قبل از ذخیره، دسترسی‌های جدید را مرور کن.",body,()=>openGroupSettings(gid));
+ const current=()=>({send_messages:$("gPermMessages").checked,send_media:$("gPermMedia").checked});
+ const dirty=()=>{const x=current();ui.save.disabled=x.send_messages===saved.send_messages&&x.send_media===saved.send_media;groupDialogStatus(ui.status,ui.save.disabled?"همه‌چیز ذخیره شده است.":"تغییرات هنوز ذخیره نشده‌اند.");};
+ $("gPermMessages").onchange=dirty;$("gPermMedia").onchange=dirty;dirty();
+ ui.save.onclick=async()=>{
+  if(!cur||cur.gid!==gid||cur.role!=="owner"){groupDialogStatus(ui.status,"دسترسی مالک تأیید نشد. پنجره را ببند و دوباره وارد شو.",true);return;}
+  const next=current();ui.save.disabled=true;$("gsetDialogCancel").disabled=true;groupDialogStatus(ui.status,"در حال ذخیره امن تنظیمات…");
   const {error:e}=await sb.rpc("set_group_member_perms",{p_gid:gid,p_perms:next});
-  if(e){sw.checked=!sw.checked;$("gMemberPermMsg").textContent=gErr(e);return;}
-  saved=next;$("gMemberPermMsg").textContent="ذخیره شد ✓";
- });
+  $("gsetDialogCancel").disabled=false;
+  if(e){ui.save.disabled=false;groupDialogStatus(ui.status,gErr(e),true);return;}
+  saved.send_messages=next.send_messages;saved.send_media=next.send_media;ui.save.disabled=true;
+  groupDialogStatus(ui.status,"تنظیمات با موفقیت ذخیره شد ✓");
+  setTimeout(()=>openGroupSettings(gid),450);
+ };
 }
+
+
 function openGroupVisibility(gid){
- if(!cur||cur.role!=="owner"){callToast("فقط مالک گروه می‌تواند نوع گروه را تغییر دهد.");return;}
- const c=SG.find(x=>x.gid===gid)||cur;
- modal(`<h3>نوع گروه</h3><p class="pg-info">گروه عمومی در جست‌وجوی گروه‌ها دیده می‌شود. گروه خصوصی در فهرست عمومی نمایش داده نمی‌شود و لینک دعوت عمومی آن غیرفعال است.</p><div class="pm-list"><label class="pm-it"><span><b>گروه عمومی</b><small>قابل مشاهده در فهرست گروه‌های عمومی</small></span><input type="radio" name="gVisibility" value="public" ${c.pub!==false?"checked":""}></label><label class="pm-it"><span><b>گروه خصوصی</b><small>فقط اعضا در فهرست گروه‌های خود می‌بینند</small></span><input type="radio" name="gVisibility" value="private" ${c.pub===false?"checked":""}></label></div><div class="msg" id="gVisibilityMsg" role="status" aria-live="polite"></div><button type="button" class="btn g" id="gVisibilityBack">بازگشت</button>`);
- $("gVisibilityBack").onclick=close;
- $("mdBody").querySelectorAll('input[name="gVisibility"]').forEach(r=>r.onchange=async()=>{
-  const isPublic=r.value==="public";$("mdBody").querySelectorAll('input[name="gVisibility"]').forEach(x=>x.disabled=true);
-  const {error}=await sb.rpc("set_group_visibility",{p_gid:gid,p_public:isPublic});
-  if(error){r.checked=!r.checked;$("gVisibilityMsg").textContent=gErr(error);$("mdBody").querySelectorAll('input[name="gVisibility"]').forEach(x=>x.disabled=false);return;}
-  c.pub=isPublic;if(cur&&cur.gid===gid)cur.pub=isPublic;
-  renderList();openGroupSettings(gid);
- });
+ if(!cur||cur.gid!==gid||cur.role!=="owner"){callToast("فقط مالک گروه می‌تواند نوع گروه را تغییر دهد.");return;}
+ const c=SG.find(x=>x.gid===gid)||cur,initial=c.pub!==false;
+ const body=`<section class="gset-dialog-section"><h4 class="gset-dialog-section-title"><i>🌐</i> میزان دسترسی گروه</h4><p class="gset-dialog-help">نوع گروه تعیین می‌کند افراد چگونه آن را پیدا کنند و وارد شوند.</p><div class="pm-list"><label class="pm-it"><span><b>گروه عمومی</b><small>در فهرست گروه‌های عمومی قابل مشاهده است.</small></span><input type="radio" name="gVisibility" value="public" ${initial?"checked":""}></label><label class="pm-it"><span><b>گروه خصوصی</b><small>در فهرست عمومی نمایش داده نمی‌شود.</small></span><input type="radio" name="gVisibility" value="private" ${!initial?"checked":""}></label></div></section>`;
+ const ui=groupSettingsDialog("نوع گروه","تغییر نوع گروه فقط پس از زدن دکمهٔ ذخیره اعمال می‌شود.",body,()=>openGroupSettings(gid));
+ const selected=()=>$("mdBody").querySelector('input[name="gVisibility"]:checked')?.value==="public";
+ const dirty=()=>{ui.save.disabled=selected()===initial;groupDialogStatus(ui.status,ui.save.disabled?"نوع فعلی گروه انتخاب شده است.":"تغییر نوع گروه ذخیره نشده است.");};
+ $("mdBody").querySelectorAll('input[name="gVisibility"]').forEach(x=>x.onchange=dirty);dirty();
+ ui.save.onclick=async()=>{
+  if(!cur||cur.gid!==gid||cur.role!=="owner"){groupDialogStatus(ui.status,"اجازهٔ مالک برای این تغییر تأیید نشد.",true);return;}
+  const next=selected();ui.save.disabled=true;$("gsetDialogCancel").disabled=true;groupDialogStatus(ui.status,"در حال ذخیره…");
+  const {error}=await sb.rpc("set_group_visibility",{p_gid:gid,p_public:next});
+  $("gsetDialogCancel").disabled=false;
+  if(error){ui.save.disabled=false;groupDialogStatus(ui.status,gErr(error),true);return;}
+  c.pub=next;if(cur&&cur.gid===gid)cur.pub=next;renderList();groupDialogStatus(ui.status,"نوع گروه ذخیره شد ✓");
+  setTimeout(()=>openGroupSettings(gid),450);
+ };
 }
+
 
 function openGroupSettings(gid){
  const c=SG.find(x=>x.gid===gid)||cur;
@@ -3355,20 +3554,20 @@ function openGroupSettings(gid){
  const me=cur.role||"member";
  if(me!=="owner"&&me!=="admin"){callToast("تنظیمات فقط برای مالک و مدیر گروه در دسترس است.");return;}
  const canEd=me==="owner"||myPerm("edit_info"),canAdd=me==="owner"||myPerm("invite_members"),canBan=me==="owner"||myPerm("ban_members"),canManage=me==="owner"||myPerm("add_admins");
- const row=(id,ico,title,sub,extra="")=>`<button type="button" class="gset-row gset-tile" id="${id}"><span class="gset-ico" aria-hidden="true">${ico}</span><span class="gset-copy"><b class="gset-tile-title">${title}</b>${sub?`<small>${sub}</small>`:""}</span><span class="gset-arrow" aria-hidden="true">‹</span></button>`;
+ const row=(id,ico,title,sub)=>`<button type="button" class="gset-row gset-tile" id="${id}"><span class="gset-ico" aria-hidden="true">${ico}</span><span class="gset-copy"><b class="gset-tile-title">${title}</b><small>${sub}</small></span><span class="gset-arrow" aria-hidden="true">‹</span></button>`;
  const gp=$("gp");gp.classList.add("open");
  $("gpBody").innerHTML=`<div class="gset-page gset-visual">
-  <div class="gset-head"><button type="button" class="gp-back" id="gsBack">‹</button><div><span class="gset-kicker">ARYA PEYVAND</span><h2>تنظیمات گروه</h2></div></div>
-  <div class="gset-profile">${avHtml(c.avatar,c.title,"s")}<div><b>${esc(c.title||"گروه")}</b><small>${me==="owner"?"مالک":"مدیر"}</small></div></div>
+  <div class="gset-head"><button type="button" class="gp-back" id="gsBack" aria-label="بازگشت">‹</button><div><span class="gset-kicker">ARYA PEYVAND</span><h2>تنظیمات گروه</h2><small class="gset-head-sub">مدیریت و شخصی‌سازی گروه</small></div><span class="gset-gear" aria-hidden="true">⚙</span></div>
+  <div class="gset-profile"><div class="gset-profile-avatar">${avHtml(c.avatar,c.title,"s")}</div><div class="gset-profile-copy"><b>${esc(c.title||"گروه")}</b><small>${me==="owner"?"مالک گروه":"مدیر گروه"} · ${c.pub===false?"خصوصی":"عمومی"}</small></div><span class="gset-role-pill">${me==="owner"?"مالک":"مدیر"}</span></div>
+  <div class="gset-section-label"><span>مدیریت گروه</span><small>اطلاعات و اعضا</small></div>
   <div class="gset-card gset-grid">
-   ${canEd?row("gsEdit","✏️","ویرایش گروه","نام، توضیحات و تصویر گروه"):""}
-   ${canAdd?row("gsAdd","👥","افزودن عضو","دعوت کاربران جدید به گروه"):""}
-   ${canBan?row("gsBans","🚫","مسدودشدگان","مدیریت کاربران مسدودشده"):""}
-   ${canManage?row("gsAdmins","🛡️","مدیران گروه","مشاهده و مدیریت مدیران"):""}
-   ${me==="owner"?row("gsMemberPerms","🔐","اختیارات اعضا","کنترل ارسال پیام و رسانه"):""}
-   ${me==="owner"?row("gsVisibility","🌐","نوع گروه",c.pub!==false?"عمومی · تغییر وضعیت":"خصوصی · تغییر وضعیت"):""}
-   ${c.pub!==false?row("gsInvite","🔗","لینک دعوت","کپی لینک عضویت در گروه"):""}
+   ${canEd?row("gsEdit","✏️","ویرایش اطلاعات","نام، توضیحات و تصویر گروه"):""}
+   ${canAdd?row("gsAdd","👥","افزودن عضو","پیدا کردن و دعوت کاربران"):""}
+   ${canBan?row("gsBans","🚫","مسدودشدگان","مشاهده و رفع مسدودیت اعضا"):""}
+   ${canManage?row("gsAdmins","🛡️","مدیران گروه","مدیریت نقش‌ها و اختیارات مدیران"):""}
   </div>
+  ${me==="owner"?`<div class="gset-section-label"><span>حریم خصوصی و دسترسی</span><small>کنترل رفتار اعضا</small></div><div class="gset-card gset-grid">${row("gsMemberPerms","🔐","اختیارات اعضا","کنترل ارسال پیام و رسانه")}${row("gsVisibility","🌐","نوع و دیده‌شدن گروه",c.pub!==false?"گروه عمومی":"گروه خصوصی")}${c.pub!==false?row("gsInvite","🔗","لینک دعوت","کپی لینک عضویت در گروه"):""}</div>`:(c.pub!==false?row("gsInvite","🔗","لینک دعوت","کپی لینک عضویت در گروه"):"")}
+  <div class="gset-footer-note"><span>🔒</span><span>تغییرات حساس با مجوز دیتابیس بررسی می‌شوند.</span></div>
  </div>`;
  $("gsBack").onclick=()=>openGroupInfo(false);
  if($("gsEdit"))$("gsEdit").onclick=()=>editInfo(gid);
