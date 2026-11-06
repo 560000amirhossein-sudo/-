@@ -1442,11 +1442,11 @@ try{var F=parseInt(localStorage.getItem("arya_text_scale_v1"),10);if(F>=85&&F<=1
    </div>
   <div class="tabs" id="tabs">
    <button class="tab on" data-t="all">همه</button><button class="tab" data-t="private">شخصی</button>
-   <button class="tab" data-t="group">گروه‌ها</button><button class="tab" data-t="channel">کانال‌ها</button>
+   <button class="tab" data-t="group">گروه‌ها</button><button class="tab" data-t="channel">کانال‌ها</button><button class="tab" data-t="archived">بایگانی</button>
   </div>
   <div id="note" role="note" style="display:none"><span></span><button type="button" id="noteX" aria-label="بستن راهنما" title="بستن">✕</button></div>
   <div class="list" id="list"></div>
-  <div id="chatMultiBar" class="chat-multi-bar" hidden aria-live="polite"><div class="chat-multi-info"><b id="chatMultiCount">۰ گفتگو انتخاب شده</b><small>حذف چت یا خروج از گروه/کانال</small></div><button type="button" id="chatMultiDelete" class="chat-multi-delete"><span aria-hidden="true">🗑️</span> حذف</button><button type="button" id="chatMultiCancel" class="chat-multi-cancel">لغو</button></div>
+  <div id="chatMultiBar" class="chat-multi-bar" hidden aria-live="polite"><div class="chat-multi-info"><b id="chatMultiCount">۰ گفتگو انتخاب شده</b><small>مدیریت گفتگوهای انتخاب‌شده</small></div><button type="button" id="chatMultiArchive" class="chat-multi-cancel">بایگانی</button><button type="button" id="chatMultiDelete" class="chat-multi-delete"><span aria-hidden="true">🗑️</span> حذف</button><button type="button" id="chatMultiCancel" class="chat-multi-cancel">لغو</button></div>
   <nav class="bn" id="bnav" aria-label="منوی اصلی">
   <button type="button" class="bi" data-n="settings" aria-label="تنظیمات" aria-haspopup="dialog"><span class="bic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span><span class="bl">تنظیمات</span></button>
   <button type="button" class="bi" data-n="groups" aria-label="گروه‌ها"><span class="bic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="9" r="3.2"/><path d="M3.5 19c.6-3 2.8-4.6 5.5-4.6s4.9 1.6 5.5 4.6"/><circle cx="17" cy="9.8" r="2.5"/><path d="M16.5 14.5c2.3-.1 4 1.2 4.5 3.8"/></svg><b class="bnb" id="bnG" hidden></b></span><span class="bl">گروه‌ها</span></button>
@@ -1721,6 +1721,10 @@ const safeM=u=>typeof u==="string"&&u.startsWith(PUB)?u:"";
 async function upload(blob,ext,type,dur){const p=Date.now()+"-"+Math.random().toString(36).slice(2,8)+(dur?"-d"+dur:"")+"."+ext;const {error}=await sb.storage.from(BUCKET).upload(p,blob,{contentType:type});if(error)throw error;return sb.storage.from(BUCKET).getPublicUrl(p).data.publicUrl;}
 function clearPending(){pending=null;pendingFile=null;pendingKind="image";upDone=null;$("prev").classList.remove("show","err","up");$("upb").style.width="0";$("prevImg").style.display="";$("prev").querySelector("span").textContent="عکس آماده ارسال";vpPrevReset();pendingDur=0;pendingPeaks=null;}
 let cur=null,tab="all",query="",pending=null,pubMsgs=[],pubErr=false,sig="";
+const archivedChatKeys=new Set();
+const chatSettingType=c=>c&&c.id===DEF?"public":(c&&["private","group","channel"].includes(c.type)?c.type:"group");
+async function loadArchiveSettings(){if(!ME)return;try{const {data,error}=await sb.from("user_chat_settings").select("chat_type,chat_id,archived").eq("user_id",ME.id);if(error)throw error;archivedChatKeys.clear();for(const r of data||[])if(r.archived)archivedChatKeys.add(String(r.chat_id));}catch(e){console.warn("بارگذاری بایگانی ناموفق بود:",e);}}
+async function setChatsArchived(chats,archived){if(!ME)throw new Error("ابتدا وارد حساب شو.");const rows=chats.map(c=>({user_id:ME.id,chat_type:chatSettingType(c),chat_id:String(c.id),archived:!!archived,updated_at:new Date().toISOString()}));const {error}=await sb.from("user_chat_settings").upsert(rows,{onConflict:"user_id,chat_type,chat_id"});if(error)throw error;for(const c of chats){if(archived)archivedChatKeys.add(String(c.id));else archivedChatKeys.delete(String(c.id));}}
 let pubKnown=null,pubCursor=null,pubOldestCursor=null,pubOlderLoading=false,pubOlderDone=false,ncReady=false,pubLoaded=false,pcLoaded=false,UN={};
 const PUB_CACHE_KEY="arya_public_messages_cache_v1";
 function restorePublicCache(){
@@ -1858,6 +1862,7 @@ function updateChatSelectionUI(){
  const bar=$("chatMultiBar");if(bar)bar.hidden=!listSelectMode;
  const count=$("chatMultiCount");if(count)count.textContent=listSelectedIds.size.toLocaleString("fa-IR")+" گفتگو انتخاب شده";
  const del=$("chatMultiDelete");if(del)del.disabled=!listSelectedIds.size;
+ const arc=$("chatMultiArchive");if(arc){arc.disabled=!listSelectedIds.size;arc.textContent=tab==="archived"?"بازگردانی":"بایگانی";}
  const L=$("list");if(L)L.querySelectorAll(".it:not(.pgi)").forEach(b=>{
   const id=String(b.dataset.id||""),eligible=canSelectConversation(id);
   b.classList.toggle("list-selecting",listSelectMode&&eligible);
@@ -1932,6 +1937,7 @@ function openChatListDeletePanel(){
  }});
 }
 $("chatMultiDelete").onclick=openChatListDeletePanel;
+$("chatMultiArchive").onclick=async()=>{const all=view(),targets=[...listSelectedIds].map(id=>all.find(c=>String(c.id)===id)).filter(Boolean);if(!targets.length)return;const archived=tab!=="archived";const b=$("chatMultiArchive");if(b)b.disabled=true;try{await setChatsArchived(targets,archived);stopChatSelection();renderList();callToast(archived?"گفتگوها به بایگانی منتقل شدند.":"گفتگوها به فهرست اصلی برگشتند.");}catch(e){if(b)b.disabled=false;callToast("ذخیره بایگانی ناموفق بود: "+(e.message||"خطای ارتباط"));}};
 $("chatMultiCancel").onclick=stopChatSelection;
 function updateGroupTools(){
   const active=tab==="group",bell=$("groupNotifyBtn"),studio=$("groupStudioBtn"),badge=$("groupNotifyCount");
@@ -1942,9 +1948,9 @@ function renderList(){
   const L=$("list");$("qx").style.display=query?"block":"none";updateGroupTools();
   
   const all=view();trackUnread(all);let rows=all;
- if(query)rows=rows.filter(c=>c.title.toLowerCase().includes(query.toLowerCase()));else rows=rows.filter(c=>tab==="all"||c.type===tab);
+ if(query)rows=rows.filter(c=>!archivedChatKeys.has(String(c.id))&&c.title.toLowerCase().includes(query.toLowerCase()));else if(tab==="archived")rows=rows.filter(c=>archivedChatKeys.has(String(c.id)));else rows=rows.filter(c=>!archivedChatKeys.has(String(c.id))&&(tab==="all"||c.type===tab));
  let h=rows.map(itemHtml).join("");
- if(!rows.length&&!(query&&(UR.length||pgVis().length)))h=`<div class="empty">${query?"نتیجه‌ای پیدا نشد.":tab==="private"?"گفتگوی خصوصی نداری.<br>نام کاربری را جست‌وجو کن و پیام بده.":tab==="group"?"گروهی نداری.<br>با «گروه جدید» یکی بساز.":tab==="channel"?"کانالی نداری.<br>با «کانال جدید» یکی بساز.":"گفتگویی وجود ندارد."}</div>`;
+ if(!rows.length&&!(query&&(UR.length||pgVis().length)))h=`<div class="empty">${query?"نتیجه‌ای پیدا نشد.":tab==="archived"?"گفتگوی بایگانی‌شده‌ای نداری.":tab==="private"?"گفتگوی خصوصی نداری.<br>نام کاربری را جست‌وجو کن و پیام بده.":tab==="group"?"گروهی نداری.<br>با «گروه جدید» یکی بساز.":tab==="channel"?"کانالی نداری.<br>با «کانال جدید» یکی بساز.":"گفتگویی وجود ندارد."}</div>`;
  if(query&&UR.length)h+=`<div class="sec">کاربران</div>`+UR.filter(p=>!PC.some(c=>c.peer===p.id&&!isPrivateChatHidden(p.id))).map(p=>itemHtml({...mkPC(p.id),unread:0})).join("");if(query&&pgVis().length)h+=`<div class="sec">گروه‌های عمومی</div>`+pgVis().map(pgItemHtml).join("");
  if(!query&&tab==="group")h=`<button class="it pgi" type="button" data-disc="1"><div class="av" style="background:linear-gradient(135deg,#6366f1,#22d3ee)">🔍</div><div class="im"><div class="r1"><span class="nm">گروه‌های عمومی</span></div><div class="r2"><span class="lt">جست‌وجو و عضویت در گروه‌های عمومی</span></div></div></button>`+h;
  L.innerHTML=h;L.querySelectorAll(".it:not(.pgi)").forEach(bindConversationItem);L.querySelectorAll(".pgi").forEach(b=>b.onclick=()=>b.dataset.disc?openDiscover():openPublicGroup(b.dataset.pg));updateChatSelectionUI();updateNav(all);
@@ -3101,6 +3107,7 @@ async function boot(u){try{await boot0(u);}catch(e){showErr("boot: "+ser(e));}}
 async function boot0(user){
  if(!user){presenceStop();endLocal();closeInc();stopCallRT();ME=null;PROF=null;stopRT();stopGRT();GU={};PGR=[];PC=[];PM={};HID=new Set();UR=[];cur=null;UN={};SG=[];GM={};GMEM={};GMR={};pcLoaded=false;ncReady=false;for(const k in UCNT)delete UCNT[k];ntClear();$("chat").style.display="none";$("ph").style.display="grid";$("app").classList.remove("open");gate("login");showGate(true);renderList();return;}
  ME=user;
+ await loadArchiveSettings();
  const {data,error}=await ownProf(user.id);
  if(error){console.error("بارگذاری پروفایل ناموفق بود؛ نشست ورود حفظ شد:",error);ME=null;PROF=null;gate("login");showGate(true);alert("بارگذاری پروفایل ناموفق بود. از حساب خارج نشده‌ای؛ اتصال را بررسی کن و صفحه را تازه‌سازی کن.");return;}
  if(!data){gate("complete");showGate(true);return;}
