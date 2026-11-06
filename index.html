@@ -3042,7 +3042,8 @@ function ntClose(now){clearTimeout(NT.timer);const el=NT.el;if(!el)return;
  setTimeout(()=>{el.remove();if(NT.el===el){NT.el=null;NT.cur=null;NT.closing=false;ntNext();}},200);}
 function ntDrop(id){NT.q=NT.q.filter(x=>x.id!==id);if(NT.cur&&NT.cur.id===id)ntClose(true);}
 function ntClear(){NT.q=[];clearTimeout(NT.timer);if(NT.el)NT.el.remove();NT.el=null;NT.cur=null;NT.closing=false;}
-function notify(n){if(!ME||document.hidden||CALL||INC)return;if(cur&&cur.id===n.id)return;
+const GROUP_MUTES_KEY="arya_group_mutes_v1";let GROUP_MUTES={};try{GROUP_MUTES=JSON.parse(localStorage.getItem(GROUP_MUTES_KEY)||"{}")||{};}catch(e){GROUP_MUTES={};}
+function notify(n){if(!ME||document.hidden||CALL||INC)return;if(String(n.id||"").startsWith("g:")&&GROUP_MUTES[n.id])return;if(cur&&cur.id===n.id)return;
  if(NT.cur&&NT.cur.id===n.id&&!NT.closing){NT.cur={...n,count:(NT.cur.count||1)+(n.count||1)};ntFill();ntArm();return;}
  const i=NT.q.findIndex(x=>x.id===n.id);
  if(i>=0)NT.q[i]={...n,count:(NT.q[i].count||1)+(n.count||1)};else{NT.q.push(n);if(NT.q.length>3)NT.q.shift();}
@@ -3312,6 +3313,42 @@ function openGroupInviteCopyDialog(gid){
  };
 }
 
+
+function openGroupNotifications(gid){
+ const key="g:"+String(gid),muted=!!GROUP_MUTES[key];
+ modal(`<h3>اعلان‌های گروه</h3><p class="pg-info">این گزینه فقط اعلان‌های داخل برنامه را روی همین دستگاه بی‌صدا می‌کند.</p><label class="pm-it"><span><b>بی‌صدا کردن اعلان‌های این گروه</b><small>هر زمان بخواهی می‌توانی دوباره روشنش کنی.</small></span><input type="checkbox" id="gNotifMute" ${muted?"checked":""}></label><div class="msg" id="gNotifMsg" role="status" aria-live="polite"></div><button type="button" class="btn g" id="gNotifClose">بستن</button>`);
+ $("gNotifClose").onclick=close;
+ $("gNotifMute").onchange=()=>{if($("gNotifMute").checked)GROUP_MUTES[key]=true;else delete GROUP_MUTES[key];try{localStorage.setItem(GROUP_MUTES_KEY,JSON.stringify(GROUP_MUTES));$("gNotifMsg").textContent="تنظیم اعلان ذخیره شد ✓";}catch(e){$("gNotifMsg").textContent="ذخیره در این دستگاه انجام نشد؛ فضای مرورگر را بررسی کن.";};};
+}
+async function openMemberPerms(gid){
+ if(!cur||cur.role!=="owner"){callToast("فقط مالک گروه می‌تواند اختیارات اعضا را تغییر دهد.");return;}
+ const {data,error}=await sb.from("groups").select("member_perms").eq("id",gid).single();
+ if(error){callToast(gErr(error));return;}
+ let saved=Object.assign({send_messages:true,send_media:true},data&&data.member_perms||{});
+ const html=()=>`<button type="button" class="gm-b" id="gMemberPermBack">‹ بازگشت</button><h3 style="margin-top:12px">اختیارات اعضای عادی</h3><p class="pg-info">این دسترسی‌ها برای همه اعضای عادی گروه اعمال می‌شود. مالک و مدیران تحت تأثیر این دو گزینه نیستند.</p><div class="pm-list"><label class="pm-it"><span><b>ارسال پیام متنی</b><small>اجازه نوشتن و فرستادن پیام</small></span><input type="checkbox" class="g-member-perm" data-k="send_messages" ${saved.send_messages!==false?"checked":""}></label><label class="pm-it"><span><b>ارسال رسانه</b><small>اجازه فرستادن عکس، ویدیو و فایل صوتی</small></span><input type="checkbox" class="g-member-perm" data-k="send_media" ${saved.send_media!==false?"checked":""}></label></div><div class="msg" id="gMemberPermMsg" role="status" aria-live="polite"></div>`;
+ modal(html());
+ $("gMemberPermBack").onclick=()=>openGroupSettings(gid);
+ $("mdBody").querySelectorAll(".g-member-perm").forEach(sw=>sw.onchange=async()=>{
+  const next={...saved};$("mdBody").querySelectorAll(".g-member-perm").forEach(x=>next[x.dataset.k]=x.checked);
+  const {error:e}=await sb.rpc("set_group_member_perms",{p_gid:gid,p_perms:next});
+  if(e){sw.checked=!sw.checked;$("gMemberPermMsg").textContent=gErr(e);return;}
+  saved=next;$("gMemberPermMsg").textContent="ذخیره شد ✓";
+ });
+}
+function openGroupVisibility(gid){
+ if(!cur||cur.role!=="owner"){callToast("فقط مالک گروه می‌تواند نوع گروه را تغییر دهد.");return;}
+ const c=SG.find(x=>x.gid===gid)||cur;
+ modal(`<h3>نوع گروه</h3><p class="pg-info">گروه عمومی در جست‌وجوی گروه‌ها دیده می‌شود. گروه خصوصی در فهرست عمومی نمایش داده نمی‌شود و لینک دعوت عمومی آن غیرفعال است.</p><div class="pm-list"><label class="pm-it"><span><b>گروه عمومی</b><small>قابل مشاهده در فهرست گروه‌های عمومی</small></span><input type="radio" name="gVisibility" value="public" ${c.pub!==false?"checked":""}></label><label class="pm-it"><span><b>گروه خصوصی</b><small>فقط اعضا در فهرست گروه‌های خود می‌بینند</small></span><input type="radio" name="gVisibility" value="private" ${c.pub===false?"checked":""}></label></div><div class="msg" id="gVisibilityMsg" role="status" aria-live="polite"></div><button type="button" class="btn g" id="gVisibilityBack">بازگشت</button>`);
+ $("gVisibilityBack").onclick=close;
+ $("mdBody").querySelectorAll('input[name="gVisibility"]').forEach(r=>r.onchange=async()=>{
+  const isPublic=r.value==="public";$("mdBody").querySelectorAll('input[name="gVisibility"]').forEach(x=>x.disabled=true);
+  const {error}=await sb.rpc("set_group_visibility",{p_gid:gid,p_public:isPublic});
+  if(error){r.checked=!r.checked;$("gVisibilityMsg").textContent=gErr(error);$("mdBody").querySelectorAll('input[name="gVisibility"]').forEach(x=>x.disabled=false);return;}
+  c.pub=isPublic;if(cur&&cur.gid===gid)cur.pub=isPublic;
+  renderList();openGroupSettings(gid);
+ });
+}
+
 function openGroupSettings(gid){
  const c=SG.find(x=>x.gid===gid)||cur;
  if(!c||!cur||cur.gid!==gid)return;
@@ -3328,7 +3365,8 @@ function openGroupSettings(gid){
    ${canAdd?row("gsAdd","👥","افزودن عضو","دعوت کاربران جدید به گروه"):""}
    ${canBan?row("gsBans","🚫","مسدودشدگان","مدیریت کاربران مسدودشده"):""}
    ${canManage?row("gsAdmins","🛡️","مدیران گروه","مشاهده و مدیریت مدیران"):""}
-   ${me==="owner"?row("gsMemberPerms","🔐","اختیارات اعضا","دسترسی‌های اعضای عادی"):""}
+   ${me==="owner"?row("gsMemberPerms","🔐","اختیارات اعضا","کنترل ارسال پیام و رسانه"):""}
+   ${me==="owner"?row("gsVisibility","🌐","نوع گروه",c.pub!==false?"عمومی · تغییر وضعیت":"خصوصی · تغییر وضعیت"):""}
    ${c.pub!==false?row("gsInvite","🔗","لینک دعوت","کپی لینک عضویت در گروه"):""}
   </div>
  </div>`;
@@ -3337,7 +3375,8 @@ function openGroupSettings(gid){
  if($("gsAdd"))$("gsAdd").onclick=()=>openGroupAddMember(gid);
  if($("gsBans"))$("gsBans").onclick=()=>openBans(gid,true);
  if($("gsAdmins"))$("gsAdmins").onclick=()=>openGroupAdmins(gid);
- if($("gsMemberPerms"))$("gsMemberPerms").onclick=()=>modal(`<button type="button" class="gm-b" id="gMemberPermBack">‹ بازگشت</button><h3 style="margin-top:12px">اختیارات اعضای عادی</h3><p class="pg-info">این بخش شامل اجازه ارسال پیام، افزودن عضو، مشاهده اعضا و مشاهده مدیران است. در دیتابیس فعلی هنوز تنظیمات پیش‌فرض اعضا و کنترل واقعی این دسترسی‌ها وجود ندارد. برای فعال‌سازی امن آن باید تغییر ساختار دیتابیس و قوانین دسترسی انجام شود؛ فعلاً کلید نمایشی نمی‌گذارم که اشتباهاً فکر کنی ذخیره و اجرا می‌شود.</p>`),setTimeout(()=>{$("gMemberPermBack")&&($("gMemberPermBack").onclick=()=>openGroupSettings(gid));},0);
+ if($("gsMemberPerms"))$("gsMemberPerms").onclick=()=>openMemberPerms(gid);
+ if($("gsVisibility"))$("gsVisibility").onclick=()=>openGroupVisibility(gid);
  if($("gsInvite"))$("gsInvite").onclick=()=>openGroupInviteCopyDialog(gid);
 }
 
@@ -3359,7 +3398,7 @@ function openGroupInfo(fresh){
  $("gpB").onclick=gpHide;
  if($("gMainSettings"))$("gMainSettings").onclick=()=>openGroupSettings(gid);
  if($("gSearchRow"))$("gSearchRow").onclick=()=>{$("gpMemberQ")?.scrollIntoView({behavior:"smooth",block:"center"});setTimeout(()=>$("gpMemberQ")?.focus(),180);};
- if($("gNotifRow"))$("gNotifRow").onclick=()=>modal(`<h3>اعلان‌های گروه</h3><p class="pg-info">تنظیمات بی‌صداسازی اعلان‌های این گروه هنوز به سامانهٔ اعلان‌ها متصل نیست؛ برای اینکه وضعیت اشتباه نشان داده نشود، فعلاً کلید روشن/خاموش نمایشی اضافه نشده است.</p><button type="button" class="btn g" id="gNotifClose">بستن</button>`),setTimeout(()=>{$("gNotifClose")&&($("gNotifClose").onclick=close)},0);
+ if($("gNotifRow"))$("gNotifRow").onclick=()=>openGroupNotifications(gid);
  $("gpBody").querySelectorAll(".gm-b").forEach(b=>b.onclick=()=>gAct(b.dataset.a,b.closest(".gm-row").dataset.u));
  $("gpBody").querySelectorAll(".gm-row").forEach(r=>r.querySelectorAll(".av,.gm-n").forEach(el=>{el.classList.add("lnk");el.onclick=()=>openProfile(r.dataset.u);}));
  if($("gShare"))$("gShare").onclick=()=>openGroupInviteCopyDialog(gid);
