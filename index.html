@@ -1721,10 +1721,18 @@ const safeM=u=>typeof u==="string"&&u.startsWith(PUB)?u:"";
 async function upload(blob,ext,type,dur){const p=Date.now()+"-"+Math.random().toString(36).slice(2,8)+(dur?"-d"+dur:"")+"."+ext;const {error}=await sb.storage.from(BUCKET).upload(p,blob,{contentType:type});if(error)throw error;return sb.storage.from(BUCKET).getPublicUrl(p).data.publicUrl;}
 function clearPending(){pending=null;pendingFile=null;pendingKind="image";upDone=null;$("prev").classList.remove("show","err","up");$("upb").style.width="0";$("prevImg").style.display="";$("prev").querySelector("span").textContent="عکس آماده ارسال";vpPrevReset();pendingDur=0;pendingPeaks=null;}
 let cur=null,tab="all",query="",pending=null,pubMsgs=[],pubErr=false,sig="";
+const DRAFTS_KEY="arya_message_drafts_v1";
+function draftIdentity(c){if(!c)return"";return c.gid?"group:"+c.gid:c.type==="private"?"private:"+c.peer:c.id===DEF?"public:"+String(c.id):"chat:"+String(c.id);}
+function readDrafts(){try{const d=JSON.parse(localStorage.getItem(DRAFTS_KEY)||"{}");return d&&typeof d==="object"&&!Array.isArray(d)?d:{};}catch{return{};}}
+function saveCurrentDraft(){if(!cur)return;try{const drafts=readDrafts(),key=draftIdentity(cur),value=$("txt").value;if(value)drafts[key]=value;else delete drafts[key];localStorage.setItem(DRAFTS_KEY,JSON.stringify(drafts));}catch(e){console.warn("ذخیره پیش‌نویس ناموفق بود:",e);}}
+function restoreCurrentDraft(){const value=readDrafts()[draftIdentity(cur)]||"";$("txt").value=value;$("txt").style.height="auto";$("txt").style.height=Math.min($("txt").scrollHeight,120)+"px";}
+function clearCurrentDraft(){if(!cur)return;try{const drafts=readDrafts();delete drafts[draftIdentity(cur)];localStorage.setItem(DRAFTS_KEY,JSON.stringify(drafts));}catch{}}
 const archivedChatKeys=new Set();
 const chatSettingType=c=>c&&c.id===DEF?"public":(c&&["private","group","channel"].includes(c.type)?c.type:"group");
-async function loadArchiveSettings(){if(!ME)return;try{const {data,error}=await sb.from("user_chat_settings").select("chat_type,chat_id,archived").eq("user_id",ME.id);if(error)throw error;archivedChatKeys.clear();for(const r of data||[])if(r.archived)archivedChatKeys.add(String(r.chat_id));}catch(e){console.warn("بارگذاری بایگانی ناموفق بود:",e);}}
-async function setChatsArchived(chats,archived){if(!ME)throw new Error("ابتدا وارد حساب شو.");const rows=chats.map(c=>({user_id:ME.id,chat_type:chatSettingType(c),chat_id:String(c.id),archived:!!archived,updated_at:new Date().toISOString()}));const {error}=await sb.from("user_chat_settings").upsert(rows,{onConflict:"user_id,chat_type,chat_id"});if(error)throw error;for(const c of chats){if(archived)archivedChatKeys.add(String(c.id));else archivedChatKeys.delete(String(c.id));}}
+const chatSettingKey=c=>chatSettingType(c)+":"+String(c.id);
+const isChatArchived=c=>archivedChatKeys.has(chatSettingKey(c));
+async function loadArchiveSettings(){if(!ME)return;try{const {data,error}=await sb.from("user_chat_settings").select("chat_type,chat_id,archived").eq("user_id",ME.id);if(error)throw error;archivedChatKeys.clear();for(const r of data||[])if(r.archived)archivedChatKeys.add(String(r.chat_type)+":"+String(r.chat_id));}catch(e){console.warn("بارگذاری بایگانی ناموفق بود:",e);}}
+async function setChatsArchived(chats,archived){if(!ME)throw new Error("ابتدا وارد حساب شو.");const rows=chats.map(c=>({user_id:ME.id,chat_type:chatSettingType(c),chat_id:String(c.id),archived:!!archived,updated_at:new Date().toISOString()}));const {error}=await sb.from("user_chat_settings").upsert(rows,{onConflict:"user_id,chat_type,chat_id"});if(error)throw error;for(const c of chats){const key=chatSettingKey(c);if(archived)archivedChatKeys.add(key);else archivedChatKeys.delete(key);}}
 let pubKnown=null,pubCursor=null,pubOldestCursor=null,pubOlderLoading=false,pubOlderDone=false,ncReady=false,pubLoaded=false,pcLoaded=false,UN={};
 const PUB_CACHE_KEY="arya_public_messages_cache_v1";
 function restorePublicCache(){
@@ -1948,7 +1956,7 @@ function renderList(){
   const L=$("list");$("qx").style.display=query?"block":"none";updateGroupTools();
   
   const all=view();trackUnread(all);let rows=all;
- if(query)rows=rows.filter(c=>!archivedChatKeys.has(String(c.id))&&c.title.toLowerCase().includes(query.toLowerCase()));else if(tab==="archived")rows=rows.filter(c=>archivedChatKeys.has(String(c.id)));else rows=rows.filter(c=>!archivedChatKeys.has(String(c.id))&&(tab==="all"||c.type===tab));
+ if(query)rows=rows.filter(c=>!isChatArchived(c)&&c.title.toLowerCase().includes(query.toLowerCase()));else if(tab==="archived")rows=rows.filter(isChatArchived);else rows=rows.filter(c=>!isChatArchived(c)&&(tab==="all"||c.type===tab));
  let h=rows.map(itemHtml).join("");
  if(!rows.length&&!(query&&(UR.length||pgVis().length)))h=`<div class="empty">${query?"نتیجه‌ای پیدا نشد.":tab==="archived"?"گفتگوی بایگانی‌شده‌ای نداری.":tab==="private"?"گفتگوی خصوصی نداری.<br>نام کاربری را جست‌وجو کن و پیام بده.":tab==="group"?"گروهی نداری.<br>با «گروه جدید» یکی بساز.":tab==="channel"?"کانالی نداری.<br>با «کانال جدید» یکی بساز.":"گفتگویی وجود ندارد."}</div>`;
  if(query&&UR.length)h+=`<div class="sec">کاربران</div>`+UR.filter(p=>!PC.some(c=>c.peer===p.id&&!isPrivateChatHidden(p.id))).map(p=>itemHtml({...mkPC(p.id),unread:0})).join("");if(query&&pgVis().length)h+=`<div class="sec">گروه‌های عمومی</div>`+pgVis().map(pgItemHtml).join("");
@@ -1965,7 +1973,7 @@ function openChat(id){
  if(multiMode)multiStop();
  if(upBusy&&(!cur||cur.id!==id))abortUp();
  if(cur&&cur.id!==id){if(voiceRecorder)cancelVoice();if(pendingKind==="audio"&&pending)clearPending();vpStopAll();}
- if(id.startsWith("u:")&&ME&&UUID.test(id.slice(2))&&!view().some(x=>x.id===id))PC.push(mkPC(id.slice(2)));const c=view().find(x=>x.id===id);if(!c)return;cur=c;sig="";ntDrop(c.id);clearReply();
+ if(id.startsWith("u:")&&ME&&UUID.test(id.slice(2))&&!view().some(x=>x.id===id))PC.push(mkPC(id.slice(2)));const c=view().find(x=>x.id===id);if(!c)return;cur=c;restoreCurrentDraft();sig="";ntDrop(c.id);clearReply();
  $("ph").style.display="none";$("chat").style.display="flex";$("app").classList.add("open");callBtns();
  setAv($("hAv"),c.avatar,c.title);$("hNm").textContent=c.title;[$("hAv"),$("hNm")].forEach(e=>e.classList.toggle("lnk",c.type==="private"));
  $("hSub").textContent=c.type==="private"?presenceText(P[c.peer]):id===DEF&&pubErr?"اتصال برقرار نیست":TL[c.type]+(c.pub===false?" خصوصی":" عمومی");
@@ -2435,7 +2443,7 @@ async function send(){
    const c=D.chats.find(x=>x.id===cur.id);c.last=text|| (m.aud?"🎙️ پیام صوتی":"");c.img=!!m.img;c.at=m.at;
   }
   if(cur.id===DEF||(!cur.gid&&cur.type!=="private"))rememberSentEmojis(text);
-  save();$("txt").value="";$("txt").style.height="";clearPending();clearReply();
+  save();$("txt").value="";$("txt").style.height="";clearCurrentDraft();clearPending();clearReply();
   renderMsgs(true);renderList();
  }catch(e){console.error(e);alert("ارسال ناموفق بود. اتصال، مجوز ذخیره‌سازی و وجود ستون‌های رسانه را بررسی کن.");}
  $("sendB").disabled=false;sendBusy=false;
@@ -2535,7 +2543,7 @@ function vpPrevReset(){
 $("msgs").addEventListener("click",vpClick);$("prev").addEventListener("click",vpClick);
 $("sendB").onclick=send;
 $("txt").onkeydown=e=>{if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing&&matchMedia("(pointer:fine)").matches){e.preventDefault();send();}};
-$("txt").oninput=()=>{$("txt").style.height="auto";$("txt").style.height=Math.min($("txt").scrollHeight,120)+"px";};
+$("txt").oninput=()=>{$("txt").style.height="auto";$("txt").style.height=Math.min($("txt").scrollHeight,120)+"px";saveCurrentDraft();};
 $("attB").onclick=e=>{e.stopPropagation();$("emo").classList.remove("open");$("atm").classList.toggle("open");};
 const pickFile=acc=>{$("atm").classList.remove("open");$("file").accept=acc;$("file").click();};
 $("atI").onclick=()=>pickFile("image/*");$("atV").onclick=()=>pickFile("video/*");
