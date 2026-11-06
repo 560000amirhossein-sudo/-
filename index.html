@@ -2836,7 +2836,7 @@ async function boot0(user){
  if(!user){presenceStop();endLocal();closeInc();stopCallRT();ME=null;PROF=null;stopRT();stopGRT();GU={};PGR=[];PC=[];PM={};HID=new Set();UR=[];cur=null;UN={};SG=[];GM={};GMEM={};GMR={};pcLoaded=false;ncReady=false;for(const k in UCNT)delete UCNT[k];ntClear();$("chat").style.display="none";$("ph").style.display="grid";$("app").classList.remove("open");gate("login");showGate(true);renderList();return;}
  ME=user;
  const {data,error}=await ownProf(user.id);
- if(error){alert("بارگذاری پروفایل ناموفق بود؛ دوباره وارد شو.");await sb.auth.signOut();return;}
+ if(error){console.error("بارگذاری پروفایل ناموفق بود؛ نشست ورود حفظ شد:",error);ME=null;PROF=null;gate("login");showGate(true);alert("بارگذاری پروفایل ناموفق بود. از حساب خارج نشده‌ای؛ اتصال را بررسی کن و صفحه را تازه‌سازی کن.");return;}
  if(!data){gate("complete");showGate(true);return;}
  PROF={...data,first_name:(user.user_metadata&&user.user_metadata.first_name)||"",last_name:(user.user_metadata&&user.user_metadata.last_name)||"",birth_date:(user.user_metadata&&user.user_metadata.birth_date)||""};P[data.id]=data;D.me.name=data.username;D.me.avatar=data.avatar_url;save();setMe();showGate(false);
  presenceStart();startRT();startCallRT();await refreshPC();await refreshSG();await loadGU();startGRT();trackUnread(view());pcLoaded=true;chkReady();renderList();if(wide())openChat(DEF);
