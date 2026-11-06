@@ -1501,6 +1501,7 @@ try{var F=parseInt(localStorage.getItem("arya_text_scale_v1"),10);if(F>=85&&F<=1
 })();
 </script>
 <script type="module">
+let navCnt={private:0,group:0};
 // بارگذاری کتابخانه با چند مسیر جایگزین؛ خرابی یک CDN نباید برنامه را روی لوگو متوقف کند.
 let createClient;
 try {
@@ -1524,8 +1525,6 @@ try {
   throw loadError;
 }
 const sb=createClient("https://jpsttfuajyfvysqydqqj.supabase.co","sb_publishable_D_D03bZTtXlKxPgz74MYfQ_Vvpmjn3x",{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
-// شمارنده منوی پایین پیش از اولین renderList مقداردهی می‌شود.
-let navCnt={private:0,group:0};
 // وضعیت تماس باید پیش از بازیابی نشست و اجرای startCallRT مقداردهی شود.
 let CALL=null,INC=null,callRT=null,callOk=false,ringInt=null,tickT=null,hbT=null,iceCache=null,iceAt=0,audioCtx=null;
 const $=id=>document.getElementById(id);
