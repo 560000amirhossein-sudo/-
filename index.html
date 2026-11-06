@@ -3097,7 +3097,12 @@ function groupReceiptStats(m){
  if(!m||!cur||!cur.gid)return{read:0,total:0,all:false};
  const members=GMR[cur.gid]||[],sent=new Date(m.created_at||0).getTime();
  const recipients=members.filter(x=>x.user_id!==m.sender_id&&(!x.joined_at||new Date(x.joined_at).getTime()<=sent));
- const reads=(GMSGREAD[cur.gid]||{})[String(m.id)]||{};const read=recipients.filter(x=>!!reads[x.user_id]).length,total=recipients.length;
+ const reads=(GMSGREAD[cur.gid]||{})[String(m.id)]||{},groupReads=GREAD[cur.gid]||{};
+ // رسیدهای قدیمی از last_read_at در group_reads می‌آیند؛ رسیدهای جدید در group_message_reads.
+ const read=recipients.filter(x=>{
+  if(reads[x.user_id])return true;
+  const last=groupReads[x.user_id];return !!last&&new Date(last).getTime()>=sent;
+ }).length,total=recipients.length;
  return{read,total,all:total>0&&read>=total};
 }
 function groupMsgRead(m){return groupReceiptStats(m).read>0;}
