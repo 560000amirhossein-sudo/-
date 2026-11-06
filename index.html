@@ -2011,7 +2011,7 @@ function forwardModal(sourceItems){
 .gset-image-row{display:flex;align-items:center;gap:13px;padding:12px;border:1px dashed #a78bfa55;border-radius:15px;background:#a78bfa0c}
 .gset-image-row .av{width:54px;height:54px;flex:0 0 54px}
 .gset-image-row input{min-width:0;flex:1;color:#cfc8dc;font-size:11px}
-.gset-admin-list{display:flex;flex-direction:column;gap:8px}
+.gset-search-row{display:flex;align-items:stretch;gap:8px}.gset-search-row input{flex:1;min-width:0}.gset-search-btn{flex:0 0 auto;padding:0 14px;border-radius:13px;border:1px solid #a78bfa66;background:#8b5cf626;color:#e9ddff;font:inherit;font-size:12px;font-weight:850}.gset-admin-list{display:flex;flex-direction:column;gap:8px}
 .gset-admin-list .gm-row{padding:10px;background:#ffffff09;border-color:#ffffff14}
 .gset-admin-list .gm-a{width:auto;margin-inline-start:auto}
 .gset-empty{padding:20px 12px;text-align:center;border:1px dashed #ffffff22;border-radius:14px;color:#aaa4bb;font-size:12px;line-height:1.9}
@@ -3358,7 +3358,7 @@ async function openBans(gid,backToSettings){
  const rows=(data||[]);
  const body=`<section class="gset-dialog-section"><h4 class="gset-dialog-section-title"><i>🚫</i> فهرست مسدودشدگان <span class="gp-count">${rows.length.toLocaleString("fa-IR")} نفر</span></h4><p class="gset-dialog-help">افراد این فهرست تا زمان رفع مسدودیت نمی‌توانند دوباره به گروه بپیوندند.</p><div class="gset-admin-list">${rows.map(r=>{const p=P[r.user_id]||{};return `<div class="gm-row" data-u="${esc(r.user_id)}">${avHtml(p.avatar_url,pName(p),"s")}<div class="gm-i"><div class="gm-n">${esc(pName(p))}</div><div class="gm-u">@${esc(p.username||"")}</div></div><div class="gm-a"><button type="button" class="gm-b" data-a="unban">رفع مسدودیت</button></div></div>`;}).join("")||'<div class="gset-empty">هنوز کاربری مسدود نشده است.</div>'}</div></section>`;
  const ui=groupSettingsDialog("کاربران مسدودشده","مدیریت دسترسی دوبارهٔ کاربران به گروه.",body,()=>backToSettings?openGroupSettings(gid):openGroupInfo(),"بستن");
- ui.save.onclick=close;ui.save.textContent="بستن";
+ $("gsetDialogCancel").hidden=true;ui.save.onclick=close;ui.save.textContent="بستن";
  $("mdBody").querySelectorAll('[data-a="unban"]').forEach(b=>b.onclick=async()=>{
   const row=b.closest(".gm-row");if(!row)return;b.disabled=true;b.textContent="در حال انجام…";
   const {error:e}=await sb.rpc("unban_group_member",{p_gid:gid,p_uid:row.dataset.u});
@@ -3377,9 +3377,9 @@ function removeDlg(gid,uid){const p=P[uid]||{};
 async 
 async function openGroupAddMember(gid){
  const canAdd=cur&&cur.gid===gid&&(cur.role==="owner"||myPerm("invite_members"));if(!canAdd){callToast("اجازه افزودن عضو را نداری.");return;}
- const body=`<section class="gset-dialog-section"><h4 class="gset-dialog-section-title"><i>👥</i> پیدا کردن عضو جدید</h4><p class="gset-dialog-help">نام نمایشی یا نام کاربری را وارد کن. فقط حساب‌هایی نمایش داده می‌شوند که هنوز عضو گروه نیستند.</p><input type="search" id="gAddSearch" dir="auto" maxlength="60" autocomplete="off" placeholder="نام یا نام کاربری…"><div class="ga-results" id="gAddResults"><div class="gset-empty">برای شروع، حداقل دو حرف بنویس.</div></div></section>`;
- const ui=groupSettingsDialog("افزودن عضو","کاربر موردنظر را جست‌وجو و سپس به گروه اضافه کن.",body,()=>openGroupSettings(gid),"بازگشت");
- ui.save.onclick=()=>openGroupSettings(gid);
+ const body=`<section class="gset-dialog-section"><h4 class="gset-dialog-section-title"><i>👥</i> پیدا کردن عضو جدید</h4><p class="gset-dialog-help">نام نمایشی یا نام کاربری را وارد کن. فقط حساب‌هایی نمایش داده می‌شوند که هنوز عضو گروه نیستند.</p><div class="gset-search-row"><input type="search" id="gAddSearch" dir="auto" maxlength="60" autocomplete="off" placeholder="نام یا نام کاربری…"><button type="button" class="gset-search-btn" id="gAddFind">جست‌وجو</button></div><div class="ga-results" id="gAddResults"><div class="gset-empty">برای شروع، حداقل دو حرف بنویس.</div></div></section>`;
+ const ui=groupSettingsDialog("افزودن عضو","کاربر موردنظر را جست‌وجو و سپس به گروه اضافه کن.",body,()=>openGroupSettings(gid),"بازگشت به تنظیمات");
+ $("gsetDialogCancel").hidden=true;ui.save.onclick=()=>openGroupSettings(gid);
  const input=$("gAddSearch"),box=$("gAddResults");
  let request=0;
  const search=async()=>{
@@ -3411,8 +3411,8 @@ function openGroupAdmins(gid){
  const rows=(GMR[gid]||[]).slice(),staff=rows.filter(r=>r.role==="owner"||r.role==="admin"),members=rows.filter(r=>r.role==="member"),canPromote=cur&&cur.gid===gid&&(cur.role==="owner"||myPerm("add_admins"));
  const item=r=>{const p=P[r.user_id]||{},self=r.user_id===ME.id;return `<div class="gm-row" data-u="${esc(r.user_id)}">${avHtml(p.avatar_url,pName(p),"s")}<div class="gm-i"><div class="gm-n">${esc(pName(p))}${self?" (تو)":""}</div><div class="gm-u">@${esc(p.username||"")} · ${roleFa(r.role)}</div></div><div class="gm-a">${r.role==="admin"&&cur.role==="owner"?`<button type="button" class="gm-b" data-admin-perms="${esc(r.user_id)}">اختیارات</button><button type="button" class="gm-b d" data-admin-demote="${esc(r.user_id)}">عزل</button>`:""}</div></div>`;};
  const body=`<section class="gset-dialog-section"><h4 class="gset-dialog-section-title"><i>🛡️</i> مدیران فعلی <span class="gp-count">${staff.length.toLocaleString("fa-IR")} نفر</span></h4><div class="gset-admin-list">${staff.map(item).join("")||'<div class="gset-empty">هنوز مدیری تعیین نشده است.</div>'}</div></section>${canPromote?`<section class="gset-dialog-section"><h4 class="gset-dialog-section-title"><i>⬆️</i> ارتقای عضو به مدیریت</h4><p class="gset-dialog-help">مدیر جدید می‌تواند فقط دسترسی‌هایی را داشته باشد که مالک برایش فعال کند.</p><div class="gset-admin-list">${members.map(r=>{const p=P[r.user_id]||{};return `<div class="gm-row">${avHtml(p.avatar_url,pName(p),"s")}<div class="gm-i"><div class="gm-n">${esc(pName(p))}</div><div class="gm-u">@${esc(p.username||"")}</div></div><div class="gm-a"><button type="button" class="gm-b" data-admin-promote="${esc(r.user_id)}">ارتقا</button></div></div>`;}).join("")||'<div class="gset-empty">عضو عادی برای ارتقا وجود ندارد.</div>'}</div></section>`:""}`;
- const ui=groupSettingsDialog("مدیران گروه","نقش‌ها و سطح دسترسی مدیران را مدیریت کن.",body,()=>openGroupSettings(gid),"بازگشت");
- ui.save.onclick=()=>openGroupSettings(gid);
+ const ui=groupSettingsDialog("مدیران گروه","نقش‌ها و سطح دسترسی مدیران را مدیریت کن.",body,()=>openGroupSettings(gid),"بازگشت به تنظیمات");
+ $("gsetDialogCancel").hidden=true;ui.save.onclick=()=>openGroupSettings(gid);
  $("mdBody").querySelectorAll("[data-admin-perms]").forEach(b=>b.onclick=()=>openPerms(gid,b.dataset.adminPerms,true));
  $("mdBody").querySelectorAll("[data-admin-demote]").forEach(b=>b.onclick=()=>{close();gAct("demote",b.dataset.adminDemote);});
  $("mdBody").querySelectorAll("[data-admin-promote]").forEach(b=>b.onclick=async()=>{
