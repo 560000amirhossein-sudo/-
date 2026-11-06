@@ -1779,13 +1779,13 @@ function openChat(id){
  $("hSub").textContent=c.type==="private"?"@"+c.uname:id===DEF&&pubErr?"اتصال برقرار نیست":TL[c.type]+(c.pub===false?" خصوصی":" عمومی");
  const p=canPost();$("attB").style.display=c.type==="private"?"none":"";$("comp").style.display=p?"flex":"none";$("joinbar").style.display=p?"none":"block";$("joinbar").textContent="فقط مدیر کانال می‌تواند پیام ارسال کند.";
  if(id===DEF&&pubMsgs.length){D.seen=pubMsgs[pubMsgs.length-1].created_at;save();}
- renderMsgs(true);renderList();
+ renderMsgs(true);$("msgs").scrollTop=$("msgs").scrollHeight;renderList();
  if(c.gid)Promise.all([loadGM(c.gid),loadMembers(c.gid)]).then(([ok])=>{if(cur&&cur.id===c.id){renderMsgs(true);if(ok&&!document.hidden)markGroupRead(c.gid);}renderList();});
  if(c.type==="private")loadPM(c.peer).then(()=>{if(cur&&cur.id===c.id){renderMsgs(true);}renderList();});
 }
 function renderMsgs(force,preserve){
  if(!cur)return;renderPin();const data=msgsOf(cur),s=cur.id+"#"+EXV+"#"+data.map(m=>m.id+(m.replyTo?m.replyTo.id:"")+"~"+(m.text||"")).join("\u0001");if(s===sig&&!force)return;sig=s;const ik=cur.id+"|"+data.map(m=>m.id).join();if(ik!==EXI){EXI=ik;exSoon();}
- const box=$("msgs"),top=box.scrollTop,oldHeight=box.scrollHeight,near=!preserve&&(box.scrollHeight-box.scrollTop-box.clientHeight<120||force);
+ const box=$("msgs"),top=box.scrollTop,oldHeight=box.scrollHeight,near=!preserve&&(box.scrollHeight-box.scrollTop-box.clientHeight<120);
  const prev=RND.id===cur.id?RND.ids:null,fresh=prev?data.filter(m=>!prev.has(String(m.id))).length:0,anim=fresh>0&&fresh<=5;
  RND={id:cur.id,ids:new Set(data.map(m=>String(m.id)))};
  const priv=cur.type==="private",grp=cur.type==="group",own=!priv&&cur.id!==DEF&&!cur.gid&&cur.role==="owner",frag=document.createDocumentFragment();
@@ -1819,7 +1819,7 @@ function renderMsgs(force,preserve){
   });
   const pu=m.uid||null,pn=!m.mine&&!pu&&cur.id===DEF?m.name:null;
   if(pu||pn)r.querySelectorAll(":scope>.av,.who>span:first-child").forEach(el=>{el.classList.add("lnk");el.tabIndex=0;el.setAttribute("role","button");el.onclick=e=>{e.stopPropagation();if(pu)openProfile(pu);else openProfileByName(pn);};el.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();el.click();}};});
-  const pic=r.querySelector("img.pic");if(pic){pic.onclick=()=>{$("lbImg").src=img;$("lb").classList.add("open");};pic.onload=()=>{if(near)box.scrollTop=box.scrollHeight;};}
+  const pic=r.querySelector("img.pic");if(pic){pic.onclick=()=>{$("lbImg").src=img;$("lb").classList.add("open");};}
   const d=r.querySelector(".del");if(d)d.onclick=e=>{e.stopPropagation();if(cur.gid){delGM(m);return;}if(cur.type==="private"){delPM(m);return;}delLocalMessage(m);};
   const receipt=r.querySelector(".group-read-receipt");if(receipt)receipt.onclick=e=>{e.stopPropagation();showGroupMessageReaders(m.id);};
   const rq=r.querySelector(".rquote");if(rq)rq.onclick=e=>{e.stopPropagation();scrollToMsg(String(m.replyTo.id));};r.querySelectorAll(".rxc").forEach(b=>b.onclick=e=>{e.stopPropagation();reactTo(m.id,b.dataset.e);});
