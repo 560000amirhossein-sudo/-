@@ -1524,6 +1524,8 @@ try {
   throw loadError;
 }
 const sb=createClient("https://jpsttfuajyfvysqydqqj.supabase.co","sb_publishable_D_D03bZTtXlKxPgz74MYfQ_Vvpmjn3x",{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+// شمارنده منوی پایین پیش از اولین renderList مقداردهی می‌شود.
+let navCnt={private:0,group:0};
 // وضعیت تماس باید پیش از بازیابی نشست و اجرای startCallRT مقداردهی شود.
 let CALL=null,INC=null,callRT=null,callOk=false,ringInt=null,tickT=null,hbT=null,iceCache=null,iceAt=0,audioCtx=null;
 const $=id=>document.getElementById(id);
@@ -3903,7 +3905,6 @@ setInterval(async()=>{if(!ME||CALL||INC||callOk||document.hidden)return;
  if(data&&data[0])onIncoming(data[0]);},4000);
 
 // ---- منوی پایین موبایل ----
-let navCnt={private:0,group:0};
 function navMark(){
  const sr=document.activeElement===$("q")||!!query,pr=($("md").classList.contains("open")&&!!$("pAv"))||($("st").classList.contains("open")&&!!$("sxAccount")&&!$("sxAccount").hidden);
  const a=pr?"profile":sr?"search":tab==="all"?"home":tab==="private"?"chats":tab==="group"?"groups":"";
