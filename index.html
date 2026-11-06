@@ -1782,7 +1782,7 @@ function openChat(id){
  if(id.startsWith("u:")&&ME&&UUID.test(id.slice(2))&&!view().some(x=>x.id===id))PC.push(mkPC(id.slice(2)));const c=view().find(x=>x.id===id);if(!c)return;cur=c;sig="";ntDrop(c.id);clearReply();
  $("ph").style.display="none";$("chat").style.display="flex";$("app").classList.add("open");callBtns();
  setAv($("hAv"),c.avatar,c.title);$("hNm").textContent=c.title;[$("hAv"),$("hNm")].forEach(e=>e.classList.toggle("lnk",c.type==="private"));
- $("hSub").textContent=c.type==="private"?"@"+c.uname:id===DEF&&pubErr?"اتصال برقرار نیست":TL[c.type]+(c.pub===false?" خصوصی":" عمومی");
+ $("hSub").textContent=c.type==="private"?presenceText(P[c.peer]):id===DEF&&pubErr?"اتصال برقرار نیست":TL[c.type]+(c.pub===false?" خصوصی":" عمومی");
  const p=canPost();$("attB").style.display=c.type==="private"?"none":"";$("comp").style.display=p?"flex":"none";$("joinbar").style.display=p?"none":"block";$("joinbar").textContent="فقط مدیر کانال می‌تواند پیام ارسال کند.";
  if(id===DEF&&pubMsgs.length){D.seen=pubMsgs[pubMsgs.length-1].created_at;save();}
  renderMsgs(true);$("msgs").scrollTop=$("msgs").scrollHeight;renderList();
@@ -2833,13 +2833,13 @@ async function go(mode){
 }
 async function boot(u){try{await boot0(u);}catch(e){showErr("boot: "+ser(e));}}
 async function boot0(user){
- if(!user){endLocal();closeInc();stopCallRT();ME=null;PROF=null;stopRT();stopGRT();GU={};PGR=[];PC=[];PM={};HID=new Set();UR=[];cur=null;UN={};SG=[];GM={};GMEM={};GMR={};pcLoaded=false;ncReady=false;for(const k in UCNT)delete UCNT[k];ntClear();$("chat").style.display="none";$("ph").style.display="grid";$("app").classList.remove("open");gate("login");showGate(true);renderList();return;}
+ if(!user){presenceStop();endLocal();closeInc();stopCallRT();ME=null;PROF=null;stopRT();stopGRT();GU={};PGR=[];PC=[];PM={};HID=new Set();UR=[];cur=null;UN={};SG=[];GM={};GMEM={};GMR={};pcLoaded=false;ncReady=false;for(const k in UCNT)delete UCNT[k];ntClear();$("chat").style.display="none";$("ph").style.display="grid";$("app").classList.remove("open");gate("login");showGate(true);renderList();return;}
  ME=user;
  const {data,error}=await ownProf(user.id);
  if(error){alert("بارگذاری پروفایل ناموفق بود؛ دوباره وارد شو.");await sb.auth.signOut();return;}
  if(!data){gate("complete");showGate(true);return;}
  PROF={...data,first_name:(user.user_metadata&&user.user_metadata.first_name)||"",last_name:(user.user_metadata&&user.user_metadata.last_name)||"",birth_date:(user.user_metadata&&user.user_metadata.birth_date)||""};P[data.id]=data;D.me.name=data.username;D.me.avatar=data.avatar_url;save();setMe();showGate(false);
- startRT();startCallRT();await refreshPC();await refreshSG();await loadGU();startGRT();trackUnread(view());pcLoaded=true;chkReady();renderList();if(wide())openChat(DEF);
+ presenceStart();startRT();startCallRT();await refreshPC();await refreshSG();await loadGU();startGRT();trackUnread(view());pcLoaded=true;chkReady();renderList();if(wide())openChat(DEF);
  let joinGroupParam=new URLSearchParams(location.search).get("joinGroup");
  if(!joinGroupParam){try{joinGroupParam=sessionStorage.getItem("arya_pending_join")||"";}catch(e){joinGroupParam="";}}
  if(joinGroupParam){
@@ -2866,9 +2866,9 @@ const bioHtml=p=>bioOk&&p&&p.bio?`<p class="pf-bio">${esc(p.bio)}</p>`:"";
 function pfOpen(h){const b=$("mdBody");b.className="card pf";b.setAttribute("role","dialog");b.setAttribute("aria-modal","true");$("md").classList.add("pfo");b.innerHTML=h;$("md").classList.add("open");$("pfX").onclick=close;pfCur=null;}
 // ستون bio ممکن است هنوز در جدول profiles ساخته نشده باشد؛ در این حالت بخش بیوگرافی پنهان می‌ماند.
 async function ownProf(uid){
- const r=await sb.from("profiles").select("id,username,display_name,avatar_url,bio").eq("id",uid).maybeSingle();
+ const r=await sb.from("profiles").select("id,username,display_name,avatar_url,bio,last_seen").eq("id",uid).maybeSingle();
  if(!r.error){bioOk=true;return r;}
- if(r.error.code==="42703"||/bio|column/i.test(r.error.message||"")){bioOk=false;return sb.from("profiles").select("id,username,display_name,avatar_url").eq("id",uid).maybeSingle();}
+ if(r.error.code==="42703"||/bio|column/i.test(r.error.message||"")){bioOk=false;return sb.from("profiles").select("id,username,display_name,avatar_url,last_seen").eq("id",uid).maybeSingle();}
  return r;
 }
 function viewMine(note){
@@ -2926,7 +2926,14 @@ $("meAv").onclick=()=>{if(!PROF)return;if(window.openProfileSettings)window.open
 $("hAv").onclick=$("hNm").onclick=()=>{if(cur&&cur.type==="private")openProfile(cur.peer);};
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){if($("md").classList.contains("open"))close();else gpHide();}});
 function mkPC(id){const p=P[id]||{};return{id:"u:"+id,type:"private",peer:id,title:pName(p),uname:p.username||"",avatar:p.avatar_url,desc:p.username?"@"+p.username:""};}
-async function profs(ids,force=false){const m=[...new Set(ids)].filter(i=>UUID.test(i)&&(force||!P[i]||!Object.prototype.hasOwnProperty.call(P[i],"avatar_url")||!P[i].username));if(!m.length)return;const {data,error}=await sb.from("profiles").select("id,username,display_name,avatar_url").in("id",m);if(error){console.warn("بارگذاری پروفایل اعضا:",error);return;}(data||[]).forEach(p=>P[p.id]={...(P[p.id]||{}),...p});}
+async function profs(ids,force=false){const m=[...new Set(ids)].filter(i=>UUID.test(i)&&(force||!P[i]||!Object.prototype.hasOwnProperty.call(P[i],"avatar_url")||!P[i].username));if(!m.length)return;const {data,error}=await sb.from("profiles").select("id,username,display_name,avatar_url,last_seen").in("id",m);if(error){console.warn("بارگذاری پروفایل اعضا:",error);return;}(data||[]).forEach(p=>P[p.id]={...(P[p.id]||{}),...p});}
+const PRESENCE_ONLINE_MS=90000;let presenceBeatTimer=null,presencePollTimer=null,presenceBusy=false;
+function presenceText(p){const t=p&&p.last_seen?new Date(p.last_seen).getTime():0;if(!t)return"آخرین بازدید نامشخص";const age=Date.now()-t;if(age>=0&&age<PRESENCE_ONLINE_MS)return"آنلاین";const d=new Date(t);return"آخرین بازدید "+d.toLocaleDateString("fa-IR",{month:"short",day:"numeric"})+"، "+d.toLocaleTimeString("fa-IR",{hour:"2-digit",minute:"2-digit"});}
+async function presenceBeat(){if(!ME||document.hidden||!navigator.onLine)return;const now=new Date().toISOString();const {error}=await sb.from("profiles").update({last_seen:now}).eq("id",ME.id);if(error)console.warn("ثبت وضعیت حضور:",error);else{PROF={...(PROF||{}),last_seen:now};P[ME.id]={...(P[ME.id]||{}),last_seen:now};}}
+async function presenceRefresh(){if(!ME||presenceBusy)return;const ids=[...new Set([...PC.map(c=>c.peer),...UR.map(p=>p.id),...(cur&&cur.peer?[cur.peer]:[])])].filter(id=>UUID.test(String(id))&&id!==ME.id).slice(0,100);if(!ids.length)return;presenceBusy=true;try{const {data,error}=await sb.from("profiles").select("id,last_seen").in("id",ids);if(error){console.warn("بارگذاری وضعیت حضور:",error);return;}(data||[]).forEach(p=>P[p.id]={...(P[p.id]||{}),...p});if(cur&&cur.type==="private")$("hSub").textContent=presenceText(P[cur.peer]);renderList();}finally{presenceBusy=false;}}
+function presenceStop(){clearInterval(presenceBeatTimer);clearInterval(presencePollTimer);presenceBeatTimer=presencePollTimer=null;}
+function presenceStart(){presenceStop();if(!ME)return;presenceBeat();presenceRefresh();presenceBeatTimer=setInterval(()=>{if(!document.hidden)presenceBeat();},45000);presencePollTimer=setInterval(()=>{if(!document.hidden)presenceRefresh();},25000);}
+document.addEventListener("visibilitychange",()=>{if(!ME)return;if(document.hidden){presenceBeat();}else{presenceBeat();presenceRefresh();}});
 async function refreshPC(poll){if(!ME)return;const {data,error}=await sb.rpc("my_conversations",{p_limit:50});if(error){console.error(error);return;}
  await profs(data.map(r=>r.peer_id));
  const prevAt=new Map(PC.map(c=>[c.peer,c.at||""]));
