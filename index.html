@@ -4772,6 +4772,97 @@ html.day-mode .gset-head h2,html.day-mode .gset-tile-title{color:#17212b!importa
 html.day-mode .sxa-card,html.day-mode .sxa-logout-card{background:#f6f8fa!important;border-color:#dce3e9!important}
 @media(prefers-reduced-motion:reduce){.app *,.app *:before,.app *:after{transition-duration:.01ms!important;animation-duration:.01ms!important}}
 
+
+/* ARYA PEYVAND: TELEGRAM DAY/NIGHT THEME REFINEMENT V2 */
+/* Telegram desktop palette: consistent surfaces in both modes. */
+:root{
+ --tg-night-bg:#0e1621;--tg-night-panel:#17212b;--tg-night-panel2:#202b36;
+ --tg-night-line:#263746;--tg-night-text:#f5f7f9;--tg-night-muted:#91a2b1;
+ --tg-blue:#3390ec;--tg-blue-hover:#2481d7;
+ --tg-day-bg:#dfe5ec;--tg-day-panel:#ffffff;--tg-day-panel2:#f1f4f7;
+ --tg-day-line:#e1e7ed;--tg-day-text:#17212b;--tg-day-muted:#708090;
+}
+html:not(.day-mode),html:not(.day-mode) body{background:var(--tg-night-bg)!important;color:var(--tg-night-text)!important}
+html:not(.day-mode) .side,html:not(.day-mode) .top,html:not(.day-mode) .head,
+html:not(.day-mode) .comp,html:not(.day-mode) .bn,html:not(.day-mode) .tabs,
+html:not(.day-mode) .card,html:not(.day-mode) #mdBody.card{
+ background:var(--tg-night-panel)!important;color:var(--tg-night-text)!important;border-color:var(--tg-night-line)!important
+}
+html:not(.day-mode) .list{background:var(--tg-night-panel)!important}
+html:not(.day-mode) .main,html:not(.day-mode) .app{background:var(--tg-night-bg)!important}
+html:not(.day-mode) .msgs{background-color:var(--tg-night-bg)!important}
+html:not(.day-mode) .sbox input,html:not(.day-mode) .comp textarea,
+html:not(.day-mode) .card input,html:not(.day-mode) .card textarea,html:not(.day-mode) .card select{
+ background:var(--tg-night-panel2)!important;color:var(--tg-night-text)!important;border-color:var(--tg-night-line)!important
+}
+html:not(.day-mode) .row:not(.me) .bub{background:#182533!important;color:#f5f7f9!important}
+html:not(.day-mode) .row.me .bub{background:#2b5278!important;color:#fff!important}
+html:not(.day-mode) .row:not(.me) .bub:before{background:#182533!important}
+html:not(.day-mode) .row.me .bub:after{background:#2b5278!important}
+html:not(.day-mode) .it .nm,html:not(.day-mode) .head .nm,
+html:not(.day-mode) .card .delete-title,html:not(.day-mode) .gset-head h2{color:#f5f7f9!important}
+html:not(.day-mode) .it .lt,html:not(.day-mode) .it .tm,html:not(.day-mode) .head .s{color:#91a2b1!important}
+html:not(.day-mode) .tab.on,html:not(.day-mode) .bi.on{background:#2b5278!important;color:#fff!important}
+html:not(.day-mode) #dayModeToggle,html:not(.day-mode) .st-open{color:#a9bac8!important}
+html:not(.day-mode) .ap-drawer-panel{background:#17212b!important;color:#f5f7f9!important;border-color:#263746!important}
+html:not(.day-mode) .ap-drawer-actions button{color:#eaf3fb!important}
+html:not(.day-mode) .ap-drawer-actions button:hover{background:#202b36!important}
+html.day-mode,html.day-mode body{background:var(--tg-day-bg)!important;color:var(--tg-day-text)!important}
+html.day-mode .app,html.day-mode .main{background:var(--tg-day-bg)!important}
+html.day-mode .side,html.day-mode .top,html.day-mode .head,
+html.day-mode .comp,html.day-mode .bn,html.day-mode .tabs,
+html.day-mode .card,html.day-mode #mdBody.card{
+ background:var(--tg-day-panel)!important;color:var(--tg-day-text)!important;border-color:var(--tg-day-line)!important
+}
+html.day-mode .list{background:var(--tg-day-panel)!important}
+html.day-mode .msgs{
+ background-color:var(--tg-day-bg)!important;
+ background-image:
+ radial-gradient(circle at 12% 18%,#9aaaba38 0 1px,transparent 1.5px),
+ radial-gradient(circle at 80% 68%,#9aaaba30 0 1px,transparent 1.5px),
+ radial-gradient(circle at 48% 90%,#9aaaba28 0 1px,transparent 1.5px)!important;
+}
+html.day-mode .sbox input,html.day-mode .comp textarea,
+html.day-mode .card input,html.day-mode .card textarea,html.day-mode .card select{
+ background:var(--tg-day-panel2)!important;color:var(--tg-day-text)!important;border-color:transparent!important
+}
+html.day-mode .row:not(.me) .bub{background:#fff!important;color:#17212b!important}
+html.day-mode .row.me .bub{background:#effdde!important;color:#17212b!important}
+html.day-mode .row:not(.me) .bub:before{background:#fff!important}
+html.day-mode .row.me .bub:after{background:#effdde!important}
+html.day-mode .mt{color:#82919d!important}
+html.day-mode .me .mt{color:#5b8b65!important}
+html.day-mode .pm-read{color:#3390ec!important}
+html.day-mode .it .nm,html.day-mode .head .nm,
+html.day-mode .card .delete-title,html.day-mode .gset-head h2{color:#17212b!important}
+html.day-mode .it .lt,html.day-mode .it .tm,html.day-mode .head .s{color:#708090!important}
+html.day-mode .it:hover{background:#f1f4f7!important}
+html.day-mode .it.on{background:#e5f1fc!important}
+html.day-mode .tab{color:#708090!important}
+html.day-mode .tab.on,html.day-mode .bi.on{background:#e5f1fc!important;color:#2481d7!important}
+html.day-mode .ib,html.day-mode .comp .ib,html.day-mode #dayModeToggle,html.day-mode .st-open{color:#708090!important}
+html.day-mode .ib:hover,html.day-mode .comp .ib:hover{background:#edf2f7!important;color:#2481d7!important}
+html.day-mode .comp .send,.comp .send{background:#3390ec!important;color:#fff!important}
+html.day-mode .card input,html.day-mode .card textarea,html.day-mode .card select{border-color:#e1e7ed!important}
+html.day-mode .btn.g{background:#f1f4f7!important;color:#334155!important;border-color:#e1e7ed!important}
+html.day-mode #gp,html.day-mode .gp{background:#fff!important;color:#17212b!important}
+html.day-mode .gset-profile,html.day-mode .gset-row,html.day-mode .gset-card,
+html.day-mode .sxa-card,html.day-mode .sxa-logout-card{background:#f6f8fa!important;border-color:#e1e7ed!important}
+html.day-mode .gset-head h2,html.day-mode .gset-tile-title{color:#17212b!important}
+html.day-mode .ap-drawer-panel{background:#fff!important;color:#17212b!important;border-color:#e1e7ed!important}
+html.day-mode .ap-drawer-actions button{color:#17212b!important}
+html.day-mode .ap-drawer-actions button:hover{background:#f1f4f7!important}
+html.day-mode .ap-drawer-cover{background:#3390ec!important;color:#fff!important}
+html.day-mode .ap-drawer-brand,html.day-mode .ap-drawer-profile{color:#fff!important}
+html.day-mode .ov{background:#17212b66!important}
+html.day-mode .ctx,html.day-mode .cmenu,html.day-mode .emo,html.day-mode .emoji-picker,
+html.day-mode .dialog,html.day-mode .menu,html.day-mode .pop,html.day-mode .picker{
+ background:#fff!important;color:#17212b!important;border-color:#e1e7ed!important
+}
+html.day-mode .ctx button,html.day-mode .cmenu button,html.day-mode .dialog button{color:inherit}
+@media(prefers-color-scheme:dark){html.day-mode{color-scheme:light}}
+@media(prefers-reduced-motion:reduce){html *,html *:before,html *:after{transition-duration:.01ms!important}}
+
 </style>
 
 <div id="aryaTelegramDrawer" class="ap-drawer" aria-hidden="true">
