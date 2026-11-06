@@ -3314,7 +3314,7 @@ function openGroupInviteCopyDialog(gid){
 }
 
 
-function openGroupNotifications(gid){
+function openGroupMuteSettings(gid){
  const key="g:"+String(gid),muted=!!GROUP_MUTES[key];
  modal(`<h3>اعلان‌های گروه</h3><p class="pg-info">این گزینه فقط اعلان‌های داخل برنامه را روی همین دستگاه بی‌صدا می‌کند.</p><label class="pm-it"><span><b>بی‌صدا کردن اعلان‌های این گروه</b><small>هر زمان بخواهی می‌توانی دوباره روشنش کنی.</small></span><input type="checkbox" id="gNotifMute" ${muted?"checked":""}></label><div class="msg" id="gNotifMsg" role="status" aria-live="polite"></div><button type="button" class="btn g" id="gNotifClose">بستن</button>`);
  $("gNotifClose").onclick=close;
@@ -3398,7 +3398,7 @@ function openGroupInfo(fresh){
  $("gpB").onclick=gpHide;
  if($("gMainSettings"))$("gMainSettings").onclick=()=>openGroupSettings(gid);
  if($("gSearchRow"))$("gSearchRow").onclick=()=>{$("gpMemberQ")?.scrollIntoView({behavior:"smooth",block:"center"});setTimeout(()=>$("gpMemberQ")?.focus(),180);};
- if($("gNotifRow"))$("gNotifRow").onclick=()=>openGroupNotifications(gid);
+ if($("gNotifRow"))$("gNotifRow").onclick=()=>openGroupMuteSettings(gid);
  $("gpBody").querySelectorAll(".gm-b").forEach(b=>b.onclick=()=>gAct(b.dataset.a,b.closest(".gm-row").dataset.u));
  $("gpBody").querySelectorAll(".gm-row").forEach(r=>r.querySelectorAll(".av,.gm-n").forEach(el=>{el.classList.add("lnk");el.onclick=()=>openProfile(r.dataset.u);}));
  if($("gShare"))$("gShare").onclick=()=>openGroupInviteCopyDialog(gid);
