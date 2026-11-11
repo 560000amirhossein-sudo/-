@@ -1568,6 +1568,7 @@ async function upload(blob,ext,type,dur){const p=Date.now()+"-"+Math.random().to
 function clearPending(){pending=null;pendingFile=null;pendingKind="image";upDone=null;$("prev").classList.remove("show","err","up");$("upb").style.width="0";$("prevImg").style.display="";$("prev").querySelector("span").textContent="عکس آماده ارسال";vpPrevReset();pendingDur=0;pendingPeaks=null;}
 let cur=null,tab="all",query="",pending=null,pubMsgs=[],pubErr=false,sig="";
 let pubKnown=null,pubCursor=null,pubOldestCursor=null,pubOlderLoading=false,pubOlderDone=false,ncReady=false,pubLoaded=false,pcLoaded=false,UN={};
+let pubRt=null,pubRtOk=false,pubPollCount=0;
 const PUB_CACHE_KEY="arya_public_messages_cache_v1";
 function restorePublicCache(){
  try{const a=JSON.parse(localStorage.getItem(PUB_CACHE_KEY)||"[]");if(!Array.isArray(a)||!a.length)return;
@@ -1671,6 +1672,31 @@ async function pull(){
    if(fresh.length){const l=fresh[fresh.length-1],t=clip(l.text,80)||mLab(l.media_type)||"پیام جدید";
     notify({id:DEF,title:(D.chats.find(c=>c.id===DEF)||{}).title||"NIGHT CHAT",avatar:null,text:(l.name?l.name+": ":"")+t,at:l.created_at,count:fresh.length});}}
   if(!pubLoaded){trackUnread(view());pubLoaded=true;chkReady();}}
+}
+function stopPublicRT(){if(pubRt){sb.removeChannel(pubRt);pubRt=null;}pubRtOk=false;}
+function startPublicRT(){
+ stopPublicRT();
+ if(!ME)return;
+ pubRt=sb.channel("public-messages-live")
+  .on("postgres_changes",{event:"INSERT",schema:"public",table:"messages"},async payload=>{
+   const m=payload&&payload.new;if(!m||m.id==null)return;
+   if(!pubKnown)pubKnown=new Set(pubMsgs.map(x=>String(x.id)));
+   const id=String(m.id);if(pubKnown.has(id))return;
+   await enrichPublicProfiles([m]);
+   pubKnown.add(id);pubMsgs.push(m);
+   pubMsgs.sort((a,b)=>Date.parse(a.created_at)-Date.parse(b.created_at));
+   if(pubMsgs.length>500)pubMsgs=pubMsgs.slice(-500);
+   pubCursor=pubMsgs[pubMsgs.length-1]?.created_at||pubCursor;
+   if(!pubOldestCursor&&pubMsgs.length)pubOldestCursor=pubMsgs[0].created_at;
+   savePublicCache();
+   if(m.name!==D.me.name){
+    const t=clip(m.text,80)||mLab(m.media_type)||"پیام جدید";
+    notify({id:DEF,title:(D.chats.find(c=>c.id===DEF)||{}).title||"NIGHT CHAT",avatar:null,text:(m.name?m.name+": ":"")+t,at:m.created_at,count:1});
+   }
+   if(cur&&cur.id===DEF){renderMsgs();if(!document.hidden){D.seen=pubCursor;save();}}
+   renderList();
+  })
+  .subscribe(status=>{pubRtOk=status==="SUBSCRIBED";});
 }
 async function loadOlderPublic(){
  if(pubOlderLoading||pubOlderDone||!pubOldestCursor||!cur||cur.id!==DEF)return;
@@ -2966,13 +2992,13 @@ async function go(mode){
 }
 async function boot(u){try{await boot0(u);}catch(e){showErr("boot: "+ser(e));}}
 async function boot0(user){
- if(!user){presenceStop();endLocal();closeInc();stopCallRT();ME=null;PROF=null;stopRT();stopGRT();GU={};PGR=[];PC=[];PM={};HID=new Set();UR=[];cur=null;UN={};SG=[];GM={};GMEM={};GMR={};pcLoaded=false;ncReady=false;for(const k in UCNT)delete UCNT[k];ntClear();$("chat").style.display="none";$("ph").style.display="grid";$("app").classList.remove("open");gate("login");showGate(true);renderList();return;}
+ if(!user){presenceStop();endLocal();closeInc();stopCallRT();ME=null;PROF=null;stopRT();stopPublicRT();stopGRT();GU={};PGR=[];PC=[];PM={};HID=new Set();UR=[];cur=null;UN={};SG=[];GM={};GMEM={};GMR={};pcLoaded=false;ncReady=false;for(const k in UCNT)delete UCNT[k];ntClear();$("chat").style.display="none";$("ph").style.display="grid";$("app").classList.remove("open");gate("login");showGate(true);renderList();return;}
  ME=user;
  const {data,error}=await ownProf(user.id);
  if(error){console.error("بارگذاری پروفایل ناموفق بود؛ نشست ورود حفظ شد:",error);ME=null;PROF=null;gate("login");showGate(true);alert("بارگذاری پروفایل ناموفق بود. از حساب خارج نشده‌ای؛ اتصال را بررسی کن و صفحه را تازه‌سازی کن.");return;}
  if(!data){gate("complete");showGate(true);return;}
  PROF={...data,first_name:(user.user_metadata&&user.user_metadata.first_name)||"",last_name:(user.user_metadata&&user.user_metadata.last_name)||"",birth_date:(user.user_metadata&&user.user_metadata.birth_date)||""};P[data.id]=data;D.me.name=data.username;D.me.avatar=data.avatar_url;save();setMe();showGate(false);
- presenceStart();startRT();startCallRT();await refreshPC();await refreshSG();await loadGU();startGRT();trackUnread(view());pcLoaded=true;chkReady();renderList();if(wide())openChat(DEF);
+ presenceStart();startRT();startPublicRT();startCallRT();await refreshPC();await refreshSG();await loadGU();startGRT();trackUnread(view());pcLoaded=true;chkReady();renderList();if(wide())openChat(DEF);
  let joinGroupParam=new URLSearchParams(location.search).get("joinGroup");
  if(!joinGroupParam){try{joinGroupParam=sessionStorage.getItem("arya_pending_join")||"";}catch(e){joinGroupParam="";}}
  if(joinGroupParam){
@@ -3982,7 +4008,7 @@ document.addEventListener("visibilitychange",()=>{if(document.hidden||!cur)retur
 setMe();renderList();
 if(D.hideNote)$("note").style.display="none";$("noteX").onclick=()=>{D.hideNote=1;save();$("note").style.display="none";};
 restorePublicCache();pull().then(()=>{renderList();if(matchMedia("(min-width:761px)").matches)openChat(DEF);});
-setInterval(async()=>{if(document.hidden)return;await pull();if(cur&&cur.id===DEF){if(pubMsgs.length){D.seen=pubMsgs[pubMsgs.length-1].created_at;}renderMsgs();}renderList();},10000);
+setInterval(async()=>{if(document.hidden)return;pubPollCount++;if(!pubRtOk||pubPollCount%6===0){await pull();if(cur&&cur.id===DEF){if(pubMsgs.length){D.seen=pubMsgs[pubMsgs.length-1].created_at;}renderMsgs();}renderList();}},10000);
 
 // ---- صفحه تنظیمات (فقط ظاهر؛ هر خطایی در این بخش جلوی کار بقیه‌ی برنامه را نمی‌گیرد) ----
 (function(){try{
