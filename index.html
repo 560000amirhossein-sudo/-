@@ -2418,7 +2418,7 @@ async function startVoice(){
   };
   try{const AC=window.AudioContext||window.webkitAudioContext;voiceCtx=new AC();voiceAn=voiceCtx.createAnalyser();voiceAn.fftSize=256;voiceCtx.createMediaStreamSource(stream).connect(voiceAn);}catch(e){voiceAn=null;}
   $("emo").classList.remove("open");$("atm").classList.remove("open");
-  const w=$("recW");w.innerHTML="<i></i>".repeat(VBN);$("recT").textContent="0:00";$("recHint").textContent="چپ: لغو · بالا: قفل";
+  const w=$("recW");w.innerHTML="<i></i>".repeat(VBN);$("recT").textContent="0:00";$("recHint").textContent=voiceHoldLocked?"ضبط قفل شد":"چپ: لغو · بالا: قفل";
   rec.start(250);voiceStarted=Date.now();voiceTimer=setInterval(recTick,80);$("recBar").classList.add("on");
   if(voiceHoldCancel)cancelVoice();else if(!voiceHoldActive&&!voiceHoldLocked)stopVoice();
   try{navigator.vibrate&&navigator.vibrate(15);}catch{}
