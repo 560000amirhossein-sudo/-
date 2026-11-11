@@ -1633,6 +1633,7 @@ async function enrichPublicProfiles(rows){
  const clean=names.filter(n=>n.length<=80);
  if(!clean.length)return;
  const missing=clean.filter(n=>!Object.prototype.hasOwnProperty.call(PUB_PROFILE_CACHE,n.toLocaleLowerCase()));
+ missing.forEach(n=>{PUB_PROFILE_CACHE[n.toLocaleLowerCase()]=null;});
  // فقط نام‌هایی که قبلاً دیده نشده‌اند از سرور جست‌وجو می‌شوند.
  for(let i=0;i<missing.length;i+=25){
   const batch=missing.slice(i,i+25);
