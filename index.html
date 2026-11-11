@@ -2403,18 +2403,18 @@ async function startVoice(){
   const rec=new MediaRecorder(stream,mime?{mimeType:mime}:{});voiceRecorder=rec;voiceParts=[];voicePk=[];voiceCancel=false;
   rec.ondataavailable=e=>{if(e.data&&e.data.size)voiceParts.push(e.data);};
   rec.onerror=e=>{console.error(e);callToast("ضبط صدا با خطا مواجه شد.");voiceCancel=true;try{if(rec.state!=="inactive")rec.stop();}catch{}endVoice();voiceRecorder=null;};
-  rec.onstop=()=>{
+  rec.onstop=async()=>{
    const cancelled=voiceCancel,ms=Date.now()-voiceStarted,parts=voiceParts,pk=voicePk;voiceCancel=false;voiceParts=[];voicePk=[];
    endVoice();voiceRecorder=null;
    if(cancelled)return;
-   if(ms<800){callToast("ضبط خیلی کوتاه بود؛ دکمه را بزن و کمی بیشتر صحبت کن.");return;}
+   if(ms<800){callToast("ضبط خیلی کوتاه بود؛ کمی بیشتر صحبت کن.");return;}
    const type=((rec.mimeType||(parts[0]&&parts[0].type)||"audio/webm")+"").split(";")[0]||"audio/webm";
    const blob=new Blob(parts,{type});
    if(!blob.size){callToast("صدایی ضبط نشد.");return;}
    if(blob.size>MAXV){callToast("حجم ویس بیشتر از ۲۰ مگابایت شد؛ کوتاه‌تر ضبط کن.");return;}
    clearPending();pending=blob;pendingFile=blob;pendingKind="audio";syncComposerAction();pendingDur=Math.max(1,Math.round(ms/1000));pendingPeaks=peaksOf(pk);
-   $("prevImg").style.display="none";pvUrl=URL.createObjectURL(blob);
-   $("vpPrevW").innerHTML=vpHtml(pvUrl,pendingPeaks,pendingDur);$("prev").classList.add("show","aud");
+   // شاد: با پایان ضبط، ویس بدون پیش‌نمایش اجباری فوراً ارسال می‌شود.
+   await send();
   };
   try{const AC=window.AudioContext||window.webkitAudioContext;voiceCtx=new AC();voiceAn=voiceCtx.createAnalyser();voiceAn.fftSize=256;voiceCtx.createMediaStreamSource(stream).connect(voiceAn);}catch(e){voiceAn=null;}
   $("emo").classList.remove("open");$("atm").classList.remove("open");
