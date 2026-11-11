@@ -3051,7 +3051,7 @@ async function boot0(user){
  if(error){console.error("بارگذاری پروفایل ناموفق بود؛ نشست ورود حفظ شد:",error);ME=null;PROF=null;gate("login");showGate(true);alert("بارگذاری پروفایل ناموفق بود. از حساب خارج نشده‌ای؛ اتصال را بررسی کن و صفحه را تازه‌سازی کن.");return;}
  if(!data){gate("complete");showGate(true);return;}
  PROF={...data,first_name:(user.user_metadata&&user.user_metadata.first_name)||"",last_name:(user.user_metadata&&user.user_metadata.last_name)||"",birth_date:(user.user_metadata&&user.user_metadata.birth_date)||""};P[data.id]=data;D.me.name=data.username;D.me.avatar=data.avatar_url;save();setMe();showGate(false);
- presenceStart();startRT();startPublicRT();startCallRT();await Promise.all([refreshPC(),refreshSG(),loadGU()]);void cleanupLegacyPrivateMedia().then(()=>Promise.all(SG.filter(g=>!g.pub).map(async g=>{const q=await sb.from("group_messages").select("id,media_url,media_type").eq("group_id",g.gid).like("media_url",PUB+BUCKET+"/%").limit(25);if(q.error)throw q.error;if(q.data&&q.data.length)await migrateLegacyPrivateGroupMedia(g.gid,q.data);}))).catch(e=>console.warn("مهاجرت خودکار رسانه‌های قدیمی گروه خصوصی:",e));startGRT();trackUnread(view());pcLoaded=true;chkReady();renderList();if(wide())openChat(DEF);
+ presenceStart();startRT();startPublicRT();startCallRT();renderList();await Promise.allSettled([refreshPC(),refreshSG(),loadGU()]);void cleanupLegacyPrivateMedia().then(()=>Promise.all(SG.filter(g=>!g.pub).map(async g=>{const q=await sb.from("group_messages").select("id,media_url,media_type").eq("group_id",g.gid).like("media_url",PUB+BUCKET+"/%").limit(25);if(q.error)throw q.error;if(q.data&&q.data.length)await migrateLegacyPrivateGroupMedia(g.gid,q.data);}))).catch(e=>console.warn("مهاجرت خودکار رسانه‌های قدیمی گروه خصوصی:",e));startGRT();trackUnread(view());pcLoaded=true;chkReady();renderList();if(wide())openChat(DEF);
  let joinGroupParam=new URLSearchParams(location.search).get("joinGroup");
  if(!joinGroupParam){try{joinGroupParam=sessionStorage.getItem("arya_pending_join")||"";}catch(e){joinGroupParam="";}}
  if(joinGroupParam){
@@ -4259,6 +4259,14 @@ setInterval(async()=>{if(document.hidden)return;pubPollCount++;if(!pubRtOk||pubP
   });
   window.addEventListener("pagehide",()=>{if(pinEnabled())showPinLock();});
 }catch(e){console.error("settings page:",e);}})();
+</script>
+<script>
+// Fallback مستقل برای بازشدن پنجره تنظیمات در صورت توقف بخشی از اسکریپت اصلی.
+(function(){
+ const open=document.getElementById("stOpen"),panel=document.getElementById("st"),back=document.getElementById("stBack");
+ if(open&&panel&&!open.dataset.fallbackBound){open.dataset.fallbackBound="1";open.addEventListener("click",()=>{panel.classList.add("open");panel.classList.remove("out");panel.setAttribute("aria-hidden","false");});}
+ if(back&&panel&&!back.dataset.fallbackBound){back.dataset.fallbackBound="1";back.addEventListener("click",()=>{panel.classList.remove("open","out");panel.setAttribute("aria-hidden","true");});}
+})();
 </script>
 <script>
 (function(){
