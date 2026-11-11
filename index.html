@@ -119,6 +119,9 @@ button{cursor:pointer;border:0;background:none}
 .del:hover{opacity:1}.me .del{color:#fecaca}
 @media(prefers-reduced-motion:reduce){.row.new,.card{animation:none}}
 .editbar{display:none;align-items:center;gap:10px;padding:9px 14px;background:linear-gradient(90deg,#21164af2,#17102bf2);border-top:1px solid #a78bfa55;color:#e9ddff;font-size:12px}.editbar.on{display:flex}.editbar .ebody{flex:1;min-width:0}.editbar b{display:block;color:#c4b5fd;font-size:12px}.editbar span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:.8}.editbar button{width:28px;height:28px;border-radius:9px;background:#ffffff12;color:inherit;border:1px solid #ffffff25}.comp{display:flex;align-items:flex-end;gap:6px;padding:10px 12px;background:var(--pn);border-top:1px solid var(--bd);position:relative}
+.comp #sendB{display:none}
+.comp.has-action #sendB{display:flex}
+.comp.has-action #emoB{display:none}
 .comp textarea{flex:1;resize:none;max-height:120px;padding:11px 14px;border-radius:20px;border:1px solid var(--bd);background:var(--pn2);outline:0;line-height:1.6}
 .send{background:var(--gr);color:#fff}
 .joinbar{padding:14px;text-align:center;background:var(--pn);border-top:1px solid var(--bd);color:var(--mu);font-size:calc(13px*var(--fs,1))}
@@ -1317,12 +1320,12 @@ try{var F=parseInt(localStorage.getItem("arya_text_scale_v1"),10);if(F>=85&&F<=1
    <div class="comp" id="comp">
     <div class="emo" id="emo"></div>
     <div class="atm" id="atm"><button id="atI" type="button">🖼️ تصویر</button><button id="atV" type="button">🎬 ویدیو</button></div>
+    <button class="ib send" id="sendB" aria-label="ارسال پیام" title="ارسال"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 3 10 14M21 3l-7 18-4-7-7-4z"/></svg></button>
     <button class="ib" id="emoB" aria-label="ایموجی" title="ایموجی">😊</button>
     <button class="ib" id="voiceB" type="button" title="ضبط پیام صوتی" aria-label="ضبط پیام صوتی"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
     <button class="ib" id="attB" title="ارسال عکس یا ویدیو" aria-label="ارسال عکس یا ویدیو">📎</button>
     <input type="file" id="file" accept="image/*,video/*" hidden>
     <textarea id="txt" rows="1" maxlength="1000" placeholder="پیام بنویس..."></textarea>
-    <button class="ib send" id="sendB" aria-label="ارسال پیام" title="ارسال"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 3 10 14M21 3l-7 18-4-7-7-4z"/></svg></button>
     <div class="recbar" id="recBar" role="group" aria-label="ضبط پیام صوتی"><button class="rb rb-x" id="recX" type="button" aria-label="لغو ضبط" title="لغو ضبط"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg></button><i class="rec-dot"></i><span class="rec-t" id="recT">0:00</span><div class="rec-w" id="recW" aria-hidden="true"></div><button class="rb rb-ok" id="recOk" type="button" aria-label="پایان ضبط و پیش‌شنوی" title="پایان ضبط و پیش‌شنوی"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="6.5" width="11" height="11" rx="3" fill="currentColor"/></svg></button></div>
    </div>
    <div class="joinbar" id="joinbar" style="display:none"></div>
@@ -2431,7 +2434,7 @@ function vpPrevReset(){
 $("msgs").addEventListener("click",vpClick);$("prev").addEventListener("click",vpClick);
 $("sendB").onclick=send;
 $("txt").onkeydown=e=>{if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing&&matchMedia("(pointer:fine)").matches){e.preventDefault();send();}};
-$("txt").oninput=()=>{$("txt").style.height="auto";$("txt").style.height=Math.min($("txt").scrollHeight,120)+"px";if(editState)$("editPreview").textContent=$("txt").value.trim()||"پیام بدون متن";};
+$("txt").oninput=()=>{$("txt").style.height="auto";$("txt").style.height=Math.min($("txt").scrollHeight,120)+"px";if(editState)$("editPreview").textContent=$("txt").value.trim()||"پیام بدون متن";syncComposerAction();};
 $("attB").onclick=e=>{e.stopPropagation();$("emo").classList.remove("open");$("atm").classList.toggle("open");};
 const pickFile=acc=>{$("atm").classList.remove("open");$("file").accept=acc;$("file").click();};
 $("atI").onclick=()=>pickFile("image/*");$("atV").onclick=()=>pickFile("video/*");
@@ -2702,11 +2705,15 @@ function applyEdit(c,id,t,ts){
  if(ch&&last&&String(last.id)===sid)ch.last=t;
  EXV++;if(cur&&cur.id===c.id)renderMsgs();renderList();}
 let editState=null;
+function syncComposerAction(){
+ const c=$("comp");
+ if(c)c.classList.toggle("has-action",!!(( $("txt")&&$("txt").value.trim())||pending||editState));
+}
 function cancelEdit(){
  if(!editState)return;editState=null;
  $("editBar").classList.remove("on");$("txt").value="";$("txt").style.height="";
  $("sendB").innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 3 10 14M21 3l-7 18-4-7-7-4z"/></svg>';
- $("sendB").setAttribute("aria-label","ارسال پیام");$("sendB").title="ارسال";$("txt").placeholder="پیام بنویس...";
+ $("sendB").setAttribute("aria-label","ارسال پیام");$("sendB").title="ارسال";$("txt").placeholder="پیام بنویس...";syncComposerAction();
 }
 function editMsg(){
  const m=getActiveMessage();hideMsgMenu();if(!m||!cur||!canEditMsg(m))return;
@@ -2715,7 +2722,7 @@ function editMsg(){
  editState={id:String(m.id),text:String(m.text||""),chatId:cur.id,chat:{...cur}};
  $("editPreview").textContent=String(m.text||"پیام");$("editBar").classList.add("on");
  $("txt").value=String(m.text||"");$("txt").placeholder="متن پیام را ویرایش کن...";
- $("txt").style.height="auto";$("txt").style.height=Math.min($("txt").scrollHeight,120)+"px";
+ $("txt").style.height="auto";$("txt").style.height=Math.min($("txt").scrollHeight,120)+"px";syncComposerAction();
  $("sendB").innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>';
  $("sendB").setAttribute("aria-label","ذخیره ویرایش");$("sendB").title="ذخیره ویرایش";
  $("txt").focus();}
