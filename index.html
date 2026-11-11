@@ -3232,7 +3232,7 @@ async function sendPM(text){
  const selectCols="id,sender_id,recipient_id,text,created_at,read_at,reply_to_id,deleted_for_all"+(pmMediaOk?",media_url,media_type":"");
  let r=await sb.from("private_messages").insert(row).select(selectCols).single();
  if(r.error&&pmReadOk&&/read_at|PGRST204|42703/i.test((r.error.code||"")+(r.error.message||""))){pmReadOk=false;const cols=selectCols.replace(",read_at","");r=await sb.from("private_messages").insert(row).select(cols).single();}
- if(r.error&&pmMediaOk&&/media_(url|type)/.test(r.error.message||"")){pmMediaOk=false;if(row.media_url){alert("ستون‌های پیام صوتی خصوصی در دیتابیس وجود ندارند؛ فایل SQL را اجرا کن.");return false;}r=await sb.from("private_messages").insert(row).select("id,sender_id,recipient_id,text,created_at,reply_to_id,deleted_for_all").single();}
+ if(r.error&&pmMediaOk&&/media_(url|type)/.test(r.error.message||"")){pmMediaOk=false;if(row.media_url){if(privatePath)sb.storage.from(PRIVATE_BUCKET).remove([privatePath]).catch(()=>{});alert("ستون‌های پیام صوتی خصوصی در دیتابیس وجود ندارند؛ فایل SQL را اجرا کن.");return false;}r=await sb.from("private_messages").insert(row).select("id,sender_id,recipient_id,text,created_at,reply_to_id,deleted_for_all").single();}
  if(r.error&&/reply_to_id|PGRST204|42703/.test((r.error.code||"")+(r.error.message||""))){replyOkP=false;delete row.reply_to_id;const cols="id,sender_id,recipient_id,text,created_at,deleted_for_all"+(pmMediaOk?",media_url,media_type":"");r=await sb.from("private_messages").insert(row).select(cols).single();}
  if(r.error){if(privatePath)sb.storage.from(PRIVATE_BUCKET).remove([privatePath]).catch(()=>{});console.error(r.error);alert(navigator.onLine?"ارسال پیام ناموفق بود؛ جزئیات در کنسول مرورگر است.":"اتصال اینترنت برقرار نیست.");return false;}
  await signPrivateMedia(r.data);addPM(r.data);rememberSentEmojis(text);return true;}
@@ -3313,7 +3313,7 @@ async function loadGMCore(gid,force=false){
  if(r.error&&gMediaOk&&/media_url|media_type|42703|PGRST204/.test((r.error.code||"")+(r.error.message||""))){gMediaOk=false;r=await qq();}
  const {data,error}=r;
  if(error){console.error(error);return false;}
- data.reverse();await loadGHides(data.map(m=>m.id));const groupInfo=SG.find(x=>String(x.gid)===String(gid));if(groupInfo&&!groupInfo.pub){await migrateLegacyPrivateGroupMedia(gid,data);await Promise.all(data.map(signPrivateMedia));}GM[gid]=data;GMFetchedAt[gid]=Date.now();await Promise.all([profs(GM[gid].map(m=>m.sender_id),true),loadGroupReads(gid),loadGroupMessageReads(gid)]);loadPin(gid);
+ data.reverse();await loadGHides(data.map(m=>m.id));const groupInfo=SG.find(x=>String(x.gid)===String(gid));if(groupInfo&&!groupInfo.pub)await migrateLegacyPrivateGroupMedia(gid,data);await Promise.all(data.map(signPrivateMedia));GM[gid]=data;GMFetchedAt[gid]=Date.now();await Promise.all([profs(GM[gid].map(m=>m.sender_id),true),loadGroupReads(gid),loadGroupMessageReads(gid)]);loadPin(gid);
  const c=SG.find(x=>x.gid===gid),l=gVis(gid).slice(-1)[0];if(c){if(l){c.last=l.text||gLab(l.media_type);c.at=l.created_at;}else if(GM[gid].length)c.last="";}
  return true;}
 function loadGM(gid,force=false){
@@ -3822,7 +3822,7 @@ async function onGIns(p){
  const k=m.group_id+"|"+m.id;if(NKG.has(k))return;NKG.add(k);if(NKG.size>300)NKG.delete(NKG.values().next().value);
  const gid=String(m.group_id);let c=SG.find(x=>String(x.gid)===gid);
  if(!c){await refreshSG();c=SG.find(x=>String(x.gid)===gid);if(!c)return;}
- await profs([m.sender_id]);if(!c.pub)await signPrivateMedia(m);
+ await profs([m.sender_id]);await signPrivateMedia(m);
  if(GM[c.gid])addGM(m);else{c.last=m.text||gLab(m.media_type);c.at=m.created_at;}
  const mine=m.sender_id===ME.id,open=!!cur&&String(cur.gid)===gid&&!document.hidden;
  if(open){renderMsgs();markGroupRead(c.gid);}
