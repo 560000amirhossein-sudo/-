@@ -1626,25 +1626,27 @@ function replyQuoteHtml(rq){
  const txt=clip(rq.text,60)||mLab(rq.mediaType)||"پیام";
  return `<div class="rquote" data-rid="${esc(String(rq.id))}"><span class="rq-name">${esc(nm)}</span><span class="rq-text">${esc(txt)}</span></div>`;
 }
+const PUB_PROFILE_CACHE=Object.create(null);
 async function enrichPublicProfiles(rows){
  const names=[...new Set((rows||[]).map(m=>String(m.name||"").trim()).filter(Boolean))].slice(0,100);
  if(!ME||!names.length)return;
  const clean=names.filter(n=>n.length<=80);
  if(!clean.length)return;
- const found=new Map();
- // Public-room messages may store a username or display name instead of sender_id.
- for(let i=0;i<clean.length;i+=25){
-  const batch=clean.slice(i,i+25);
+ const missing=clean.filter(n=>!Object.prototype.hasOwnProperty.call(PUB_PROFILE_CACHE,n.toLocaleLowerCase()));
+ // فقط نام‌هایی که قبلاً دیده نشده‌اند از سرور جست‌وجو می‌شوند.
+ for(let i=0;i<missing.length;i+=25){
+  const batch=missing.slice(i,i+25);
   const [a,b]=await Promise.all([
    sb.from("profiles").select("id,username,display_name,avatar_url").in("username",batch),
    sb.from("profiles").select("id,username,display_name,avatar_url").in("display_name",batch)
   ]);
-  if(!a.error)(a.data||[]).forEach(p=>{found.set(String(p.username||"").toLocaleLowerCase(),p);P[p.id]={...(P[p.id]||{}),...p};});
-  if(!b.error)(b.data||[]).forEach(p=>{found.set(String(p.display_name||"").trim().toLocaleLowerCase(),p);P[p.id]={...(P[p.id]||{}),...p};});
+  if(!a.error)(a.data||[]).forEach(p=>{PUB_PROFILE_CACHE[String(p.username||"").toLocaleLowerCase()]=p;P[p.id]={...(P[p.id]||{}),...p};});
+  if(!b.error)(b.data||[]).forEach(p=>{PUB_PROFILE_CACHE[String(p.display_name||"").trim().toLocaleLowerCase()]=p;P[p.id]={...(P[p.id]||{}),...p};});
  }
  for(const m of rows||[]){
   if(m.sender_id&&P[m.sender_id]){m.avatar_url=P[m.sender_id].avatar_url||m.avatar_url||null;continue;}
-  const p=found.get(String(m.name||"").trim().toLocaleLowerCase());
+  const key=String(m.name||"").trim().toLocaleLowerCase();
+  const p=PUB_PROFILE_CACHE[key];
   if(p){m.sender_id=p.id;m.avatar_url=p.avatar_url||null;}
  }
 }
@@ -2276,7 +2278,7 @@ $("multiDelete").onclick=multiDeleteModal;
 // ---- ارسال سریع و نمایش فوری پیام ----
 let sendSfxCtx=null;
 function prepareSendSfx(){try{const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;sendSfxCtx=sendSfxCtx||new AC();if(sendSfxCtx.state==="suspended")sendSfxCtx.resume().catch(()=>{});}catch(e){}}
-function playSendSfx(){try{if(!sendSfxCtx||sendSfxCtx.state!=="running")return;const t=sendSfxCtx.currentTime,o=sendSfxCtx.createOscillator(),g=sendSfxCtx.createGain();o.type="sine";o.frequency.setValueAtTime(760,t);o.frequency.exponentialRampToValueAtTime(1040,t+.075);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.16,t+.012);g.gain.exponentialRampToValueAtTime(.0001,t+.13);o.connect(g);g.connect(sendSfxCtx.destination);o.start(t);o.stop(t+.14);}catch(e){}}
+function playSendSfx(){try{if(!sendSfxCtx||sendSfxCtx.state!=="running")return;const t=sendSfxCtx.currentTime,o=sendSfxCtx.createOscillator(),g=sendSfxCtx.createGain();o.type="triangle";o.frequency.setValueAtTime(880,t);o.frequency.exponentialRampToValueAtTime(1320,t+.085);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.36,t+.008);g.gain.exponentialRampToValueAtTime(.0001,t+.18);o.connect(g);g.connect(sendSfxCtx.destination);o.start(t);o.stop(t+.14);}catch(e){}}
 function addOptimisticMessage(text){
  if(!text||pending||!cur||!ME)return null;
  const id="local-send-"+Date.now()+"-"+Math.random().toString(36).slice(2),at=new Date().toISOString();
@@ -2911,7 +2913,7 @@ try{const _jp=new URLSearchParams(location.search).get("joinGroup");if(_jp&&/^[0
 const AVB="avatars",UNRE=/^[A-Za-z0-9_]{3,20}$/,UUID=/^[0-9a-f-]{36}$/i,EMRE=/^\S+@\S+\.\S+$/;
 let SG=[],GM={},GMEM={},GMR={},sgWarn=false;
 let GU={},GREAD={},GMSGREAD={},grt=null,grt2=null,grtOk=false,gMediaOk=true,guWarn=false,PGR=[],pst=null,gTick=0;const GMT={},NKG=new Set();
-let ME=null,PROF=null,P={},PC=[],PM={},PMFetchedAt={},HID=new Set(),pmHidesLoaded=false,UR=[],rt=null,rtOk=false,recov=false,pmReadOk=true,sendBusy=false;
+let ME=null,PROF=null,P={},PC=[],PM={},PMFetchedAt={},PMInFlight={},HID=new Set(),pmHidesLoaded=false,UR=[],rt=null,rtOk=false,recov=false,pmReadOk=true,sendBusy=false;
 const likeEsc=t=>t.replace(/[\\%_]/g,"\\$&"),pName=p=>p?(p.display_name||p.username):"کاربر";
 const showGate=v=>{document.documentElement.classList.remove("arya-session-pending");$("gate").style.display=v?"flex":"none";};
 const redir=()=>/^https?:$/.test(location.protocol)?location.origin+location.pathname:undefined;
@@ -3105,7 +3107,7 @@ async function refreshPC(poll){if(!ME)return;const {data,error}=await sb.rpc("my
  PC.forEach(c=>{const a=PM[c.peer];if(a&&a.length){const l=visPM(c.peer).slice(-1)[0];c.last=l?l.text:"";}});
  if(poll)for(const r of data)if(r.last_sender!==ME.id&&r.last_at>(prevAt.get(r.peer_id)||""))ntPM({sender_id:r.peer_id,created_at:r.last_at,text:r.last_text});}
 async function markSeen(peer){const a=PM[peer]||[],l=a[a.length-1];(D.pmSeen=D.pmSeen||{})[peer]=l?l.created_at:new Date().toISOString();save();delete UN[peer];if(ME&&pmReadOk&&UUID.test(String(peer))){const unread=a.filter(m=>m.sender_id===peer&&m.recipient_id===ME.id&&!m.read_at);if(unread.length){const {error}=await sb.rpc("mark_private_messages_read",{p_peer:peer});if(error){if(!/mark_private_messages_read|PGRST202|42883/i.test((error.code||"")+(error.message||"")))console.warn("رسید خواندن خصوصی:",error);return;}const now=new Date().toISOString();unread.forEach(m=>m.read_at=now);if(cur&&cur.peer===peer){EXV++;renderMsgs(true);}renderList();}}}
-async function loadPM(peer){if(!ME||!UUID.test(peer))return;if(rtOk&&PMFetchedAt[peer]&&Date.now()-PMFetchedAt[peer]<8000){if(cur&&cur.peer===peer&&!document.hidden)markSeen(peer);return;}
+async function loadPMCore(peer){if(!ME||!UUID.test(peer))return;if(rtOk&&PMFetchedAt[peer]&&Date.now()-PMFetchedAt[peer]<8000){if(cur&&cur.peer===peer&&!document.hidden)markSeen(peer);return;}
  // رسانهٔ خصوصی در صورت وجود ستون‌ها بارگذاری می‌شود؛ نبود ستون‌ها چت متنی را از کار نمی‌اندازد.
  const pmQ=cols=>sb.from("private_messages").select(cols).or(`and(sender_id.eq.${ME.id},recipient_id.eq.${peer}),and(sender_id.eq.${peer},recipient_id.eq.${ME.id})`).order("created_at",{ascending:false}).limit(200);
  let cols="id,sender_id,recipient_id,text,created_at,read_at,reply_to_id,deleted_for_all"+(pmMediaOk?",media_url,media_type":"");
@@ -3115,6 +3117,11 @@ async function loadPM(peer){if(!ME||!UUID.test(peer))return;if(rtOk&&PMFetchedAt
  if(error&&/deleted_for_all/.test((error.code||"")+(error.message||""))){cols=cols.replace(",deleted_for_all","");({data,error}=await pmQ(cols));}
  if(error&&/reply_to_id|PGRST204|42703/.test((error.code||"")+(error.message||""))){replyOkP=false;cols=cols.replace(",reply_to_id","");({data,error}=await pmQ(cols));}
  if(error){console.error(error);PM[peer]=PM[peer]||[];return;}PM[peer]=data.reverse();PMFetchedAt[peer]=Date.now();await loadHides(peer);if(cur&&cur.peer===peer&&!document.hidden)markSeen(peer);}
+function loadPM(peer){
+ if(PMInFlight[peer])return PMInFlight[peer];
+ const task=loadPMCore(peer);PMInFlight[peer]=task;
+ return task.finally(()=>{if(PMInFlight[peer]===task)delete PMInFlight[peer];});
+}
 const visPM=peer=>(PM[peer]||[]).filter(m=>!m.deleted_for_all&&!HID.has(String(m.id)));
 function dropPM(id){for(const k in PM){const a=PM[k],i=a.findIndex(x=>String(x.id)===String(id));if(i<0)continue;a.splice(i,1);const c=PC.find(x=>x.peer===k),l=visPM(k).slice(-1)[0];if(c)c.last=l?(l.text||mLab(l.media_type)):"";if(cur&&cur.peer===k)renderMsgs(true);renderList();return;}}
 async function loadHides(peer){if(pmHidesLoaded||!ME)return;const {data,error}=await sb.from("private_message_hides").select("message_id").eq("user_id",ME.id).limit(1000);if(error){console.warn("بارگذاری حذف‌های خصوصی:",error);return;}(data||[]).forEach(r=>HID.add(String(r.message_id)));pmHidesLoaded=true;}
@@ -3229,7 +3236,7 @@ setInterval(async()=>{if(!ME||document.hidden||rtOk)return;await refreshPC(true)
 
 // ================= گروه‌های سرور با نقش‌های مالک / مدیر / عضو =================
 // نقش‌ها در دیتابیس (جدول group_members) ذخیره و با RLS و تابع‌های SQL اعمال می‌شوند؛ دکمه‌های مخفی‌شده فقط راحتی کاربر هستند.
-const GMFetchedAt={};
+const GMFetchedAt={},GMInFlight={};
 const GERR={BANNED:"دسترسی شما به این گروه مسدود شده است.",NOT_FOUND:"پیام پیدا نشد.",FORBIDDEN:"اجازهٔ این کار را نداری.",NOT_A_MEMBER:"این کاربر عضو گروه نیست.",USER_NOT_FOUND:"کاربر پیدا نشد.",OWNER_CANNOT_LEAVE:"مالک نمی‌تواند از گروه خارج شود.",BAD_ROLE:"نقش نامعتبر است.",NOT_PUBLIC:"این گروه عمومی نیست.",GROUP_NOT_FOUND:"گروه پیدا نشد.",NOT_AUTHENTICATED:"ابتدا وارد حساب شو."};
 function gErr(e){const m=String((e&&e.message)||e||"");for(const k in GERR)if(m.includes(k))return GERR[k];if(/schema cache|does not exist|PGRST20|Could not find|relation/i.test(m))return"جدول‌های گروه هنوز در دیتابیس ساخته نشده‌اند؛ فایل SQL را اجرا کن.";return"انجام نشد؛ دوباره تلاش کن.";}
 const roleFa=r=>r==="owner"?"مالک":r==="admin"?"مدیر":"عضو";
@@ -3252,7 +3259,7 @@ async function loadGHides(ids){if(!gHideOk||!ME||gHidesLoaded)return;
   if(error){if(gHideMissing(error))gHideOk=false;console.warn("group_message_hides:",error);return;}
   (data||[]).forEach(r=>GHID.add(String(r.message_id)));gHidesLoaded=true;}
 function afterGDel(gid){const l=gVis(gid).slice(-1)[0],c=SG.find(x=>x.gid===gid);if(c)c.last=l?(l.text||gLab(l.media_type)):"";renderMsgs(true);renderList();}
-async function loadGM(gid,force=false){
+async function loadGMCore(gid,force=false){
  if(grtOk&&!force&&GMFetchedAt[gid]&&Date.now()-GMFetchedAt[gid]<8000)return true;
  const qq=()=>sb.from("group_messages").select("id,group_id,sender_id,text,created_at,reply_to_id"+(gMediaOk?",media_url,media_type":"")).eq("group_id",gid).order("created_at",{ascending:false}).limit(200);
  let r=await qq();
@@ -3262,6 +3269,10 @@ async function loadGM(gid,force=false){
  data.reverse();await loadGHides(data.map(m=>m.id));GM[gid]=data;GMFetchedAt[gid]=Date.now();await Promise.all([profs(GM[gid].map(m=>m.sender_id),true),loadGroupReads(gid),loadGroupMessageReads(gid)]);loadPin(gid);
  const c=SG.find(x=>x.gid===gid),l=gVis(gid).slice(-1)[0];if(c){if(l){c.last=l.text||gLab(l.media_type);c.at=l.created_at;}else if(GM[gid].length)c.last="";}
  return true;}
+function loadGM(gid,force=false){
+ if(GMInFlight[gid])return force?GMInFlight[gid].then(()=>loadGM(gid,true)):GMInFlight[gid];
+ const task=loadGMCore(gid,force);const tracked=task.finally(()=>{if(GMInFlight[gid]===tracked)delete GMInFlight[gid];});GMInFlight[gid]=tracked;return tracked;
+}
 async function loadGroupReads(gid){
  // گروه‌ها فقط از رسیدهای دقیق هر پیام استفاده می‌کنند؛ جدول قدیمی group_reads در این پروژه وجود ندارد.
  if(gid!=null)GREAD[gid]={};
