@@ -118,7 +118,7 @@ button{cursor:pointer;border:0;background:none}
 .del{color:#f87171;font-size:calc(10px*var(--fs,1));opacity:.75;padding:2px 4px}
 .del:hover{opacity:1}.me .del{color:#fecaca}
 @media(prefers-reduced-motion:reduce){.row.new,.card{animation:none}}
-.comp{display:flex;align-items:flex-end;gap:6px;padding:10px 12px;background:var(--pn);border-top:1px solid var(--bd);position:relative}
+.editbar{display:none;align-items:center;gap:10px;padding:9px 14px;background:linear-gradient(90deg,#21164af2,#17102bf2);border-top:1px solid #a78bfa55;color:#e9ddff;font-size:12px}.editbar.on{display:flex}.editbar .ebody{flex:1;min-width:0}.editbar b{display:block;color:#c4b5fd;font-size:12px}.editbar span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:.8}.editbar button{width:28px;height:28px;border-radius:9px;background:#ffffff12;color:inherit;border:1px solid #ffffff25}.comp{display:flex;align-items:flex-end;gap:6px;padding:10px 12px;background:var(--pn);border-top:1px solid var(--bd);position:relative}
 .comp textarea{flex:1;resize:none;max-height:120px;padding:11px 14px;border-radius:20px;border:1px solid var(--bd);background:var(--pn2);outline:0;line-height:1.6}
 .send{background:var(--gr);color:#fff}
 .joinbar{padding:14px;text-align:center;background:var(--pn);border-top:1px solid var(--bd);color:var(--mu);font-size:calc(13px*var(--fs,1))}
@@ -1313,6 +1313,7 @@ try{var F=parseInt(localStorage.getItem("arya_text_scale_v1"),10);if(F>=85&&F<=1
    <div class="msgs" id="msgs"></div>
    <div class="rprev" id="rprev"><div class="rprev-bar"></div><span class="rprev-ic">↩</span><div class="rprev-body"><div class="rprev-name" id="rprevName"></div><div class="rprev-text" id="rprevText"></div></div><button class="rprev-x" id="rprevX" type="button" aria-label="لغو پاسخ">✕</button></div>
    <div class="prev" id="prev"><img id="prevImg" alt=""><span style="flex:1">عکس آماده ارسال</span><div id="vpPrevW"></div><button class="ib" id="prevX" aria-label="لغو ارسال فایل" title="لغو">✕</button><i class="upb" id="upb"></i></div>
+   <div class="editbar" id="editBar"><div class="ebody"><b>در حال ویرایش پیام</b><span id="editPreview"></span></div><button id="editCancel" type="button" aria-label="لغو ویرایش" title="لغو ویرایش">✕</button></div>
    <div class="comp" id="comp">
     <div class="emo" id="emo"></div>
     <div class="atm" id="atm"><button id="atI" type="button">🖼️ تصویر</button><button id="atV" type="button">🎬 ویدیو</button></div>
@@ -2295,6 +2296,7 @@ function removeOptimisticMessage(o){
  if(key){const i=key.findIndex(m=>String(m.id)===String(o.id));if(i>=0)key.splice(i,1);}
 }
 async function send(){
+ if(editState){await saveEdit();return;}
  if(sendBusy)return;const text=$("txt").value.trim();if((!text&&!pending)||!canPost())return;
  prepareSendSfx();
  let sendSfxPlayed=false;const confirmSendSfx=()=>{if(!sendSfxPlayed){playSendSfx();sendSfxPlayed=true;}};
@@ -2429,7 +2431,7 @@ function vpPrevReset(){
 $("msgs").addEventListener("click",vpClick);$("prev").addEventListener("click",vpClick);
 $("sendB").onclick=send;
 $("txt").onkeydown=e=>{if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing&&matchMedia("(pointer:fine)").matches){e.preventDefault();send();}};
-$("txt").oninput=()=>{$("txt").style.height="auto";$("txt").style.height=Math.min($("txt").scrollHeight,120)+"px";};
+$("txt").oninput=()=>{$("txt").style.height="auto";$("txt").style.height=Math.min($("txt").scrollHeight,120)+"px";if(editState)$("editPreview").textContent=$("txt").value.trim()||"پیام بدون متن";};
 $("attB").onclick=e=>{e.stopPropagation();$("emo").classList.remove("open");$("atm").classList.toggle("open");};
 const pickFile=acc=>{$("atm").classList.remove("open");$("file").accept=acc;$("file").click();};
 $("atI").onclick=()=>pickFile("image/*");$("atV").onclick=()=>pickFile("video/*");
@@ -2699,16 +2701,41 @@ function applyEdit(c,id,t,ts){
  const last=c.id===DEF?null:c.gid?gVis(c.gid).slice(-1)[0]:visPM(c.peer).slice(-1)[0],ch=c.gid?SG.find(z=>z.gid===c.gid):c.peer?PC.find(z=>z.peer===c.peer):null;
  if(ch&&last&&String(last.id)===sid)ch.last=t;
  EXV++;if(cur&&cur.id===c.id)renderMsgs();renderList();}
+let editState=null;
+function cancelEdit(){
+ if(!editState)return;editState=null;
+ $("editBar").classList.remove("on");$("txt").value="";$("txt").style.height="";
+ $("sendB").innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 3 10 14M21 3l-7 18-4-7-7-4z"/></svg>';
+ $("sendB").setAttribute("aria-label","ارسال پیام");$("sendB").title="ارسال";$("txt").placeholder="پیام بنویس...";
+}
 function editMsg(){
- const m=getActiveMessage();hideMsgMenu();if(!m||!cur||!canEditMsg(m))return;const c=cur,id=m.id;
- modal(`<h3>ویرایش پیام</h3><textarea id="emT" rows="4" maxlength="1000" aria-label="متن پیام">${esc(m.text)}</textarea><button class="btn" id="emGo" type="button">ذخیره</button><div class="msg" id="emM" role="status"></div>`);
- $("emT").focus();
- $("emGo").onclick=async()=>{const t=$("emT").value.trim();if(!t){$("emM").textContent="متن نباید خالی باشد.";return;}if(t===m.text){close();return;}
-  $("emGo").disabled=true;
-  const fn=c.id===DEF?"edit_public_message":c.gid?"edit_group_message":"edit_private_message";
-  const {data,error}=await sb.rpc(fn,{p_id:Number(id),p_text:t});
-  if(error){$("emM").textContent=exErr(error);$("emGo").disabled=false;return;}
-  close();applyEdit(c,id,t,data);};}
+ const m=getActiveMessage();hideMsgMenu();if(!m||!cur||!canEditMsg(m))return;
+ if(pending){callToast("ابتدا فایل آماده ارسال را لغو کن.");return;}
+ if(editState)cancelEdit();
+ editState={id:String(m.id),text:String(m.text||""),chatId:cur.id,chat:{...cur}};
+ $("editPreview").textContent=String(m.text||"پیام");$("editBar").classList.add("on");
+ $("txt").value=String(m.text||"");$("txt").placeholder="متن پیام را ویرایش کن...";
+ $("txt").style.height="auto";$("txt").style.height=Math.min($("txt").scrollHeight,120)+"px";
+ $("sendB").innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>';
+ $("sendB").setAttribute("aria-label","ذخیره ویرایش");$("sendB").title="ذخیره ویرایش";
+ $("txt").focus();}
+async function saveEdit(){
+ const st=editState;if(!st||sendBusy)return;
+ const t=$("txt").value.trim();if(!t){callToast("متن پیام نباید خالی باشد.");$("txt").focus();return;}
+ if(t===st.text){cancelEdit();return;}
+ if(!cur||cur.id!==st.chatId){cancelEdit();return;}
+ sendBusy=true;$("sendB").disabled=true;
+ try{
+  const c=st.chat,fn=c.id===DEF?"edit_public_message":c.gid?"edit_group_message":"edit_private_message";
+  const {data,error}=await sb.rpc(fn,{p_id:Number(st.id),p_text:t});
+  if(error)throw error;
+  editState=null;$("editBar").classList.remove("on");$("txt").value="";$("txt").style.height="";$("txt").placeholder="پیام بنویس...";
+  $("sendB").innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 3 10 14M21 3l-7 18-4-7-7-4z"/></svg>';$("sendB").setAttribute("aria-label","ارسال پیام");$("sendB").title="ارسال";
+  applyEdit(c,st.id,t,data);callToast("پیام ویرایش شد.");
+ }catch(e){console.error(e);callToast(exErr(e)||"ویرایش پیام انجام نشد.");}
+ finally{sendBusy=false;$("sendB").disabled=false;}
+}
+$("editCancel").onclick=cancelEdit;
 $("mmEdit").onclick=editMsg;
 function onPMEdit(m){
  const peer=m.sender_id===ME.id?m.recipient_id:m.sender_id,a=PM[peer];if(!a)return;
