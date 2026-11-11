@@ -955,16 +955,23 @@ html.day-mode #dayModeToggle{color:#6242a4;background:#e9e5f5;border-color:#d8cf
  .pm-read{display:inline-block;min-width:12px;line-height:1;direction:ltr;white-space:nowrap;}
 
 
-/* پنجرهٔ کوچک تأیید حذف، با چیدمان سادهٔ روبیکا */
-.delete-action-panel{gap:12px;padding:2px 0 0;max-width:360px;margin:0 auto}
-.delete-action-panel .delete-panel-head{padding:0;justify-content:center}
-.delete-action-panel .delete-title{font-size:17px;text-align:center}
-.delete-question{margin:0;text-align:center;color:var(--mu);font-size:13px;line-height:1.9}
-.delete-action-panel .delete-inline-option{min-height:44px;padding:9px 11px;border-radius:11px;font-size:12px}
-.delete-action-panel .delete-confirm-actions{grid-template-columns:1fr 1fr;gap:9px;margin-top:2px}
-.delete-action-panel .delete-confirm-actions .delete-back,.delete-action-panel .delete-confirm-actions .delete-choice{min-height:42px;border-radius:10px;font-size:13px}
-.delete-action-panel .delete-confirm-actions .delete-back{text-align:center}
-.delete-action-panel .delete-confirm-actions .delete-choice{padding:8px 12px}
+/* پنجرهٔ تأیید حذف، بازسازی‌شده بر اساس نمونهٔ روبیکا */
+.ov:has(.card .delete-action-panel){align-items:center;background:#0009}
+.ov:has(.card .delete-action-panel) .card{width:min(350px,100%);padding:20px 24px 14px;background:#fff!important;color:#252525!important;border:0;border-radius:12px;box-shadow:0 12px 35px #0004;animation:in .18s}
+.delete-action-panel{direction:rtl;gap:16px;padding:8px 0 0;max-width:none;margin:0 auto;color:#252525}
+.delete-action-panel .delete-panel-head{padding:0;justify-content:flex-start;min-height:34px}
+.delete-action-panel .delete-title{font-size:22px;text-align:right;color:#222!important;font-weight:800;line-height:1.7}
+.delete-question{margin:0;text-align:right;color:#333;font-size:16px;line-height:1.9}
+.delete-action-panel .delete-inline-option{display:flex;flex-direction:row;align-items:center;justify-content:flex-start;gap:12px;min-height:54px;padding:2px 0;border:0;border-radius:0;background:transparent;color:#333;font-size:16px;font-weight:500;line-height:1.7}
+.delete-action-panel .delete-inline-option input{order:0;width:20px;height:20px;flex:0 0 20px;border:2px solid #888;border-radius:2px;background:#fff}
+.delete-action-panel .delete-inline-option input:checked{background:#6d86c9;border-color:#6d86c9}
+.delete-action-panel .delete-inline-option:has(input:checked){background:transparent;border:0}
+.delete-action-panel .delete-confirm-actions{direction:rtl;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px;padding:0 2px}
+.delete-action-panel .delete-confirm-actions .delete-back,.delete-action-panel .delete-confirm-actions .delete-choice{display:flex;align-items:center;justify-content:center;min-height:48px;padding:8px 12px;border:0;border-radius:0;background:transparent;box-shadow:none;font-size:16px;font-weight:700}
+.delete-action-panel .delete-confirm-actions .delete-back{color:#6885ce;text-align:center}
+.delete-action-panel .delete-confirm-actions .delete-choice{color:#c65e68}
+.delete-action-panel .delete-confirm-actions .delete-choice .delete-choice-copy strong{font-size:16px;color:#c65e68!important}
+.delete-action-panel .delete-status{color:#b94b55}
 
 /* ===== پنل یکپارچه حذف پیام ===== */
 .delete-panel{direction:rtl;display:flex;flex-direction:column;gap:14px;padding-top:8px}
@@ -2874,7 +2881,8 @@ function deletePanelMarkup({title,subtitle,target,targetMeta,count,actions,help,
 }
 function deleteActionPanelMarkup({title,target,targetMeta,count,checkboxId,checkboxText}){
  const checkbox=checkboxText?`<label class="delete-inline-option" for="${checkboxId}"><input id="${checkboxId}" type="checkbox"><span>${checkboxText}</span></label>`:"";
- return `<section class="delete-panel delete-action-panel"><header class="delete-panel-head"><h3 class="delete-title">${title}</h3></header><p class="delete-question">${count&&count!=="۱ پیام"?"آیا از حذف پیام‌های انتخاب‌شده اطمینان دارید؟":"آیا از حذف این پیام اطمینان دارید؟"}</p>${checkbox}<div class="delete-confirm-actions"><button class="delete-back" id="deleteActionCancel" type="button">انصراف</button><button class="delete-choice danger" id="deleteActionGo" type="button"><span class="delete-choice-copy"><strong>حذف</strong></span></button></div><div class="delete-status" id="deleteActionStatus" role="status" aria-live="polite"></div></section>`;
+ const question=count&&count!=="۱ پیام"?"آیا از حذف پیام‌های انتخاب‌شده اطمینان دارید؟":"آیا از حذف این پیام اطمینان دارید؟";
+ return `<section class="delete-panel delete-action-panel"><header class="delete-panel-head"><h3 class="delete-title">${title}</h3></header><p class="delete-question">${question}</p>${checkbox}<div class="delete-confirm-actions"><button class="delete-choice danger" id="deleteActionGo" type="button"><span class="delete-choice-copy"><strong>حذف</strong></span></button><button class="delete-back" id="deleteActionCancel" type="button">لغو</button></div><div class="delete-status" id="deleteActionStatus" role="status" aria-live="polite"></div></section>`;
 }
 function deleteConfirmScreen({title,subtitle,body,confirmText,onBack,onConfirm}){
  modal(`<section class="delete-panel"><header class="delete-panel-head"><div class="delete-symbol warn" aria-hidden="true">⚠️</div><div style="min-width:0"><h3 class="delete-title">${title}</h3><p class="delete-subtitle">${subtitle}</p></div></header><div class="delete-confirm-box">${body}</div><div class="delete-confirm-actions"><button class="delete-back" id="delConfirmBack" type="button">برگشت</button><button class="delete-choice danger" id="delConfirmOk" type="button"><span class="delete-choice-icon" aria-hidden="true">🗑️</span><span class="delete-choice-copy"><strong>${confirmText||"تأیید حذف"}</strong></span></button></div><div class="delete-status" id="delConfirmStatus" role="status" aria-live="polite"></div></section>`);
