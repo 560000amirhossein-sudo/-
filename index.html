@@ -2570,7 +2570,7 @@ $("mmCopy").onclick=()=>{const m=getActiveMessage();if(m&&m.text){navigator.clip
 
 // ================= واکنش، ویرایش و سنجاق پیام (هماهنگ با chat_features_fixed.sql) =================
 const RXE=["\u2764\uFE0F","\u{1F602}","\u{1F60D}","\u{1F44D}","\u{1F622}","\u{1F621}","\u{1F525}"];
-let extrasOk=true,EX={key:"",re:{},ed:{},own:new Set(),pin:null,canPin:false,sg:""},EXV=0,EXI="",exT=null,exBusy=false;
+let extrasOk=true,EX={key:"",re:{},ed:{},own:new Set(),pin:null,canPin:false,sg:""},EXV=0,EXI="",exT=null,exBusy=false,exFetchedAt=0;
 const exKey=c=>!c?"":c.id===DEF?"public":c.gid?"group:"+c.gid:c.type==="private"&&c.peer?"private:"+c.peer:"";
 const exScope=c=>!c?"":c.id===DEF?"public":c.gid?"group":c.type==="private"&&c.peer?"private":"";
 const exLoaded=()=>extrasOk&&!!cur&&!!EX.key&&EX.key===exKey(cur);
@@ -2586,13 +2586,13 @@ function exErr(e){const m=String((e&&e.message)||e||"");
 function exSoon(d){clearTimeout(exT);exT=setTimeout(()=>loadExtras(),d||250);}
 async function loadExtras(force){
  const c=cur;if(!c||!ME||!extrasOk||(exBusy&&!force))return;const sc=exScope(c);if(!sc)return;
- const key=exKey(c),ids=msgsOf(c).map(m=>Number(m.id)).filter(n=>Number.isFinite(n)).slice(-300);
+ const key=exKey(c);if(!force&&EX.key===key&&Date.now()-exFetchedAt<15000)return;const ids=msgsOf(c).map(m=>Number(m.id)).filter(n=>Number.isFinite(n)).slice(-300);
  exBusy=true;
  try{
   const {data,error}=await sb.rpc("chat_extras",{p_scope:sc,p_ids:ids,p_peer:sc==="private"?c.peer:null,p_gid:sc==="group"?c.gid:null});
   if(error){if(exMissing(error)){extrasOk=false;$("mmr").style.display="none";}console.warn("chat_extras:",error);return;}
   if(!cur||exKey(cur)!==key)return;
-  const sg=JSON.stringify(data);if(EX.key===key&&EX.sg===sg)return;
+  exFetchedAt=Date.now();const sg=JSON.stringify(data);if(EX.key===key&&EX.sg===sg)return;
   const re={},ed={};
   for(const r of data.reactions||[])(re[String(r.message_id)]=re[String(r.message_id)]||[]).push({e:r.emoji,n:r.cnt,mine:!!r.mine});
   for(const r of data.edited||[])ed[String(r.message_id)]=r.edited_at;
@@ -2907,7 +2907,7 @@ try{const _jp=new URLSearchParams(location.search).get("joinGroup");if(_jp&&/^[0
 const AVB="avatars",UNRE=/^[A-Za-z0-9_]{3,20}$/,UUID=/^[0-9a-f-]{36}$/i,EMRE=/^\S+@\S+\.\S+$/;
 let SG=[],GM={},GMEM={},GMR={},sgWarn=false;
 let GU={},GREAD={},GMSGREAD={},grt=null,grt2=null,grtOk=false,gMediaOk=true,guWarn=false,PGR=[],pst=null,gTick=0;const GMT={},NKG=new Set();
-let ME=null,PROF=null,P={},PC=[],PM={},HID=new Set(),pmHidesLoaded=false,UR=[],rt=null,rtOk=false,recov=false,pmReadOk=true,sendBusy=false;
+let ME=null,PROF=null,P={},PC=[],PM={},PMFetchedAt={},HID=new Set(),pmHidesLoaded=false,UR=[],rt=null,rtOk=false,recov=false,pmReadOk=true,sendBusy=false;
 const likeEsc=t=>t.replace(/[\\%_]/g,"\\$&"),pName=p=>p?(p.display_name||p.username):"کاربر";
 const showGate=v=>{document.documentElement.classList.remove("arya-session-pending");$("gate").style.display=v?"flex":"none";};
 const redir=()=>/^https?:$/.test(location.protocol)?location.origin+location.pathname:undefined;
@@ -2992,7 +2992,7 @@ async function go(mode){
 }
 async function boot(u){try{await boot0(u);}catch(e){showErr("boot: "+ser(e));}}
 async function boot0(user){
- if(!user){presenceStop();endLocal();closeInc();stopCallRT();ME=null;PROF=null;stopRT();stopPublicRT();stopGRT();GU={};PGR=[];PC=[];PM={};HID=new Set();pmHidesLoaded=false;GHID.clear();gHidesLoaded=false;UR=[];cur=null;UN={};SG=[];GM={};GMEM={};GMR={};pcLoaded=false;ncReady=false;for(const k in UCNT)delete UCNT[k];ntClear();$("chat").style.display="none";$("ph").style.display="grid";$("app").classList.remove("open");gate("login");showGate(true);renderList();return;}
+ if(!user){presenceStop();endLocal();closeInc();stopCallRT();ME=null;PROF=null;stopRT();stopPublicRT();stopGRT();GU={};PGR=[];PC=[];PM={};PMFetchedAt={};HID=new Set();pmHidesLoaded=false;GHID.clear();gHidesLoaded=false;for(const k in GMFetchedAt)delete GMFetchedAt[k];UR=[];cur=null;UN={};SG=[];GM={};GMEM={};GMR={};pcLoaded=false;ncReady=false;for(const k in UCNT)delete UCNT[k];ntClear();$("chat").style.display="none";$("ph").style.display="grid";$("app").classList.remove("open");gate("login");showGate(true);renderList();return;}
  ME=user;
  const {data,error}=await ownProf(user.id);
  if(error){console.error("بارگذاری پروفایل ناموفق بود؛ نشست ورود حفظ شد:",error);ME=null;PROF=null;gate("login");showGate(true);alert("بارگذاری پروفایل ناموفق بود. از حساب خارج نشده‌ای؛ اتصال را بررسی کن و صفحه را تازه‌سازی کن.");return;}
@@ -3102,7 +3102,7 @@ async function refreshPC(poll){if(!ME)return;const {data,error}=await sb.rpc("my
  await loadUnread();
  if(poll)for(const r of data)if(r.last_sender!==ME.id&&r.last_at>(prevAt.get(r.peer_id)||""))ntPM({sender_id:r.peer_id,created_at:r.last_at,text:r.last_text});}
 async function markSeen(peer){const a=PM[peer]||[],l=a[a.length-1];(D.pmSeen=D.pmSeen||{})[peer]=l?l.created_at:new Date().toISOString();save();delete UN[peer];if(ME&&pmReadOk&&UUID.test(String(peer))){const unread=a.filter(m=>m.sender_id===peer&&m.recipient_id===ME.id&&!m.read_at);if(unread.length){const {error}=await sb.rpc("mark_private_messages_read",{p_peer:peer});if(error){if(!/mark_private_messages_read|PGRST202|42883/i.test((error.code||"")+(error.message||"")))console.warn("رسید خواندن خصوصی:",error);return;}const now=new Date().toISOString();unread.forEach(m=>m.read_at=now);if(cur&&cur.peer===peer){EXV++;renderMsgs(true);}renderList();}}}
-async function loadPM(peer){if(!ME||!UUID.test(peer))return;
+async function loadPM(peer){if(!ME||!UUID.test(peer))return;if(rtOk&&PMFetchedAt[peer]&&Date.now()-PMFetchedAt[peer]<8000){if(cur&&cur.peer===peer&&!document.hidden)markSeen(peer);return;}
  // رسانهٔ خصوصی در صورت وجود ستون‌ها بارگذاری می‌شود؛ نبود ستون‌ها چت متنی را از کار نمی‌اندازد.
  const pmQ=cols=>sb.from("private_messages").select(cols).or(`and(sender_id.eq.${ME.id},recipient_id.eq.${peer}),and(sender_id.eq.${peer},recipient_id.eq.${ME.id})`).order("created_at",{ascending:false}).limit(200);
  let cols="id,sender_id,recipient_id,text,created_at,read_at,reply_to_id,deleted_for_all"+(pmMediaOk?",media_url,media_type":"");
@@ -3111,7 +3111,7 @@ async function loadPM(peer){if(!ME||!UUID.test(peer))return;
  if(error&&pmMediaOk&&/media_url|media_type|PGRST204|42703/.test((error.code||"")+(error.message||""))){pmMediaOk=false;cols="id,sender_id,recipient_id,text,created_at,reply_to_id,deleted_for_all";({data,error}=await pmQ(cols));}
  if(error&&/deleted_for_all/.test((error.code||"")+(error.message||""))){cols=cols.replace(",deleted_for_all","");({data,error}=await pmQ(cols));}
  if(error&&/reply_to_id|PGRST204|42703/.test((error.code||"")+(error.message||""))){replyOkP=false;cols=cols.replace(",reply_to_id","");({data,error}=await pmQ(cols));}
- if(error){console.error(error);PM[peer]=PM[peer]||[];return;}PM[peer]=data.reverse();await loadHides(peer);if(cur&&cur.peer===peer&&!document.hidden)markSeen(peer);}
+ if(error){console.error(error);PM[peer]=PM[peer]||[];return;}PM[peer]=data.reverse();PMFetchedAt[peer]=Date.now();await loadHides(peer);if(cur&&cur.peer===peer&&!document.hidden)markSeen(peer);}
 const visPM=peer=>(PM[peer]||[]).filter(m=>!m.deleted_for_all&&!HID.has(String(m.id)));
 function dropPM(id){for(const k in PM){const a=PM[k],i=a.findIndex(x=>String(x.id)===String(id));if(i<0)continue;a.splice(i,1);const c=PC.find(x=>x.peer===k),l=visPM(k).slice(-1)[0];if(c)c.last=l?(l.text||mLab(l.media_type)):"";if(cur&&cur.peer===k)renderMsgs(true);renderList();return;}}
 async function loadHides(peer){if(pmHidesLoaded||!ME)return;const {data,error}=await sb.from("private_message_hides").select("message_id").eq("user_id",ME.id).limit(1000);if(error){console.warn("بارگذاری حذف‌های خصوصی:",error);return;}(data||[]).forEach(r=>HID.add(String(r.message_id)));pmHidesLoaded=true;}
@@ -3158,7 +3158,7 @@ function delPM(m){
  };
 }
 
-function addPM(m){const peer=m.sender_id===ME.id?m.recipient_id:m.sender_id,a=PM[peer]=PM[peer]||[];if(a.some(x=>x.id===m.id))return false;a.push(m);a.sort((x,y)=>x.created_at<y.created_at?-1:1);
+function addPM(m){const peer=m.sender_id===ME.id?m.recipient_id:m.sender_id,a=PM[peer]=PM[peer]||[];PMFetchedAt[peer]=Date.now();if(a.some(x=>x.id===m.id))return false;a.push(m);a.sort((x,y)=>x.created_at<y.created_at?-1:1);
  let c=PC.find(x=>x.peer===peer);if(!c){c=mkPC(peer);PC.push(c);}c.last=m.text||mLab(m.media_type);c.at=m.created_at;
  if(cur&&cur.peer===peer&&!document.hidden)markSeen(peer);else if(m.sender_id!==ME.id)(UN[peer]=UN[peer]||new Set()).add(String(m.id));return true;}
 async function sendPM(text){
@@ -3226,6 +3226,7 @@ setInterval(async()=>{if(!ME||document.hidden||rtOk)return;await refreshPC(true)
 
 // ================= گروه‌های سرور با نقش‌های مالک / مدیر / عضو =================
 // نقش‌ها در دیتابیس (جدول group_members) ذخیره و با RLS و تابع‌های SQL اعمال می‌شوند؛ دکمه‌های مخفی‌شده فقط راحتی کاربر هستند.
+const GMFetchedAt={};
 const GERR={BANNED:"دسترسی شما به این گروه مسدود شده است.",NOT_FOUND:"پیام پیدا نشد.",FORBIDDEN:"اجازهٔ این کار را نداری.",NOT_A_MEMBER:"این کاربر عضو گروه نیست.",USER_NOT_FOUND:"کاربر پیدا نشد.",OWNER_CANNOT_LEAVE:"مالک نمی‌تواند از گروه خارج شود.",BAD_ROLE:"نقش نامعتبر است.",NOT_PUBLIC:"این گروه عمومی نیست.",GROUP_NOT_FOUND:"گروه پیدا نشد.",NOT_AUTHENTICATED:"ابتدا وارد حساب شو."};
 function gErr(e){const m=String((e&&e.message)||e||"");for(const k in GERR)if(m.includes(k))return GERR[k];if(/schema cache|does not exist|PGRST20|Could not find|relation/i.test(m))return"جدول‌های گروه هنوز در دیتابیس ساخته نشده‌اند؛ فایل SQL را اجرا کن.";return"انجام نشد؛ دوباره تلاش کن.";}
 const roleFa=r=>r==="owner"?"مالک":r==="admin"?"مدیر":"عضو";
@@ -3248,13 +3249,14 @@ async function loadGHides(ids){if(!gHideOk||!ME||gHidesLoaded)return;
   if(error){if(gHideMissing(error))gHideOk=false;console.warn("group_message_hides:",error);return;}
   (data||[]).forEach(r=>GHID.add(String(r.message_id)));gHidesLoaded=true;}
 function afterGDel(gid){const l=gVis(gid).slice(-1)[0],c=SG.find(x=>x.gid===gid);if(c)c.last=l?(l.text||gLab(l.media_type)):"";renderMsgs(true);renderList();}
-async function loadGM(gid){
+async function loadGM(gid,force=false){
+ if(grtOk&&!force&&GMFetchedAt[gid]&&Date.now()-GMFetchedAt[gid]<8000)return true;
  const qq=()=>sb.from("group_messages").select("id,group_id,sender_id,text,created_at,reply_to_id"+(gMediaOk?",media_url,media_type":"")).eq("group_id",gid).order("created_at",{ascending:false}).limit(200);
  let r=await qq();
  if(r.error&&gMediaOk&&/media_url|media_type|42703|PGRST204/.test((r.error.code||"")+(r.error.message||""))){gMediaOk=false;r=await qq();}
  const {data,error}=r;
  if(error){console.error(error);return false;}
- data.reverse();await loadGHides(data.map(m=>m.id));GM[gid]=data;await Promise.all([profs(GM[gid].map(m=>m.sender_id),true),loadGroupReads(gid),loadGroupMessageReads(gid)]);loadPin(gid);
+ data.reverse();await loadGHides(data.map(m=>m.id));GM[gid]=data;GMFetchedAt[gid]=Date.now();await Promise.all([profs(GM[gid].map(m=>m.sender_id),true),loadGroupReads(gid),loadGroupMessageReads(gid)]);loadPin(gid);
  const c=SG.find(x=>x.gid===gid),l=gVis(gid).slice(-1)[0];if(c){if(l){c.last=l.text||gLab(l.media_type);c.at=l.created_at;}else if(GM[gid].length)c.last="";}
  return true;}
 async function loadGroupReads(gid){
@@ -3746,10 +3748,10 @@ let guT=null;const guSoon=()=>{clearTimeout(guT);guT=setTimeout(async()=>{await 
 async function gSync(full){
  if(!ME)return;const old={...GU};
  if(full){await refreshSG();await loadGU();if(cur&&cur.gid)await loadMembers(cur.gid);}
- if(cur&&cur.gid){await loadGM(cur.gid);if(cur&&cur.gid){renderMsgs();if(!document.hidden)markGroupRead(cur.gid);}}
+ if(cur&&cur.gid){await loadGM(cur.gid,true);if(cur&&cur.gid){renderMsgs();if(!document.hidden)markGroupRead(cur.gid);}}
  if(full)for(const g of SG){const n=GU[g.gid]||0,o=old[g.gid]||0;if(n>o&&!(cur&&cur.gid===g.gid))notify({id:g.id,title:g.title,avatar:g.avatar,text:g.last||"پیام جدید",at:g.at,count:n-o});}
  renderList();}
-async function gCatchUp(){if(!ME)return;await refreshSG();await loadGU();if(cur&&cur.gid){if(await loadGM(cur.gid)){renderMsgs();if(!document.hidden)markGroupRead(cur.gid);}}renderList();}
+async function gCatchUp(){if(!ME)return;await refreshSG();await loadGU();if(cur&&cur.gid){if(await loadGM(cur.gid,true)){renderMsgs();if(!document.hidden)markGroupRead(cur.gid);}}renderList();}
 // ---- Realtime پیام‌های گروه ----
 async function onGIns(p){
  const m=p&&p.new;if(!m||m.group_id==null||!ME)return;
