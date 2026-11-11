@@ -1582,7 +1582,7 @@ function savePublicCache(){
  }catch(e){}
 }
 const UCNT={},POP={},NK=new Set();
-const GHID=new Set();let gHideOk=true;
+const GHID=new Set();let gHideOk=true,gHidesLoaded=false;
 const safe=u=>{if(typeof u!=="string")return"";if(/^data:image\/(?:png|jpeg|webp|gif|avif);base64,/i.test(u))return u;try{const x=new URL(u);return x.protocol==="https:"&&x.origin==="https://jpsttfuajyfvysqydqqj.supabase.co"&&/^\/storage\/v1\/object\/(?:public|sign)\/avatars\//.test(x.pathname)?u:"";}catch{return"";}};
 const hue=n=>{let h=0;for(const c of String(n||""))h=(h*31+c.charCodeAt(0))%360;return h;};
 const avBg=n=>{const h=hue(n);return `linear-gradient(135deg,hsl(${h} 65% 55%),hsl(${(h+40)%360} 60% 32%))`;};
@@ -2242,12 +2242,12 @@ function multiDeleteModal(){
     afterDel(peer);
    }else if(isGroup){
     if(deleteAll){
-     for(const m of items){
-      const {data,error}=await sb.from("group_messages").delete().eq("id",m.id).select("id");
-      if(error||!data||!data.length){console.warn("حذف چندپیامی گروه برای همه:",error||"ردیفی حذف نشد");fail++;continue;}
-      GM[gid]=(GM[gid]||[]).filter(x=>String(x.id)!==String(m.id));ok++;
-     }
-     const loaded=await loadGM(gid);if(!loaded)console.warn("پس از حذف گروه، تازه‌سازی گفتگو ناموفق بود.");
+     const ids=items.map(m=>String(m.id));
+     const {data,error}=await sb.from("group_messages").delete().in("id",ids).select("id");
+     if(error)throw error;
+     const removed=new Set((data||[]).map(x=>String(x.id)));
+     ok=removed.size;fail=items.length-ok;
+     GM[gid]=(GM[gid]||[]).filter(x=>!removed.has(String(x.id)));
     }else{
      for(const m of items){
       const {error}=await sb.from("group_message_hides").insert({user_id:ME.id,message_id:m.id});
@@ -2907,7 +2907,7 @@ try{const _jp=new URLSearchParams(location.search).get("joinGroup");if(_jp&&/^[0
 const AVB="avatars",UNRE=/^[A-Za-z0-9_]{3,20}$/,UUID=/^[0-9a-f-]{36}$/i,EMRE=/^\S+@\S+\.\S+$/;
 let SG=[],GM={},GMEM={},GMR={},sgWarn=false;
 let GU={},GREAD={},GMSGREAD={},grt=null,grt2=null,grtOk=false,gMediaOk=true,guWarn=false,PGR=[],pst=null,gTick=0;const GMT={},NKG=new Set();
-let ME=null,PROF=null,P={},PC=[],PM={},HID=new Set(),UR=[],rt=null,rtOk=false,recov=false,pmReadOk=true,sendBusy=false;
+let ME=null,PROF=null,P={},PC=[],PM={},HID=new Set(),pmHidesLoaded=false,UR=[],rt=null,rtOk=false,recov=false,pmReadOk=true,sendBusy=false;
 const likeEsc=t=>t.replace(/[\\%_]/g,"\\$&"),pName=p=>p?(p.display_name||p.username):"کاربر";
 const showGate=v=>{document.documentElement.classList.remove("arya-session-pending");$("gate").style.display=v?"flex":"none";};
 const redir=()=>/^https?:$/.test(location.protocol)?location.origin+location.pathname:undefined;
@@ -2992,7 +2992,7 @@ async function go(mode){
 }
 async function boot(u){try{await boot0(u);}catch(e){showErr("boot: "+ser(e));}}
 async function boot0(user){
- if(!user){presenceStop();endLocal();closeInc();stopCallRT();ME=null;PROF=null;stopRT();stopPublicRT();stopGRT();GU={};PGR=[];PC=[];PM={};HID=new Set();UR=[];cur=null;UN={};SG=[];GM={};GMEM={};GMR={};pcLoaded=false;ncReady=false;for(const k in UCNT)delete UCNT[k];ntClear();$("chat").style.display="none";$("ph").style.display="grid";$("app").classList.remove("open");gate("login");showGate(true);renderList();return;}
+ if(!user){presenceStop();endLocal();closeInc();stopCallRT();ME=null;PROF=null;stopRT();stopPublicRT();stopGRT();GU={};PGR=[];PC=[];PM={};HID=new Set();pmHidesLoaded=false;GHID.clear();gHidesLoaded=false;UR=[];cur=null;UN={};SG=[];GM={};GMEM={};GMR={};pcLoaded=false;ncReady=false;for(const k in UCNT)delete UCNT[k];ntClear();$("chat").style.display="none";$("ph").style.display="grid";$("app").classList.remove("open");gate("login");showGate(true);renderList();return;}
  ME=user;
  const {data,error}=await ownProf(user.id);
  if(error){console.error("بارگذاری پروفایل ناموفق بود؛ نشست ورود حفظ شد:",error);ME=null;PROF=null;gate("login");showGate(true);alert("بارگذاری پروفایل ناموفق بود. از حساب خارج نشده‌ای؛ اتصال را بررسی کن و صفحه را تازه‌سازی کن.");return;}
@@ -3114,7 +3114,7 @@ async function loadPM(peer){if(!ME||!UUID.test(peer))return;
  if(error){console.error(error);PM[peer]=PM[peer]||[];return;}PM[peer]=data.reverse();await loadHides(peer);if(cur&&cur.peer===peer&&!document.hidden)markSeen(peer);}
 const visPM=peer=>(PM[peer]||[]).filter(m=>!m.deleted_for_all&&!HID.has(String(m.id)));
 function dropPM(id){for(const k in PM){const a=PM[k],i=a.findIndex(x=>String(x.id)===String(id));if(i<0)continue;a.splice(i,1);const c=PC.find(x=>x.peer===k),l=visPM(k).slice(-1)[0];if(c)c.last=l?(l.text||mLab(l.media_type)):"";if(cur&&cur.peer===k)renderMsgs(true);renderList();return;}}
-async function loadHides(peer){const {data,error}=await sb.from("private_message_hides").select("message_id").eq("user_id",ME.id).limit(1000);if(error){console.warn("بارگذاری حذف‌های خصوصی:",error);return;}(data||[]).forEach(r=>HID.add(String(r.message_id)));}
+async function loadHides(peer){if(pmHidesLoaded||!ME)return;const {data,error}=await sb.from("private_message_hides").select("message_id").eq("user_id",ME.id).limit(1000);if(error){console.warn("بارگذاری حذف‌های خصوصی:",error);return;}(data||[]).forEach(r=>HID.add(String(r.message_id)));pmHidesLoaded=true;}
 function afterDel(peer){const l=visPM(peer).slice(-1)[0],c=PC.find(x=>x.peer===peer);if(c)c.last=l?(l.text||mLab(l.media_type)):"";renderMsgs(true);renderList();}
 function delLocalMessage(m){
  const chatId=cur.id,target=esc(forwardLabel(cur)),targetMeta=cur.type==="channel"?"کانال":"گفت‌وگو";
@@ -3131,24 +3131,27 @@ function delLocalMessage(m){
 }
 function delPM(m){
  const peer=cur.peer,target=esc(forwardLabel(cur)),canAll=!!m.mine;
- modal(deleteActionPanelMarkup({title:"حذف پیام",target,targetMeta:"گفت‌وگوی خصوصی",count:"۱ پیام",checkboxId:"deleteScopeAll",checkboxText:canAll?`حذف برای ${target}`:null}));
+ modal(deleteActionPanelMarkup({title:"حذف پیام",target,targetMeta:"گفت‌وگوی خصوصی",count:"۱ پیام",checkboxId:"deleteScopeAll",checkboxText:canAll?("حذف برای "+target):null}));
  $("deleteActionCancel").onclick=close;
  const button=$("deleteActionGo"),status=$("deleteActionStatus");
  button.onclick=async()=>{
   const deleteAll=canAll&&$("deleteScopeAll")&&$("deleteScopeAll").checked;
+  const old=(PM[peer]||[]).slice(),wasHidden=HID.has(String(m.id));
   button.disabled=true;button.querySelector("strong").textContent="در حال حذف…";
+  if(deleteAll)PM[peer]=(PM[peer]||[]).filter(x=>String(x.id)!==String(m.id));
+  else HID.add(String(m.id));
+  afterDel(peer);
   try{
-   if(deleteAll){
-    await deletePrivateForEveryone(m.id);
-    PM[peer]=(PM[peer]||[]).filter(x=>String(x.id)!==String(m.id));
-   }else{
+   if(deleteAll)await deletePrivateForEveryone(m.id);
+   else{
     const {error}=await sb.from("private_message_hides").insert({user_id:ME.id,message_id:String(m.id)});
     if(error&&error.code!=="23505")throw error;
-    HID.add(String(m.id));
    }
-   close();afterDel(peer);
+   close();callToast("پیام حذف شد.");
   }catch(e){
    console.error(deleteAll?"حذف خصوصی برای هر دو:":"حذف خصوصی برای من:",e);
+   PM[peer]=old;if(wasHidden)HID.add(String(m.id));else HID.delete(String(m.id));
+   afterDel(peer);
    button.disabled=false;button.querySelector("strong").textContent="حذف";
    if(status)status.textContent=deleteAll?(e&&e.message||"حذف برای هر دو انجام نشد؛ دوباره تلاش کن."):(navigator.onLine?"حذف انجام نشد؛ دوباره تلاش کن.":"اتصال اینترنت برقرار نیست.");
   }
@@ -3239,11 +3242,11 @@ async function refreshSG(){
 const gLab=t=>t==="image"?"🖼️ عکس":t==="video"?"🎬 ویدیو":t==="audio"?"🎙️ پیام صوتی":"";
 const gHideMissing=e=>/PGRST205|42P01|schema cache|Could not find the table|relation .*group_message_hides.* does not exist/i.test(String((e&&e.code)||"")+" "+String((e&&e.message)||""));
 function gVis(gid){return(GM[gid]||[]).filter(m=>!GHID.has(String(m.id)));}
-async function loadGHides(ids){if(!gHideOk||!ME)return;
+async function loadGHides(ids){if(!gHideOk||!ME||gHidesLoaded)return;
   // همان الگوی loadHides چت خصوصی: همه‌ی حذف‌های خود کاربر (RLS: user_id = auth.uid())، بدون فیلتر in روی شناسه‌ها.
   const {data,error}=await sb.from("group_message_hides").select("message_id").eq("user_id",ME.id).limit(1000);
   if(error){if(gHideMissing(error))gHideOk=false;console.warn("group_message_hides:",error);return;}
-  (data||[]).forEach(r=>GHID.add(String(r.message_id)));}
+  (data||[]).forEach(r=>GHID.add(String(r.message_id)));gHidesLoaded=true;}
 function afterGDel(gid){const l=gVis(gid).slice(-1)[0],c=SG.find(x=>x.gid===gid);if(c)c.last=l?(l.text||gLab(l.media_type)):"";renderMsgs(true);renderList();}
 async function loadGM(gid){
  const qq=()=>sb.from("group_messages").select("id,group_id,sender_id,text,created_at,reply_to_id"+(gMediaOk?",media_url,media_type":"")).eq("group_id",gid).order("created_at",{ascending:false}).limit(200);
@@ -3321,22 +3324,25 @@ async function delGM(m){
  const button=$("deleteActionGo"),status=$("deleteActionStatus");
  button.onclick=async()=>{
   const deleteAll=canAll&&$("deleteScopeAll")&&$("deleteScopeAll").checked;
+  const old=(GM[gid]||[]).slice(),oldHidden=GHID.has(String(m.id));
   button.disabled=true;button.querySelector("strong").textContent="در حال حذف…";
+  if(deleteAll)GM[gid]=(GM[gid]||[]).filter(x=>String(x.id)!==String(m.id));
+  else GHID.add(String(m.id));
+  afterGDel(gid);
   try{
    if(deleteAll){
-    const {data:delRows,error}=await sb.from("group_messages").delete().eq("id",m.id).select("id");
+    const {data,error}=await sb.from("group_messages").delete().eq("id",m.id).select("id");
     if(error)throw error;
-    if(!delRows||!delRows.length)throw new Error("حذف انجام نشد؛ ممکن است مجوز لازم وجود نداشته باشد.");
-    const reloaded=await loadGM(gid);
-    if(!reloaded||(GM[gid]||[]).some(x=>String(x.id)===String(m.id)))throw new Error("حذف تأیید نشد؛ پیام هنوز در گروه دیده می‌شود.");
+    if(!data||!data.length)throw new Error("حذف انجام نشد؛ ممکن است مجوز لازم وجود نداشته باشد.");
    }else{
     const {error}=await sb.from("group_message_hides").insert({user_id:ME.id,message_id:m.id});
     if(error&&error.code!=="23505")throw error;
-    GHID.add(String(m.id));
    }
-   close();afterGDel(gid);
+   close();callToast("پیام حذف شد.");
   }catch(e){
    console.error("حذف پیام گروه:",e);
+   GM[gid]=old;if(oldHidden)GHID.add(String(m.id));else GHID.delete(String(m.id));
+   afterGDel(gid);
    button.disabled=false;button.querySelector("strong").textContent="حذف";
    if(status)status.textContent=(e&&e.message&&/حذف|مجوز|پیام/.test(e.message))?e.message:(navigator.onLine?"حذف انجام نشد؛ دوباره تلاش کن.":"اتصال اینترنت برقرار نیست.");
   }
