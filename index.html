@@ -1635,9 +1635,11 @@ async function enrichPublicProfiles(rows){
  // Public-room messages may store a username or display name instead of sender_id.
  for(let i=0;i<clean.length;i+=25){
   const batch=clean.slice(i,i+25);
-  const a=await sb.from("profiles").select("id,username,display_name,avatar_url").in("username",batch);
+  const [a,b]=await Promise.all([
+   sb.from("profiles").select("id,username,display_name,avatar_url").in("username",batch),
+   sb.from("profiles").select("id,username,display_name,avatar_url").in("display_name",batch)
+  ]);
   if(!a.error)(a.data||[]).forEach(p=>{found.set(String(p.username||"").toLocaleLowerCase(),p);P[p.id]={...(P[p.id]||{}),...p};});
-  const b=await sb.from("profiles").select("id,username,display_name,avatar_url").in("display_name",batch);
   if(!b.error)(b.data||[]).forEach(p=>{found.set(String(p.display_name||"").trim().toLocaleLowerCase(),p);P[p.id]={...(P[p.id]||{}),...p};});
  }
  for(const m of rows||[]){
@@ -2274,7 +2276,7 @@ $("multiDelete").onclick=multiDeleteModal;
 // ---- ارسال سریع و نمایش فوری پیام ----
 let sendSfxCtx=null;
 function prepareSendSfx(){try{const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;sendSfxCtx=sendSfxCtx||new AC();if(sendSfxCtx.state==="suspended")sendSfxCtx.resume().catch(()=>{});}catch(e){}}
-function playSendSfx(){try{if(!sendSfxCtx||sendSfxCtx.state!=="running")return;const t=sendSfxCtx.currentTime,o=sendSfxCtx.createOscillator(),g=sendSfxCtx.createGain();o.type="sine";o.frequency.setValueAtTime(760,t);o.frequency.exponentialRampToValueAtTime(1040,t+.075);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.045,t+.012);g.gain.exponentialRampToValueAtTime(.0001,t+.13);o.connect(g);g.connect(sendSfxCtx.destination);o.start(t);o.stop(t+.14);}catch(e){}}
+function playSendSfx(){try{if(!sendSfxCtx||sendSfxCtx.state!=="running")return;const t=sendSfxCtx.currentTime,o=sendSfxCtx.createOscillator(),g=sendSfxCtx.createGain();o.type="sine";o.frequency.setValueAtTime(760,t);o.frequency.exponentialRampToValueAtTime(1040,t+.075);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.16,t+.012);g.gain.exponentialRampToValueAtTime(.0001,t+.13);o.connect(g);g.connect(sendSfxCtx.destination);o.start(t);o.stop(t+.14);}catch(e){}}
 function addOptimisticMessage(text){
  if(!text||pending||!cur||!ME)return null;
  const id="local-send-"+Date.now()+"-"+Math.random().toString(36).slice(2),at=new Date().toISOString();
@@ -2292,6 +2294,7 @@ function removeOptimisticMessage(o){
 async function send(){
  if(sendBusy)return;const text=$("txt").value.trim();if((!text&&!pending)||!canPost())return;
  prepareSendSfx();
+ let sendSfxPlayed=false;const confirmSendSfx=()=>{if(!sendSfxPlayed){playSendSfx();sendSfxPlayed=true;}};
  sendBusy=true;$("sendB").disabled=true;
  const optimistic=addOptimisticMessage(text);
  if(optimistic){renderMsgs(true);renderList();}
@@ -2307,12 +2310,11 @@ async function send(){
     const ext=pendingKind==="audio"?(mt.includes("ogg")?"ogg":mt.includes("mp4")?"m4a":"webm"):pendingKind==="video"?(mt.includes("quicktime")?"mov":mt.includes("webm")?"webm":"mp4"):"jpg";
     row.media_url=await upload(pendingKind==="audio"?pending:pendingKind==="video"?pendingFile:pending,ext,mt,pendingKind==="audio"?pendingDur:0);
    }
-   const {error}=await sb.from("messages").insert(row);if(error)throw error;await pull();
-   D.seen=pubMsgs[pubMsgs.length-1]?.created_at||D.seen;
+   const {error}=await sb.from("messages").insert(row);if(error)throw error;confirmSendSfx();
   }else if(cur.gid){
-   if(!await gSend(text)){removeOptimisticMessage(optimistic);renderMsgs(true);$("sendB").disabled=false;sendBusy=false;return;}
+   if(!await gSend(text)){removeOptimisticMessage(optimistic);renderMsgs(true);$("sendB").disabled=false;sendBusy=false;return;}confirmSendSfx();
   }else if(cur.type==="private"){
-   if(!await sendPM(text)){removeOptimisticMessage(optimistic);renderMsgs(true);$("sendB").disabled=false;sendBusy=false;return;}
+   if(!await sendPM(text)){removeOptimisticMessage(optimistic);renderMsgs(true);$("sendB").disabled=false;sendBusy=false;return;}confirmSendSfx();
   }else{
    if(pendingKind==="video"){alert("ویدیو فقط در گروه عمومی ارسال می‌شود.");removeOptimisticMessage(optimistic);renderMsgs(true);$("sendB").disabled=false;sendBusy=false;return;}
    const m={id:"m"+Date.now(),text,img:pending&&pendingKind==="image"?await b2d(pending):null,aud:pending&&pendingKind==="audio"?await b2d(pending):null,at:new Date().toISOString()};
@@ -2320,10 +2322,12 @@ async function send(){
    (D.msgs[cur.id]=D.msgs[cur.id]||[]).push(m);
    const c=D.chats.find(x=>x.id===cur.id);c.last=text|| (m.aud?"🎙️ پیام صوتی":"");c.img=!!m.img;c.at=m.at;
   }
-  removeOptimisticMessage(optimistic);
+  const publicOptimistic=!!(optimistic&&optimistic.kind==="public");
+  if(!publicOptimistic)removeOptimisticMessage(optimistic);
   if(cur.id===DEF||(!cur.gid&&cur.type!=="private"))rememberSentEmojis(text);
   save();$("txt").value="";$("txt").style.height="";clearPending();clearReply();
-  playSendSfx();renderMsgs(true);renderList();
+  confirmSendSfx();renderMsgs(true);renderList();
+  if(publicOptimistic)pull().then(()=>{removeOptimisticMessage(optimistic);D.seen=pubMsgs[pubMsgs.length-1]?.created_at||D.seen;save();if(cur&&cur.id===DEF)renderMsgs(true);renderList();}).catch(e=>console.warn("همگام‌سازی پیام عمومی:",e));
  }catch(e){console.error(e);removeOptimisticMessage(optimistic);renderMsgs(true);alert("ارسال ناموفق بود. اتصال، مجوز ذخیره‌سازی و وجود ستون‌های رسانه را بررسی کن.");}
  $("sendB").disabled=false;sendBusy=false;
 }
@@ -4014,7 +4018,7 @@ document.addEventListener("visibilitychange",()=>{if(document.hidden||!cur)retur
  if(cur.id===DEF){if(pubMsgs.length){D.seen=pubMsgs[pubMsgs.length-1].created_at;save();}}else if(cur.peer)markSeen(cur.peer);else if(cur.gid)markGroupRead(cur.gid);renderList();});
 setMe();renderList();
 if(D.hideNote)$("note").style.display="none";$("noteX").onclick=()=>{D.hideNote=1;save();$("note").style.display="none";};
-restorePublicCache();pull().then(()=>{renderList();if(matchMedia("(min-width:761px)").matches)openChat(DEF);});
+restorePublicCache();renderList();if(matchMedia("(min-width:761px)").matches)openChat(DEF);pull().then(()=>{renderList();if(cur&&cur.id===DEF)renderMsgs(true);}).catch(e=>console.warn("بارگذاری پیام‌های عمومی:",e));
 setInterval(async()=>{if(document.hidden)return;pubPollCount++;if(!pubRtOk||pubPollCount%6===0){await pull();if(cur&&cur.id===DEF){if(pubMsgs.length){D.seen=pubMsgs[pubMsgs.length-1].created_at;}renderMsgs();}renderList();}},10000);
 
 // ---- صفحه تنظیمات (فقط ظاهر؛ هر خطایی در این بخش جلوی کار بقیه‌ی برنامه را نمی‌گیرد) ----
