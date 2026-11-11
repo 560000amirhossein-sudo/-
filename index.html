@@ -2380,7 +2380,7 @@ async function startVoice(){
    const blob=new Blob(parts,{type});
    if(!blob.size){callToast("صدایی ضبط نشد.");return;}
    if(blob.size>MAXV){callToast("حجم ویس بیشتر از ۲۰ مگابایت شد؛ کوتاه‌تر ضبط کن.");return;}
-   clearPending();pending=blob;pendingFile=blob;pendingKind="audio";pendingDur=Math.max(1,Math.round(ms/1000));pendingPeaks=peaksOf(pk);
+   clearPending();pending=blob;pendingFile=blob;pendingKind="audio";syncComposerAction();pendingDur=Math.max(1,Math.round(ms/1000));pendingPeaks=peaksOf(pk);
    $("prevImg").style.display="none";pvUrl=URL.createObjectURL(blob);
    $("vpPrevW").innerHTML=vpHtml(pvUrl,pendingPeaks,pendingDur);$("prev").classList.add("show","aud");
   };
@@ -2775,11 +2775,11 @@ $("file").onchange=async()=>{
  if(f.type.startsWith("video/")){
   if(!["video/mp4","video/webm","video/quicktime"].includes(f.type)){gWarn("فقط mp4، webm یا mov پشتیبانی می‌شود.");return;}
   if(f.size>MAXV){gWarn("حجم ویدیو باید کمتر از ۲۰ مگابایت باشد.");return;}
-  clearPending();pending=f;pendingFile=f;pendingKind="video";$("prevImg").style.display="none";$("prev").querySelector("span").textContent="🎬 ویدیو آماده ارسال: "+f.name;$("prev").classList.add("show");return;
+  clearPending();pending=f;pendingFile=f;pendingKind="video";syncComposerAction();$("prevImg").style.display="none";$("prev").querySelector("span").textContent="🎬 ویدیو آماده ارسال: "+f.name;$("prev").classList.add("show");return;
  }
  if(!f.type.startsWith("image/")){if(cur&&cur.gid)callToast("فقط عکس یا ویدیو قابل ارسال است.");return;}
  if(cur&&cur.gid){if(!/^image\/(jpeg|png|webp|gif|heic|heif)$/.test(f.type)){callToast("فرمت عکس پشتیبانی نمی‌شود (JPG، PNG، WebP، GIF یا HEIC).");return;}if(f.size>MAXI){callToast("حجم عکس باید کمتر از ۱۵ مگابایت باشد.");return;}}
- try{clearPending();pending=await resize(f,cur&&cur.id===DEF?1024:cur&&cur.gid?1280:640,false);if(cur&&cur.gid&&pending.size>MAXIO){clearPending();callToast("حجم عکس پس از فشرده‌سازی هنوز زیاد است؛ عکس کوچک‌تری انتخاب کن.");return;}$("prevImg").src=URL.createObjectURL(pending);$("prev").classList.add("show");}catch{if(cur&&cur.gid)callToast("عکس قابل خواندن نبود.");else alert("عکس قابل خواندن نبود.");}
+ try{clearPending();pending=await resize(f,cur&&cur.id===DEF?1024:cur&&cur.gid?1280:640,false);syncComposerAction();if(cur&&cur.gid&&pending.size>MAXIO){clearPending();callToast("حجم عکس پس از فشرده‌سازی هنوز زیاد است؛ عکس کوچک‌تری انتخاب کن.");return;}$("prevImg").src=URL.createObjectURL(pending);$("prev").classList.add("show");}catch{if(cur&&cur.gid)callToast("عکس قابل خواندن نبود.");else alert("عکس قابل خواندن نبود.");}
 };
 $("prevX").onclick=()=>{if(upBusy){abortUp();return;}clearPending();};
 const EMOJI_GROUPS=[
