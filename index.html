@@ -2845,7 +2845,7 @@ function drawEmojiPicker(){
  const search=$("emojiSearch");search.oninput=()=>{emojiQuery=search.value;const pos=search.selectionStart;drawEmojiPicker();const next=$("emojiSearch");next.focus();try{next.setSelectionRange(pos,pos)}catch{}};
  emojiBox.querySelector(".ep-close").onclick=()=>emojiBox.classList.remove("open");
  emojiBox.querySelectorAll("[data-ecat]").forEach(b=>b.onclick=()=>{emojiCategory=b.dataset.ecat;emojiQuery="";drawEmojiPicker();});
- emojiBox.querySelectorAll("[data-emoji]").forEach(b=>b.onclick=()=>{const e=b.dataset.emoji,txt=$("txt"),a=txt.selectionStart??txt.value.length,z=txt.selectionEnd??txt.value.length;txt.value=txt.value.slice(0,a)+e+txt.value.slice(z);const p=a+e.length;txt.focus();txt.setSelectionRange(p,p);txt.dispatchEvent(new Event("input",{bubbles:true}));/* ایموجی فقط پس از ارسال موفق به «اخیر» اضافه می‌شود. */});
+ emojiBox.querySelectorAll("[data-emoji]").forEach(b=>b.onclick=()=>{const e=b.dataset.emoji,txt=$("txt"),a=txt.selectionStart??txt.value.length,z=txt.selectionEnd??txt.value.length;txt.value=txt.value.slice(0,a)+e+txt.value.slice(z);const p=a+e.length;txt.focus();txt.setSelectionRange(p,p);txt.dispatchEvent(new Event("input",{bubbles:true}));syncComposerAction();/* با انتخاب حتی یک ایموجی، دکمه ارسال فوراً نمایش داده شود. */});
 }
 drawEmojiPicker();
 $("emoB").onclick=()=>{$("atm").classList.remove("open");if(!emojiBox.classList.contains("open"))drawEmojiPicker();emojiBox.classList.toggle("open");};
