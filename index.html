@@ -2998,7 +2998,7 @@ async function boot0(user){
  if(error){console.error("بارگذاری پروفایل ناموفق بود؛ نشست ورود حفظ شد:",error);ME=null;PROF=null;gate("login");showGate(true);alert("بارگذاری پروفایل ناموفق بود. از حساب خارج نشده‌ای؛ اتصال را بررسی کن و صفحه را تازه‌سازی کن.");return;}
  if(!data){gate("complete");showGate(true);return;}
  PROF={...data,first_name:(user.user_metadata&&user.user_metadata.first_name)||"",last_name:(user.user_metadata&&user.user_metadata.last_name)||"",birth_date:(user.user_metadata&&user.user_metadata.birth_date)||""};P[data.id]=data;D.me.name=data.username;D.me.avatar=data.avatar_url;save();setMe();showGate(false);
- presenceStart();startRT();startPublicRT();startCallRT();await refreshPC();await refreshSG();await loadGU();startGRT();trackUnread(view());pcLoaded=true;chkReady();renderList();if(wide())openChat(DEF);
+ presenceStart();startRT();startPublicRT();startCallRT();await Promise.all([refreshPC(),refreshSG(),loadGU()]);startGRT();trackUnread(view());pcLoaded=true;chkReady();renderList();if(wide())openChat(DEF);
  let joinGroupParam=new URLSearchParams(location.search).get("joinGroup");
  if(!joinGroupParam){try{joinGroupParam=sessionStorage.getItem("arya_pending_join")||"";}catch(e){joinGroupParam="";}}
  if(joinGroupParam){
@@ -3094,12 +3094,11 @@ function presenceStop(){clearInterval(presenceBeatTimer);clearInterval(presenceP
 function presenceStart(){presenceStop();if(!ME)return;presenceBeat();presenceRefresh();presenceBeatTimer=setInterval(()=>{if(!document.hidden)presenceBeat();},45000);presencePollTimer=setInterval(()=>{if(!document.hidden)presenceRefresh();},25000);}
 document.addEventListener("visibilitychange",()=>{if(!ME)return;if(document.hidden){presenceBeat();}else{presenceBeat();presenceRefresh();}});
 async function refreshPC(poll){if(!ME)return;const {data,error}=await sb.rpc("my_conversations",{p_limit:50});if(error){console.error(error);return;}
- await profs(data.map(r=>r.peer_id));
+ await Promise.all([profs(data.map(r=>r.peer_id)),loadUnread()]);
  const prevAt=new Map(PC.map(c=>[c.peer,c.at||""]));
  const keep=PC.filter(c=>!c.at&&!data.some(r=>"u:"+r.peer_id===c.id));
  PC=data.map(r=>({...mkPC(r.peer_id),last:r.last_text,at:r.last_at})).concat(keep);
  PC.forEach(c=>{const a=PM[c.peer];if(a&&a.length){const l=visPM(c.peer).slice(-1)[0];c.last=l?l.text:"";}});
- await loadUnread();
  if(poll)for(const r of data)if(r.last_sender!==ME.id&&r.last_at>(prevAt.get(r.peer_id)||""))ntPM({sender_id:r.peer_id,created_at:r.last_at,text:r.last_text});}
 async function markSeen(peer){const a=PM[peer]||[],l=a[a.length-1];(D.pmSeen=D.pmSeen||{})[peer]=l?l.created_at:new Date().toISOString();save();delete UN[peer];if(ME&&pmReadOk&&UUID.test(String(peer))){const unread=a.filter(m=>m.sender_id===peer&&m.recipient_id===ME.id&&!m.read_at);if(unread.length){const {error}=await sb.rpc("mark_private_messages_read",{p_peer:peer});if(error){if(!/mark_private_messages_read|PGRST202|42883/i.test((error.code||"")+(error.message||"")))console.warn("رسید خواندن خصوصی:",error);return;}const now=new Date().toISOString();unread.forEach(m=>m.read_at=now);if(cur&&cur.peer===peer){EXV++;renderMsgs(true);}renderList();}}}
 async function loadPM(peer){if(!ME||!UUID.test(peer))return;if(rtOk&&PMFetchedAt[peer]&&Date.now()-PMFetchedAt[peer]<8000){if(cur&&cur.peer===peer&&!document.hidden)markSeen(peer);return;}
