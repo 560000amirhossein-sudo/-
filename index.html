@@ -19,7 +19,12 @@
   "url": "https://aryapeyvand.onrender.com/"
 }
 </script><meta name="theme-color" content="#06041a">
+<script>
+(function(){try{const s=JSON.parse(localStorage.getItem("sb-jpsttfuajyfvysqydqqj-auth-token")||"null");if(s&&s.access_token&&s.refresh_token&&s.user&&s.user.id)document.documentElement.classList.add("arya-session-pending");}catch(e){}})();
+</script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://jpsttfuajyfvysqydqqj.supabase.co" crossorigin>
+<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vazirmatn@33.0.3/Vazirmatn-font-face.css" media="print" onload="this.media='all'">
 <style>
 :root{--bg:#07050d;--pn:#100b19;--pn2:#171024;--bd:#2c2040;--pu:#a855f7;--pu2:#6d28d9;--tx:#f3eefc;--mu:#a49ab9;--gr:linear-gradient(135deg,#c084fc,#7c3aed 55%,#5b21b6)}
@@ -135,6 +140,7 @@ button{cursor:pointer;border:0;background:none}
 .msg{color:#c4b5fd;font-size:calc(12px*var(--fs,1));margin-top:10px;min-height:18px;line-height:1.8}
 .chk{display:flex;gap:8px;align-items:center;margin-top:12px;font-size:calc(13px*var(--fs,1))}
 /* ===== صفحه ورود و ثبت‌نام: ظاهر نئونی NIGHT CHAT (فقط #gate) ===== */
+html.arya-session-pending #gate{display:none!important}
 #gate{z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;text-align:center;padding:max(1em,env(safe-area-inset-top)) max(1em,env(safe-area-inset-right)) max(1em,env(safe-area-inset-bottom)) max(1em,env(safe-area-inset-left));font-family:Vazirmatn,Vazir,Tahoma,"Segoe UI",system-ui,sans-serif;font-size:clamp(12.5px,min(1.5625vh,1.2vw),17px);line-height:1.6;color:#f3eefc;background:#05030f;overflow-x:hidden}
 #gate *{box-sizing:border-box}
 #gate .gbg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;background:radial-gradient(60% 46% at 50% 40%,#2a0f6a59,transparent 72%),radial-gradient(48% 40% at 86% 10%,#5b21b66b,transparent 70%),radial-gradient(44% 44% at 6% 84%,#4c1d9547,transparent 70%),linear-gradient(180deg,#05030f 0%,#070420 55%,#0b0630 100%)}
@@ -1536,6 +1542,8 @@ try {
   if (typeof createClient !== "function") throw new Error("Supabase library unavailable");
 } catch (loadError) {
   const body = document.getElementById("gBody");
+  document.documentElement.classList.remove("arya-session-pending");
+  const gateLayer=document.getElementById("gate");if(gateLayer)gateLayer.style.display="flex";
   if (body) body.innerHTML = '<div style="max-width:340px;margin:18px auto;padding:16px;border:1px solid #efb85b66;border-radius:16px;background:#171326;color:#fff;text-align:center;line-height:1.9"><b>اتصال اولیه برقرار نشد</b><p style="margin:7px 0;color:#d8d1e8;font-size:13px">بارگذاری سرویس موردنیاز ناموفق بود. اینترنت را بررسی کن و دوباره تلاش کن.</p><button onclick="location.reload()" style="border:0;border-radius:10px;padding:10px 22px;background:#8b5cf6;color:white;font-weight:700">تلاش دوباره</button></div>';
   throw loadError;
 }
@@ -2854,7 +2862,7 @@ let SG=[],GM={},GMEM={},GMR={},sgWarn=false;
 let GU={},GREAD={},GMSGREAD={},grt=null,grt2=null,grtOk=false,gMediaOk=true,guWarn=false,PGR=[],pst=null,gTick=0;const GMT={},NKG=new Set();
 let ME=null,PROF=null,P={},PC=[],PM={},HID=new Set(),UR=[],rt=null,rtOk=false,recov=false,pmReadOk=true,sendBusy=false;
 const likeEsc=t=>t.replace(/[\\%_]/g,"\\$&"),pName=p=>p?(p.display_name||p.username):"کاربر";
-const showGate=v=>{$("gate").style.display=v?"flex":"none";};
+const showGate=v=>{document.documentElement.classList.remove("arya-session-pending");$("gate").style.display=v?"flex":"none";};
 const redir=()=>/^https?:$/.test(location.protocol)?location.origin+location.pathname:undefined;
 const gm=t=>{const e=$("gM");if(e)e.textContent=t||"";};
 const ser=e=>{try{if(typeof e==="string")return e;if(e instanceof Error)return e.name+": "+(typeof e.message==="string"?e.message:JSON.stringify(e.message));return JSON.stringify(e,Object.getOwnPropertyNames(Object(e)));}catch{return String(e);}};
