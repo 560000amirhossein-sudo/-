@@ -954,6 +954,18 @@ html.day-mode #dayModeToggle{color:#6242a4;background:#e9e5f5;border-color:#d8cf
 
  .pm-read{display:inline-block;min-width:12px;line-height:1;direction:ltr;white-space:nowrap;}
 
+
+/* پنجرهٔ کوچک تأیید حذف، با چیدمان سادهٔ روبیکا */
+.delete-action-panel{gap:12px;padding:2px 0 0;max-width:360px;margin:0 auto}
+.delete-action-panel .delete-panel-head{padding:0;justify-content:center}
+.delete-action-panel .delete-title{font-size:17px;text-align:center}
+.delete-question{margin:0;text-align:center;color:var(--mu);font-size:13px;line-height:1.9}
+.delete-action-panel .delete-inline-option{min-height:44px;padding:9px 11px;border-radius:11px;font-size:12px}
+.delete-action-panel .delete-confirm-actions{grid-template-columns:1fr 1fr;gap:9px;margin-top:2px}
+.delete-action-panel .delete-confirm-actions .delete-back,.delete-action-panel .delete-confirm-actions .delete-choice{min-height:42px;border-radius:10px;font-size:13px}
+.delete-action-panel .delete-confirm-actions .delete-back{text-align:center}
+.delete-action-panel .delete-confirm-actions .delete-choice{padding:8px 12px}
+
 /* ===== پنل یکپارچه حذف پیام ===== */
 .delete-panel{direction:rtl;display:flex;flex-direction:column;gap:14px;padding-top:8px}
 .delete-panel-head{display:flex;align-items:center;gap:12px;padding:2px 34px 4px 0;min-width:0}
@@ -2214,7 +2226,7 @@ function multiDeleteModal(){
  if(!items.length){callToast("اول پیام‌هایی را انتخاب کن.");return;}
  const isGroup=!!gid,isPrivate=cur.type==="private",allCanDelete=isGroup?items.every(m=>canDelG({mine:m.sender_id===ME.id,uid:m.sender_id})):isPrivate?items.every(m=>m.sender_id===ME.id):false;
  const label=items.length.toLocaleString("fa-IR"),target=esc(forwardLabel(cur));
- const checkboxText=allCanDelete?(isPrivate?`حذف برای ${target}`:"حذف برای همه"):null;
+ const checkboxText=allCanDelete?(isPrivate?`همچنین حذف برای ${target}`:"همچنین حذف برای همه"):null;
  modal(deleteActionPanelMarkup({title:"حذف پیام‌ها",target,targetMeta:isPrivate?"گفت‌وگوی خصوصی":isGroup?"گروه":cur.type==="channel"?"کانال":"گفت‌وگو",count:`${label} پیام`,checkboxId:"multiDeleteScopeAll",checkboxText}));
  $("deleteActionCancel").onclick=close;
  const button=$("deleteActionGo"),status=$("deleteActionStatus");
@@ -2862,7 +2874,7 @@ function deletePanelMarkup({title,subtitle,target,targetMeta,count,actions,help,
 }
 function deleteActionPanelMarkup({title,target,targetMeta,count,checkboxId,checkboxText}){
  const checkbox=checkboxText?`<label class="delete-inline-option" for="${checkboxId}"><input id="${checkboxId}" type="checkbox"><span>${checkboxText}</span></label>`:"";
- return `<section class="delete-panel delete-action-panel"><header class="delete-panel-head"><div class="delete-symbol" aria-hidden="true">🗑️</div><div style="min-width:0"><h3 class="delete-title">${title}</h3></div></header><div class="delete-target"><span class="delete-target-ico" aria-hidden="true">💬</span><span class="delete-target-copy"><span class="delete-target-name">${target}</span><span class="delete-target-meta">${targetMeta||"گفت‌وگوی انتخاب‌شده"}</span></span>${count?`<span class="delete-count">${count}</span>`:""}</div>${checkbox}<div class="delete-confirm-actions"><button class="delete-choice danger" id="deleteActionGo" type="button"><span class="delete-choice-icon" aria-hidden="true">🗑️</span><span class="delete-choice-copy"><strong>حذف</strong></span></button><button class="delete-back" id="deleteActionCancel" type="button">لغو</button></div><div class="delete-status" id="deleteActionStatus" role="status" aria-live="polite"></div></section>`;
+ return `<section class="delete-panel delete-action-panel"><header class="delete-panel-head"><h3 class="delete-title">${title}</h3></header><p class="delete-question">${count&&count!=="۱ پیام"?"آیا از حذف پیام‌های انتخاب‌شده اطمینان دارید؟":"آیا از حذف این پیام اطمینان دارید؟"}</p>${checkbox}<div class="delete-confirm-actions"><button class="delete-back" id="deleteActionCancel" type="button">انصراف</button><button class="delete-choice danger" id="deleteActionGo" type="button"><span class="delete-choice-copy"><strong>حذف</strong></span></button></div><div class="delete-status" id="deleteActionStatus" role="status" aria-live="polite"></div></section>`;
 }
 function deleteConfirmScreen({title,subtitle,body,confirmText,onBack,onConfirm}){
  modal(`<section class="delete-panel"><header class="delete-panel-head"><div class="delete-symbol warn" aria-hidden="true">⚠️</div><div style="min-width:0"><h3 class="delete-title">${title}</h3><p class="delete-subtitle">${subtitle}</p></div></header><div class="delete-confirm-box">${body}</div><div class="delete-confirm-actions"><button class="delete-back" id="delConfirmBack" type="button">برگشت</button><button class="delete-choice danger" id="delConfirmOk" type="button"><span class="delete-choice-icon" aria-hidden="true">🗑️</span><span class="delete-choice-copy"><strong>${confirmText||"تأیید حذف"}</strong></span></button></div><div class="delete-status" id="delConfirmStatus" role="status" aria-live="polite"></div></section>`);
@@ -3180,7 +3192,7 @@ function delLocalMessage(m){
 }
 function delPM(m){
  const peer=cur.peer,target=esc(forwardLabel(cur)),canAll=!!m.mine;
- modal(deleteActionPanelMarkup({title:"حذف پیام",target,targetMeta:"گفت‌وگوی خصوصی",count:"۱ پیام",checkboxId:"deleteScopeAll",checkboxText:canAll?("حذف برای "+target):null}));
+ modal(deleteActionPanelMarkup({title:"حذف پیام",target,targetMeta:"گفت‌وگوی خصوصی",count:"۱ پیام",checkboxId:"deleteScopeAll",checkboxText:canAll?("همچنین حذف برای "+target):null}));
  $("deleteActionCancel").onclick=close;
  const button=$("deleteActionGo"),status=$("deleteActionStatus");
  button.onclick=async()=>{
@@ -3374,7 +3386,7 @@ function myPerm(k){const r=cur&&cur.role;if(r==="owner")return true;if(r!=="admi
 function canDelG(m){const r=cur&&cur.role;if(m.mine||r==="owner")return true;return r==="admin"&&myPerm("delete_messages")&&((GMEM[cur.gid]||{})[m.uid]==="member");}
 async function delGM(m){
  const gid=cur.gid,canAll=canDelG(m),target=esc(forwardLabel(cur));
- modal(deleteActionPanelMarkup({title:"حذف پیام",target,targetMeta:"گروه",count:"۱ پیام",checkboxId:"deleteScopeAll",checkboxText:canAll?"حذف برای همه":null}));
+ modal(deleteActionPanelMarkup({title:"حذف پیام",target,targetMeta:"گروه",count:"۱ پیام",checkboxId:"deleteScopeAll",checkboxText:canAll?"همچنین حذف برای همه":null}));
  $("deleteActionCancel").onclick=close;
  const button=$("deleteActionGo"),status=$("deleteActionStatus");
  button.onclick=async()=>{
