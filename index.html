@@ -1881,7 +1881,7 @@ function renderMsgs(force,preserve){
    a.addEventListener("pointerdown",ev=>{ev.stopPropagation();});
   });
   const pu=m.uid||null,pn=!m.mine&&!pu&&cur.id===DEF?m.name:null;
-  if(pu||pn)r.querySelectorAll(":scope>.av,.who>span:first-child").forEach(el=>{el.classList.add("lnk");el.tabIndex=0;el.setAttribute("role","button");el.onclick=e=>{e.stopPropagation();if(pu)openProfile(pu);else openProfileByName(pn);};el.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();el.click();}};});
+  if(pu||pn)r.querySelectorAll(":scope>.av").forEach(el=>{el.classList.add("lnk");el.tabIndex=0;el.setAttribute("role","button");el.onclick=e=>{e.stopPropagation();if(pu)openProfile(pu);else openProfileByName(pn);};el.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();el.click();}};});
   const pic=r.querySelector("img.pic");if(pic){pic.onclick=()=>{$("lbImg").src=img;$("lb").classList.add("open");};}
   const d=r.querySelector(".del");if(d)d.onclick=e=>{e.stopPropagation();if(cur.gid){delGM(m);return;}if(cur.type==="private"){delPM(m);return;}delLocalMessage(m);};
   const rq=r.querySelector(".rquote");if(rq)rq.onclick=e=>{e.stopPropagation();scrollToMsg(String(m.replyTo.id));};r.querySelectorAll(".rxc").forEach(b=>b.onclick=e=>{e.stopPropagation();reactTo(m.id,b.dataset.e);});
@@ -1927,7 +1927,7 @@ function getActiveMessage(){
 }
 
 // ---- انتخاب چند پیام و فوروارد؛ بدون تغییر منطق ریپلای کشیدنی ----
-const multiSelected=new Map();let multiMode=false,multiChatId="";
+const multiSelected=new Map();let multiMode=false,multiChatId="",ignoreLongPressClick=false;
 const multiKey=()=>cur?cur.id:"";
 function selectedSet(chatId){const k=chatId||multiKey();if(!multiSelected.has(k))multiSelected.set(k,new Set());return multiSelected.get(k);}
 function multiRefresh(){
@@ -1962,7 +1962,7 @@ function multiStop(){
 function multiToggle(row){if(!multiMode||!cur||cur.id!==multiChatId||!row)return;const set=selectedSet(multiChatId),id=String(row.dataset.mid);if(!id)return;if(set.has(id))set.delete(id);else set.add(id);row.classList.toggle("multi-selected",set.has(id));multiRefresh();}
 $("mmSelect").onclick=()=>{if(multiMode)multiStop();else multiStart();};
 $("multiCancel").onclick=multiStop;
-$("msgs").addEventListener("click",e=>{if(!multiMode)return;const row=e.target.closest(".row");if(!row)return;if(e.target.closest(".lnk,.rquote,.del,video,a,.vp,button"))return;e.preventDefault();e.stopImmediatePropagation();multiToggle(row);},true);
+$("msgs").addEventListener("click",e=>{if(ignoreLongPressClick){ignoreLongPressClick=false;e.preventDefault();e.stopImmediatePropagation();return;}if(!multiMode)return;const row=e.target.closest(".row");if(!row)return;if(e.target.closest(".lnk,.rquote,.del,video,a,.vp,button"))return;e.preventDefault();e.stopImmediatePropagation();multiToggle(row);},true);
 function forwardLabel(c){return c.id===DEF?"گفت‌وگوی عمومی":c.title||c.name||"گفت‌وگو";}
 function forwardKind(c){return c.id===DEF?"گفت‌وگوی عمومی":c.gid?"گروه":c.type==="private"?"گفت‌وگوی خصوصی":c.type==="channel"?"کانال":"گفت‌وگو";}
 function forwardModal(sourceItems){
@@ -2525,7 +2525,7 @@ msgsBox.addEventListener("click",e=>{
 });
 msgsBox.addEventListener("contextmenu",e=>{const row=e.target.closest(".row");if(row){e.preventDefault();hideRxBar();showMsgMenu(row,e.clientX,e.clientY);}});
 // پاسخ سریع با کشیدن آرام پیام به چپ یا راست؛ روی کل ردیف پیام، نه فقط حباب
-let replySwipe=null,ignoreSwipeClick=false;
+let replySwipe=null,ignoreSwipeClick=false,pressStart=null;
 function resetReplySwipe(){
  if(replySwipe&&replySwipe.row){replySwipe.row.classList.remove("swiping");replySwipe.row.style.removeProperty("--reply-swipe-x");}
  replySwipe=null;
@@ -2543,8 +2543,11 @@ msgsBox.addEventListener("pointerdown",e=>{
  if(e.target.closest(".rxc,.del,.lnk,.rquote,video,a,.vp,button,input,textarea,select"))return;
  const row=rowForSwipe(e);if(!row)return;
  resetReplySwipe();replySwipe={row,x:e.clientX,y:e.clientY,dx:0,dy:0,axis:"",chat:cur&&cur.id};
+ clearTimeout(pressTimer);pressTarget=row;pressStart={x:e.clientX,y:e.clientY};
+ pressTimer=setTimeout(()=>{const target=pressTarget;pressTimer=null;pressTarget=null;pressStart=null;if(!target||!target.isConnected||!cur||multiMode)return;activeMsgEl=target;ignoreLongPressClick=true;multiStart();},520);
 });
 msgsBox.addEventListener("pointermove",e=>{
+ if(pressTimer&&pressStart&&Math.hypot(e.clientX-pressStart.x,e.clientY-pressStart.y)>10){clearTimeout(pressTimer);pressTimer=null;pressTarget=null;pressStart=null;}
  if(!replySwipe)return;
  const st=replySwipe,dx=e.clientX-st.x,dy=e.clientY-st.y;st.dx=dx;st.dy=dy;
  if(!st.axis&&Math.max(Math.abs(dx),Math.abs(dy))>9)st.axis=Math.abs(dx)>Math.abs(dy)*1.18?"x":"y";
@@ -2564,9 +2567,9 @@ function finishReplySwipe(){
  const m=msgsOf(cur).find(x=>String(x.id)===String(st.row.dataset.mid));
  if(m){hideMsgMenu();hideRxBar();setReply(m);$("emo").classList.remove("open");$("txt").focus();}
 }
-msgsBox.addEventListener("pointerup",finishReplySwipe);
-msgsBox.addEventListener("pointercancel",resetReplySwipe);
-msgsBox.addEventListener("lostpointercapture",resetReplySwipe);
+msgsBox.addEventListener("pointerup",e=>{clearTimeout(pressTimer);pressTimer=null;pressTarget=null;pressStart=null;finishReplySwipe();});
+msgsBox.addEventListener("pointercancel",()=>{clearTimeout(pressTimer);pressTimer=null;pressTarget=null;pressStart=null;resetReplySwipe();});
+msgsBox.addEventListener("lostpointercapture",()=>{clearTimeout(pressTimer);pressTimer=null;pressTarget=null;pressStart=null;resetReplySwipe();});
 msgsBox.addEventListener("click",e=>{if(ignoreSwipeClick){e.preventDefault();e.stopPropagation();ignoreSwipeClick=false;}},true);
 document.addEventListener("click",e=>{if(!e.target.closest("#mmenu")&&!e.target.closest(".row"))hideMsgMenu();if(!e.target.closest("#atm"))$("atm").classList.remove("open");});
 $("mmForward").onclick=()=>{const m=getActiveMessage();hideMsgMenu();if(m)forwardModal([m]);};
@@ -3089,7 +3092,7 @@ async function openProfileByName(name){
  P[p.id]={...(P[p.id]||{}),...p};await openProfile(p.id);
 }
 $("meAv").onclick=()=>{if(!PROF)return;if(window.openProfileSettings)window.openProfileSettings();else viewMine();};
-$("hAv").onclick=$("hNm").onclick=()=>{if(cur&&cur.type==="private")openProfile(cur.peer);};
+$("hAv").onclick=()=>{if(cur&&cur.type==="private")openProfile(cur.peer);};$("hNm").onclick=null;
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){if($("md").classList.contains("open"))close();else gpHide();}});
 function mkPC(id){const p=P[id]||{};return{id:"u:"+id,type:"private",peer:id,title:pName(p),uname:p.username||"",avatar:p.avatar_url,desc:p.username?"@"+p.username:""};}
 async function profs(ids,force=false){const m=[...new Set(ids)].filter(i=>UUID.test(i)&&(force||!P[i]||!Object.prototype.hasOwnProperty.call(P[i],"avatar_url")||!P[i].username));if(!m.length)return;const {data,error}=await sb.from("profiles").select("id,username,display_name,avatar_url,last_seen").in("id",m);if(error){console.warn("بارگذاری پروفایل اعضا:",error);return;}(data||[]).forEach(p=>P[p.id]={...(P[p.id]||{}),...p});}
@@ -3693,7 +3696,7 @@ function openGroupInfo(fresh){
  if($("gSearchRow"))$("gSearchRow").onclick=()=>{$("gpMemberQ")?.scrollIntoView({behavior:"smooth",block:"center"});setTimeout(()=>$("gpMemberQ")?.focus(),180);};
  if($("gNotifRow"))$("gNotifRow").onclick=()=>openGroupMuteSettings(gid);
  $("gpBody").querySelectorAll(".gm-b").forEach(b=>b.onclick=()=>gAct(b.dataset.a,b.closest(".gm-row").dataset.u));
- $("gpBody").querySelectorAll(".gm-row").forEach(r=>r.querySelectorAll(".av,.gm-n").forEach(el=>{el.classList.add("lnk");el.onclick=()=>openProfile(r.dataset.u);}));
+ $("gpBody").querySelectorAll(".gm-row").forEach(r=>r.querySelectorAll(".av").forEach(el=>{el.classList.add("lnk");el.onclick=()=>openProfile(r.dataset.u);}));
  if($("gShare"))$("gShare").onclick=()=>openGroupInviteCopyDialog(gid);
  // جست‌وجوی محلی بین اعضا
  const mq=$("gpMemberQ");if(mq)mq.oninput=()=>{const q=mq.value.trim().toLocaleLowerCase();$("gpBody").querySelectorAll(".gm-row[data-search]").forEach(r=>{r.style.display=!q||r.dataset.search.includes(q)?"":"none";});};
