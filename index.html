@@ -1564,12 +1564,18 @@ D=D||{me:{name:"مهمان"+(1000+Math.floor(Math.random()*9000)),avatar:null},c
 D.hiddenPrivateChats=D.hiddenPrivateChats&&typeof D.hiddenPrivateChats==="object"?D.hiddenPrivateChats:{};
 if(!D.chats.some(c=>c.id===DEF))D.chats.unshift({id:DEF,type:"group",title:"NIGHT CHAT عمومی",desc:"گروه عمومی همه‌ی اعضا",role:"member",pub:true});
 const save=()=>{try{localStorage.setItem(LSK,JSON.stringify(D));}catch{alert("حافظه‌ی مرورگر پر شد.");}};save();
-const PUB="https://jpsttfuajyfvysqydqqj.supabase.co/storage/v1/object/public/",BUCKET="chat-media",MAXV=20*1024*1024,MAXI=15*1024*1024,MAXIO=5*1024*1024,SBK="sb_publishable_D_D03bZTtXlKxPgz74MYfQ_Vvpmjn3x";
+const PUB="https://jpsttfuajyfvysqydqqj.supabase.co/storage/v1/object/public/",BUCKET="chat-media",PRIVATE_BUCKET="chat-private-media",MAXV=20*1024*1024,MAXI=15*1024*1024,MAXIO=5*1024*1024,SBK="sb_publishable_D_D03bZTtXlKxPgz74MYfQ_Vvpmjn3x";
 let mediaOk=true,replyOk=true,replyOkP=true,pmMediaOk=true,pendingKind="image",pendingFile=null,upDone=null,upBusy=false,upXhr=null;
 let voiceRecorder=null,voiceStream=null,voiceParts=[],voiceStarted=0,voiceTimer=null,voiceCtx=null,voiceAn=null,voicePk=[],voiceCancel=false,voiceStarting=false,pvUrl=null,pendingDur=0,pendingPeaks=null;
 const VP={a:null,url:null,el:null};
-const safeM=u=>typeof u==="string"&&u.startsWith(PUB)?u:"";
-async function upload(blob,ext,type,dur){const p=Date.now()+"-"+Math.random().toString(36).slice(2,8)+(dur?"-d"+dur:"")+"."+ext;const {error}=await sb.storage.from(BUCKET).upload(p,blob,{contentType:type});if(error)throw error;return sb.storage.from(BUCKET).getPublicUrl(p).data.publicUrl;}
+const safeM=u=>{if(typeof u!=="string")return"";if(u.startsWith(PUB))return u;try{const x=new URL(u);return x.protocol==="https:"&&x.origin==="https://jpsttfuajyfvysqydqqj.supabase.co"&&x.pathname.startsWith("/storage/v1/object/sign/"+PRIVATE_BUCKET+"/")?u:"";}catch{return"";}};
+async function upload(blob,ext,type,dur){const p=ME.id+"/"+Date.now()+"-"+Math.random().toString(36).slice(2,8)+(dur?"-d"+dur:"")+"."+ext;const {error}=await sb.storage.from(BUCKET).upload(p,blob,{contentType:type,upsert:false});if(error)throw error;return sb.storage.from(BUCKET).getPublicUrl(p).data.publicUrl;}
+async function uploadPrivateObject(blob,ext,type){const p=ME.id+"/"+Date.now()+"-"+Math.random().toString(36).slice(2,8)+"."+ext;const {error}=await sb.storage.from(PRIVATE_BUCKET).upload(p,blob,{contentType:type,upsert:false});if(error)throw error;return p;}
+async function signPrivateMedia(m){if(!m||typeof m.media_url!=="string")return m;const mark=m.media_url.startsWith("private://")?"private://":m.media_url.startsWith("group://")?"group://":"";if(!mark){m._signed_media_url=null;return m;}const path=m.media_url.slice(mark.length);const {data,error}=await sb.storage.from(PRIVATE_BUCKET).createSignedUrl(path,3600);if(error){m._signed_media_url=null;console.warn("امضای لینک رسانه خصوصی:",error);return m;}m._signed_media_url=data.signedUrl.startsWith("http")?data.signedUrl:"https://jpsttfuajyfvysqydqqj.supabase.co"+data.signedUrl;return m;}
+async function fetchMediaForCopy(url,kind){const res=await fetch(url,{credentials:"omit"});if(!res.ok)throw new Error("دریافت رسانه برای فوروارد ناموفق بود.");const blob=await res.blob();let mime=blob.type|| (kind==="audio"?"audio/webm":kind==="video"?"video/mp4":"image/jpeg");if(mime==="application/octet-stream")mime=kind==="audio"?"audio/webm":kind==="video"?"video/mp4":"image/jpeg";const ext=mime.includes("ogg")?"ogg":mime.includes("mpeg")?"mp3":mime.includes("mp4")?(kind==="video"?"mp4":"m4a"):mime.includes("quicktime")?"mov":mime.includes("webm")?"webm":mime.includes("png")?"png":mime.includes("webp")?"webp":kind==="video"?"mp4":kind==="audio"?"webm":"jpg";return{blob,mime,ext};}
+async function copyMediaToPrivate(url,kind,marker){const x=await fetchMediaForCopy(url,kind);return marker+await uploadPrivateObject(x.blob,x.ext,x.mime);}
+async function copyMediaToPublic(url,kind){const x=await fetchMediaForCopy(url,kind);return await upload(x.blob,x.ext,x.mime,0);}
+async function migrateLegacyPrivateGroupMedia(gid,rows){const group=SG.find(x=>String(x.gid)===String(gid));if(!group||group.pub)return;for(const m of rows||[]){if(!m||!m.media_url||!m.media_url.startsWith(PUB+BUCKET+"/"))continue;let path=null;try{const x=await fetchMediaForCopy(m.media_url,m.media_type||"image");path=await uploadPrivateObject(x.blob,x.ext,x.mime);const r=await sb.rpc("migrate_private_group_media",{p_mid:m.id,p_path:path});if(r.error||r.data!==true)throw r.error||new Error("مهاجرت رسانه تأیید نشد");m.media_url="group://"+path;}catch(e){if(path)sb.storage.from(PRIVATE_BUCKET).remove([path]).catch(()=>{});console.warn("انتقال رسانه گروه خصوصی:",e);}}}
 function clearPending(){pending=null;pendingFile=null;pendingKind="image";upDone=null;$("prev").classList.remove("show","err","up");$("upb").style.width="0";$("prevImg").style.display="";$("prev").querySelector("span").textContent="عکس آماده ارسال";vpPrevReset();pendingDur=0;pendingPeaks=null;if(typeof syncComposerAction==="function")syncComposerAction();}
 let cur=null,tab="all",query="",pending=null,pubMsgs=[],pubErr=false,sig="";
 let pubKnown=null,pubCursor=null,pubOldestCursor=null,pubOlderLoading=false,pubOlderDone=false,ncReady=false,pubLoaded=false,pcLoaded=false,UN={};
@@ -1618,8 +1624,8 @@ function view(){return D.chats.map(c=>{
  return{...c,unread:0,at:c.at||""};}).concat(PC.filter(c=>!isPrivateChatHidden(c.peer)).map(c=>({...c,unread:unc(c),at:c.at||""}))).concat(SG.map(c=>({...c,unread:GU[c.gid]||0,at:c.at||""}))).sort((a,b)=>String(b.at).localeCompare(String(a.at)));}
 function msgsOf(c){
  if(c.id===DEF)return pubMsgs.map(m=>({id:m.id,text:m.text,img:m.media_type==="image"?m.media_url:null,vid:m.media_type==="video"?m.media_url:null,aud:m.media_type==="audio"?m.media_url:null,at:m.created_at,mine:(m.sender_id&&ME?m.sender_id===ME.id:m.name===D.me.name),name:(P[m.sender_id]&&pName(P[m.sender_id]))||m.name,avatar:(P[m.sender_id]||{}).avatar_url||m.avatar_url||null,uid:m.sender_id||null,replyTo:m.reply_to_id?findPubReply(m.reply_to_id):null}));
- if(c.gid)return gVis(c.gid).map(m=>({id:m.id,text:m.text,img:m.media_type==="image"?m.media_url:null,vid:m.media_type==="video"?m.media_url:null,aud:m.media_type==="audio"?m.media_url:null,at:m.created_at,mine:m.sender_id===ME.id,name:pName(P[m.sender_id]),avatar:(P[m.sender_id]||{}).avatar_url,uid:m.sender_id,replyTo:m.reply_to_id?findGroupReply(c.gid,m.reply_to_id):null}));
- if(c.type==="private")return visPM(c.peer).map(m=>({id:m.id,text:m.text,img:m.media_type==="image"?m.media_url:null,vid:m.media_type==="video"?m.media_url:null,aud:m.media_type==="audio"?m.media_url:null,at:m.created_at,read_at:m.read_at||null,mine:m.sender_id===ME.id,name:pName(P[m.sender_id]),avatar:(P[m.sender_id]||{}).avatar_url,uid:m.sender_id,replyTo:m.reply_to_id?findPMReply(c.peer,m.reply_to_id):null}));
+ if(c.gid)return gVis(c.gid).map(m=>({id:m.id,text:m.text,img:m.media_type==="image"?(m._signed_media_url||m.media_url):null,vid:m.media_type==="video"?(m._signed_media_url||m.media_url):null,aud:m.media_type==="audio"?(m._signed_media_url||m.media_url):null,at:m.created_at,mine:m.sender_id===ME.id,name:pName(P[m.sender_id]),avatar:(P[m.sender_id]||{}).avatar_url,uid:m.sender_id,replyTo:m.reply_to_id?findGroupReply(c.gid,m.reply_to_id):null}));
+ if(c.type==="private")return visPM(c.peer).map(m=>({id:m.id,text:m.text,img:m.media_type==="image"?(m._signed_media_url||m.media_url):null,vid:m.media_type==="video"?(m._signed_media_url||m.media_url):null,aud:m.media_type==="audio"?(m._signed_media_url||m.media_url):null,at:m.created_at,read_at:m.read_at||null,mine:m.sender_id===ME.id,name:pName(P[m.sender_id]),avatar:(P[m.sender_id]||{}).avatar_url,uid:m.sender_id,replyTo:m.reply_to_id?findPMReply(c.peer,m.reply_to_id):null}));
  return(D.msgs[c.id]||[]).map(m=>({...m,mine:true,name:D.me.name,avatar:D.me.avatar,replyTo:m.replyTo?findLocalReply(c.id,m.replyTo):null}));}
 // ---- پاسخ به پیام: پیدا کردن پیام اصلی ----
 function findPubReply(rid){const m=pubMsgs.find(x=>String(x.id)===String(rid));return m?{id:m.id,name:m.name,text:m.text,mediaType:m.media_type}:null;}
@@ -1859,7 +1865,7 @@ function renderMsgs(force,preserve){
  const priv=cur.type==="private",grp=cur.type==="group",own=!priv&&cur.id!==DEF&&!cur.gid&&cur.role==="owner",frag=document.createDocumentFragment();
  box.innerHTML=data.length?"":`<div class="empty">هنوز پیامی نیست. اولین نفر باش! 👋</div>`;
  for(const m of data){
-  const img=safe(m.img)||safeM(m.img),vid=safeM(m.vid),aud=(typeof m.aud==="string"&&(m.aud.startsWith(PUB)||m.aud.startsWith("data:audio/")))?m.aud:"",r=document.createElement("div");r.className="row"+(m.mine?" me":"")+(anim&&!prev.has(String(m.id))?" new":"");
+  const img=safe(m.img)||safeM(m.img),vid=safeM(m.vid),aud=safeM(m.aud)||(typeof m.aud==="string"&&m.aud.startsWith("data:audio/")?m.aud:""),r=document.createElement("div");r.className="row"+(m.mine?" me":"")+(anim&&!prev.has(String(m.id))?" new":"");
   r.dataset.mid=String(m.id);
   const isE=!!m.text&&!img&&!vid&&!aud&&!m.replyTo&&EMJ.test(m.text)&&[...m.text.replace(/\s/g,"")].length<=6;
   const sgR=cur.gid?((GMEM[cur.gid]||{})[m.uid]||""):"";
@@ -2143,20 +2149,24 @@ html.day-mode .gset-footer-note{background:#f5f0ff;border-color:#e5d8ff;color:#6
   try{
    for(const m of items){
     const originalText=m.text||"",mediaUrl=m.img||m.vid||m.aud||null,mediaType=m.img?"image":m.vid?"video":m.aud?"audio":null;
+    let storedMediaUrl=mediaUrl;
+    const privateTarget=target.type==="private"||(!!target.gid&&!target.pub);
+    if(mediaUrl&&privateTarget)storedMediaUrl=await copyMediaToPrivate(mediaUrl,mediaType,target.type==="private"?"private://":"group://");
+    else if(mediaUrl&&mediaUrl.includes("/object/sign/"+PRIVATE_BUCKET+"/"))storedMediaUrl=await copyMediaToPublic(mediaUrl,mediaType);
     const attribution="↪ فوروارد شده از "+forwardLabel(sourceChat)+(m.name?" · "+m.name:"");
     const forwardedText=originalText?attribution+"\n"+originalText:attribution;
     let err=null;
     if(target.id===DEF){
      const row={name:D.me.name,text:forwardedText};
-     if(mediaUrl){if(!mediaOk)throw new Error("ستون رسانه در گفت‌وگوی عمومی فعال نیست؛ تنظیمات رسانهٔ Supabase را بررسی کن.");row.media_url=mediaUrl;row.media_type=mediaType;}
+     if(storedMediaUrl){if(!mediaOk)throw new Error("ستون رسانه در گفت‌وگوی عمومی فعال نیست؛ تنظیمات رسانهٔ Supabase را بررسی کن.");row.media_url=storedMediaUrl;row.media_type=mediaType;}
      const r=await sb.from("messages").insert(row);err=r.error;
     }else if(target.gid){
      const row={group_id:target.gid,sender_id:ME.id,text:forwardedText||null};
-     if(mediaUrl){if(!gMediaOk)throw new Error("ستون رسانه در گروه مقصد آماده نیست.");row.media_url=mediaUrl;row.media_type=mediaType;}
+     if(storedMediaUrl){if(!gMediaOk)throw new Error("ستون رسانه در گروه مقصد آماده نیست.");row.media_url=storedMediaUrl;row.media_type=mediaType;}
      const r=await sb.from("group_messages").insert(row);err=r.error;
     }else if(target.type==="private"){
      const row={sender_id:ME.id,recipient_id:target.peer,text:forwardedText||null};
-     if(mediaUrl){if(!pmMediaOk)throw new Error("رسانه در پیام خصوصی مقصد فعال نیست.");row.media_url=mediaUrl;row.media_type=mediaType;}
+     if(storedMediaUrl){if(!pmMediaOk)throw new Error("رسانه در پیام خصوصی مقصد فعال نیست.");row.media_url=storedMediaUrl;row.media_type=mediaType;}
      const r=await sb.from("private_messages").insert(row);err=r.error;
     }else{
      const local={id:"m"+Date.now()+"_"+done,text:forwardedText,name:D.me.name,uid:ME&&ME.id||null,mine:true,img:mediaType==="image"?mediaUrl:null,vid:mediaType==="video"?mediaUrl:null,aud:mediaType==="audio"?mediaUrl:null,at:new Date().toISOString()};
@@ -3152,7 +3162,7 @@ async function loadPMCore(peer){if(!ME||!UUID.test(peer))return;if(rtOk&&PMFetch
  if(error&&pmMediaOk&&/media_url|media_type|PGRST204|42703/.test((error.code||"")+(error.message||""))){pmMediaOk=false;cols="id,sender_id,recipient_id,text,created_at,reply_to_id,deleted_for_all";({data,error}=await pmQ(cols));}
  if(error&&/deleted_for_all/.test((error.code||"")+(error.message||""))){cols=cols.replace(",deleted_for_all","");({data,error}=await pmQ(cols));}
  if(error&&/reply_to_id|PGRST204|42703/.test((error.code||"")+(error.message||""))){replyOkP=false;cols=cols.replace(",reply_to_id","");({data,error}=await pmQ(cols));}
- if(error){console.error(error);PM[peer]=PM[peer]||[];return;}PM[peer]=data.reverse();PMFetchedAt[peer]=Date.now();await loadHides(peer);if(cur&&cur.peer===peer&&!document.hidden)markSeen(peer);}
+ if(error){console.error(error);PM[peer]=PM[peer]||[];return;}data.reverse();await Promise.all(data.map(signPrivateMedia));PM[peer]=data;PMFetchedAt[peer]=Date.now();await loadHides(peer);if(cur&&cur.peer===peer&&!document.hidden)markSeen(peer);}
 function loadPM(peer){
  if(PMInFlight[peer])return PMInFlight[peer];
  const task=loadPMCore(peer);PMInFlight[peer]=task;
@@ -3213,18 +3223,19 @@ async function sendPM(text){
  const row={sender_id:ME.id,recipient_id:cur.peer,text:text||null};
  if(replyTo&&replyOkP)row.reply_to_id=replyTo.id;
  if(replyTo&&!replyOkP)callToast("ریپلای ذخیره نشد: ستون reply_to_id در دیتابیس نیست (SQL را اجرا کن).");
+ let privatePath=null;
  if(pending&&pendingKind==="audio"){
   if(!pmMediaOk){alert("برای پیام صوتی خصوصی ابتدا باید فایل SQL پیوست‌شده را در Supabase اجرا کنی.");return false;}
   const type=pending.type||"audio/webm",ext=type.includes("ogg")?"ogg":type.includes("mp4")?"m4a":"webm";
-  row.media_type="audio";row.media_url=await upload(pending,ext,type,pendingDur);
+  row.media_type="audio";privatePath=await uploadPrivateObject(pending,ext,type);row.media_url="private://"+privatePath;
  }
  const selectCols="id,sender_id,recipient_id,text,created_at,read_at,reply_to_id,deleted_for_all"+(pmMediaOk?",media_url,media_type":"");
  let r=await sb.from("private_messages").insert(row).select(selectCols).single();
  if(r.error&&pmReadOk&&/read_at|PGRST204|42703/i.test((r.error.code||"")+(r.error.message||""))){pmReadOk=false;const cols=selectCols.replace(",read_at","");r=await sb.from("private_messages").insert(row).select(cols).single();}
  if(r.error&&pmMediaOk&&/media_(url|type)/.test(r.error.message||"")){pmMediaOk=false;if(row.media_url){alert("ستون‌های پیام صوتی خصوصی در دیتابیس وجود ندارند؛ فایل SQL را اجرا کن.");return false;}r=await sb.from("private_messages").insert(row).select("id,sender_id,recipient_id,text,created_at,reply_to_id,deleted_for_all").single();}
  if(r.error&&/reply_to_id|PGRST204|42703/.test((r.error.code||"")+(r.error.message||""))){replyOkP=false;delete row.reply_to_id;const cols="id,sender_id,recipient_id,text,created_at,deleted_for_all"+(pmMediaOk?",media_url,media_type":"");r=await sb.from("private_messages").insert(row).select(cols).single();}
- if(r.error){console.error(r.error);alert(navigator.onLine?"ارسال پیام ناموفق بود؛ جزئیات در کنسول مرورگر است.":"اتصال اینترنت برقرار نیست.");return false;}
- addPM(r.data);rememberSentEmojis(text);return true;}
+ if(r.error){if(privatePath)sb.storage.from(PRIVATE_BUCKET).remove([privatePath]).catch(()=>{});console.error(r.error);alert(navigator.onLine?"ارسال پیام ناموفق بود؛ جزئیات در کنسول مرورگر است.":"اتصال اینترنت برقرار نیست.");return false;}
+ await signPrivateMedia(r.data);addPM(r.data);rememberSentEmojis(text);return true;}
 // ---- اعلان پیام جدید ----
 async function loadUnread(){if(!ME)return;
  const snap={};for(const k in UN)snap[k]=new Set(UN[k]);
@@ -3260,7 +3271,7 @@ function ntPM(m){const k=m.sender_id+"|"+Date.parse(m.created_at);if(NK.has(k))r
  const p=P[m.sender_id];notify({id:"u:"+m.sender_id,title:pName(p),avatar:p&&p.avatar_url,text:m.text||mLab(m.media_type)||"پیام جدید",at:m.created_at,count:1});}
 function stopRT(){if(rt){sb.removeChannel(rt);rt=null;}rtOk=false;}
 function startRT(){stopRT();
- const h=async p=>{const m=p.new;await profs([m.sender_id,m.recipient_id]);if(addPM(m)){const peer=m.sender_id===ME.id?m.recipient_id:m.sender_id;const isOpen=!!(cur&&cur.peer===peer);if(isOpen){renderMsgs();if(m.sender_id!==ME.id&&!document.hidden)markSeen(peer);}renderList();if(m.sender_id!==ME.id)ntPM(m);}};
+ const h=async p=>{const m=p.new;await profs([m.sender_id,m.recipient_id]);await signPrivateMedia(m);if(addPM(m)){const peer=m.sender_id===ME.id?m.recipient_id:m.sender_id;const isOpen=!!(cur&&cur.peer===peer);if(isOpen){renderMsgs();if(m.sender_id!==ME.id&&!document.hidden)markSeen(peer);}renderList();if(m.sender_id!==ME.id)ntPM(m);}};
  rt=sb.channel("pm-"+ME.id)
   .on("postgres_changes",{event:"INSERT",schema:"public",table:"private_messages",filter:"recipient_id=eq."+ME.id},h)
   .on("postgres_changes",{event:"INSERT",schema:"public",table:"private_messages",filter:"sender_id=eq."+ME.id},h)
@@ -3302,7 +3313,7 @@ async function loadGMCore(gid,force=false){
  if(r.error&&gMediaOk&&/media_url|media_type|42703|PGRST204/.test((r.error.code||"")+(r.error.message||""))){gMediaOk=false;r=await qq();}
  const {data,error}=r;
  if(error){console.error(error);return false;}
- data.reverse();await loadGHides(data.map(m=>m.id));GM[gid]=data;GMFetchedAt[gid]=Date.now();await Promise.all([profs(GM[gid].map(m=>m.sender_id),true),loadGroupReads(gid),loadGroupMessageReads(gid)]);loadPin(gid);
+ data.reverse();await loadGHides(data.map(m=>m.id));const groupInfo=SG.find(x=>String(x.gid)===String(gid));if(groupInfo&&!groupInfo.pub){await migrateLegacyPrivateGroupMedia(gid,data);await Promise.all(data.map(signPrivateMedia));}GM[gid]=data;GMFetchedAt[gid]=Date.now();await Promise.all([profs(GM[gid].map(m=>m.sender_id),true),loadGroupReads(gid),loadGroupMessageReads(gid)]);loadPin(gid);
  const c=SG.find(x=>x.gid===gid),l=gVis(gid).slice(-1)[0];if(c){if(l){c.last=l.text||gLab(l.media_type);c.at=l.created_at;}else if(GM[gid].length)c.last="";}
  return true;}
 function loadGM(gid,force=false){
@@ -3365,7 +3376,7 @@ async function sendGM(text,media,g){
  if(r.error&&!media&&gMediaOk&&/media_url|media_type|42703|PGRST204/.test((r.error.code||"")+(r.error.message||""))){gMediaOk=false;r=await sb.from("group_messages").insert(row).select(sel()).single();}
  const {data,error}=r;
  if(error){console.error(error);if(!media)alert(navigator.onLine?"ارسال پیام ناموفق بود؛ دوباره تلاش کن.":"اتصال اینترنت برقرار نیست.");else prevSt(navigator.onLine?"دیتابیس این پیام رسانه را نپذیرفت؛ فایل SQL را اجرا کن.":"اتصال اینترنت برقرار نیست.","err");return false;}
- addGM(data);rememberSentEmojis(text);return true;}
+ await signPrivateMedia(data);addGM(data);rememberSentEmojis(text);return true;}
 const PERMS=[["delete_messages","حذف پیام‌ها","حذف پیام اعضا"],["invite_members","دعوت اعضا","افزودن کاربر با نام کاربری"],["ban_members","اخراج و مسدودکردن اعضا","حذف عضو و جلوگیری از بازگشت"],["pin_messages","سنجاق پیام","سنجاق و برداشتن سنجاق"],["edit_info","تغییر اطلاعات گروه","نام و توضیحات گروه"],["add_admins","افزودن مدیران","ارتقای عضو به مدیر"]];
 function myPerm(k){const r=cur&&cur.role;if(r==="owner")return true;if(r!=="admin")return false;const x=(GMR[cur.gid]||[]).find(q=>q.user_id===ME.id);return !!(x&&x.perms&&x.perms[k]);}
 function canDelG(m){const r=cur&&cur.role;if(m.mine||r==="owner")return true;return r==="admin"&&myPerm("delete_messages")&&((GMEM[cur.gid]||{})[m.uid]==="member");}
@@ -3771,13 +3782,16 @@ async function gSend(text){
  if(pending){
   if(!gMediaOk){prevSt("ارسال رسانه در گروه هنوز فعال نیست؛ فایل SQL را در Supabase اجرا کن.","err");return false;}
   const isV=pendingKind==="video",isA=pendingKind==="audio",blob=isA?pending:isV?pendingFile:pending,type=isA?(pending.type||"audio/webm"):isV?(pendingFile.type||"video/mp4"):"image/jpeg";
-  if(upDone&&upDone.src===blob&&String(upDone.gid)===String(g.gid))media=upDone.media;
+  const groupInfo=SG.find(x=>String(x.gid)===String(g.gid)),privateGroup=!!(groupInfo&&!groupInfo.pub);
+  if(upDone&&upDone.src===blob&&String(upDone.gid)===String(g.gid)&&!!upDone.private===privateGroup)media=upDone.media;
   else{
-   const ext=isA?(type.includes("ogg")?"ogg":type.includes("mp4")?"m4a":"webm"):isV?(type.includes("quicktime")?"mov":type.includes("webm")?"webm":"mp4"):"jpg",path="g/"+g.gid+"/"+ME.id+"-"+Date.now()+"-"+Math.random().toString(36).slice(2,8)+(isA&&pendingDur?"-d"+pendingDur:"")+"."+ext;
+   const ext=isA?(type.includes("ogg")?"ogg":type.includes("mp4")?"m4a":"webm"):isV?(type.includes("quicktime")?"mov":type.includes("webm")?"webm":"mp4"):"jpg";
    upBusy=true;prevSt("در حال آپلود… ۰٪","up",0);
-   try{await upX(path,blob,type,p=>prevSt("در حال آپلود… "+Math.round(p*100).toLocaleString("fa-IR")+"٪","up",p));}
-   catch(e){upBusy=false;if(e&&e.message==="ABORT")return false;console.error(e);prevSt(upErr(e)+" برای تلاش دوباره، ارسال را بزن.","err");return false;}
-   upBusy=false;media={url:PUB+BUCKET+"/"+path,type:pendingKind,path};upDone={src:blob,gid:g.gid,media};
+   try{
+    if(privateGroup){const path=await uploadPrivateObject(blob,ext,type);media={url:"group://"+path,type:pendingKind,path,private:true};}
+    else{const path=ME.id+"/g/"+g.gid+"/"+Date.now()+"-"+Math.random().toString(36).slice(2,8)+(isA&&pendingDur?"-d"+pendingDur:"")+"."+ext;await upX(path,blob,type,p=>prevSt("در حال آپلود… "+Math.round(p*100).toLocaleString("fa-IR")+"٪","up",p));media={url:PUB+BUCKET+"/"+path,type:pendingKind,path,private:false};}
+   }catch(e){upBusy=false;if(e&&e.message==="ABORT")return false;console.error(e);prevSt(upErr(e)+" برای تلاش دوباره، ارسال را بزن.","err");return false;}
+   upBusy=false;upDone={src:blob,gid:g.gid,media,private:privateGroup};
   }
   prevSt("در حال ارسال پیام…","up",1);
  }
@@ -3808,7 +3822,7 @@ async function onGIns(p){
  const k=m.group_id+"|"+m.id;if(NKG.has(k))return;NKG.add(k);if(NKG.size>300)NKG.delete(NKG.values().next().value);
  const gid=String(m.group_id);let c=SG.find(x=>String(x.gid)===gid);
  if(!c){await refreshSG();c=SG.find(x=>String(x.gid)===gid);if(!c)return;}
- await profs([m.sender_id]);
+ await profs([m.sender_id]);if(!c.pub)await signPrivateMedia(m);
  if(GM[c.gid])addGM(m);else{c.last=m.text||gLab(m.media_type);c.at=m.created_at;}
  const mine=m.sender_id===ME.id,open=!!cur&&String(cur.gid)===gid&&!document.hidden;
  if(open){renderMsgs();markGroupRead(c.gid);}
