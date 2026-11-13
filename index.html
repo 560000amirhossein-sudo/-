@@ -227,7 +227,7 @@ html.arya-session-pending #gate{display:none!important}
 @media (max-width:380px){#gate{font-size:14px}}
 @media (prefers-reduced-motion:reduce){#gate .gdots i{animation:none}#gate .gbtn,#gate .gf input{transition:none}}
 #lb img{max-width:100%;max-height:100%;border-radius:12px}
-#prev.up::after{content:attr(data-progress)"٪";position:absolute;inset-inline-start:42px;top:50%;transform:translateY(-50%);width:42px;height:42px;display:grid;place-items:center;border-radius:50%;font-size:10px;font-weight:800;color:white;background:conic-gradient(#a855f7 calc(var(--p,0)*1%),#ffffff35 0);box-shadow:0 2px 12px #0008;pointer-events:none}
+#prev.up::after{content:attr(data-progress)"٪";position:absolute;inset-inline-start:42px;top:50%;transform:translateY(-50%);width:42px;height:42px;display:grid;place-items:center;border-radius:50%;font-size:10px;font-weight:800;color:white;background:conic-gradient(#a855f7 var(--progress-angle,0deg),#ffffff35 0);box-shadow:0 2px 12px #0008;pointer-events:none}
 #prev.up{--p:0}
 #prev.up[data-progress="0"]{--p:0}
 #prev.up[data-progress="100"]{--p:100}
@@ -3865,7 +3865,7 @@ setInterval(()=>{if(!ME||document.hidden)return;gTick++;if(grtOk&&gTick%3)return
 
 // ================= گروه‌ها: آپلود رسانه، خوانده‌نشده‌ها (همگام در دیتابیس)، Realtime و گروه عمومی =================
 const gWarn=t=>cur&&cur.gid?callToast(t):alert(t);
-function prevSt(t,k,p){const s=$("prev").querySelector("span");s.textContent=t;$("prev").classList.add("show");$("prev").classList.toggle("err",k==="err");$("prev").classList.toggle("up",k==="up");const pct=Math.round((p==null?0:p)*100);$("prev").dataset.progress=String(pct);$("prev").style.setProperty("--p",pct);$("upb").style.width=pct+"%";}
+function prevSt(t,k,p){const s=$("prev").querySelector("span");s.textContent=t;$("prev").classList.add("show");$("prev").classList.toggle("err",k==="err");$("prev").classList.toggle("up",k==="up");const pct=Math.round((p==null?0:p)*100);$("prev").dataset.progress=String(pct);$("prev").style.setProperty("--progress-angle",(pct*3.6)+"deg");$("upb").style.width=pct+"%";}
 function upErr(e){const m=String((e&&e.message)||""),st=e&&e.status;
  if(m==="NETWORK"||!navigator.onLine)return"اتصال اینترنت قطع شد.";
  if(m==="TIMEOUT")return"آپلود طولانی شد و متوقف شد.";
