@@ -1377,7 +1377,7 @@ try{var F=parseInt(localStorage.getItem("arya_text_scale_v1"),10);if(F>=85&&F<=1
     <div class="media-sheet-backdrop" id="mediaSheet" aria-hidden="true">
      <section class="media-sheet" role="dialog" aria-modal="true" aria-label="انتخاب رسانه">
       <div class="media-sheet-head"><b>افزودن به پیام</b><button id="mediaClose" type="button" aria-label="بستن">✕</button></div>
-      <div class="media-tabs" role="tablist"><button class="active" id="mediaPhotos" type="button" role="tab" aria-selected="true">عکس‌ها</button><button id="mediaVideos" type="button" role="tab" aria-selected="false">فیلم‌ها</button><button id="mediaAll" type="button" role="tab" aria-selected="false">همه</button></div>
+      <div class="media-tabs" role="tablist"><button class="active" id="mediaAll" type="button" role="tab" aria-selected="true">همه</button><button id="mediaPhotos" type="button" role="tab" aria-selected="false">عکس‌ها</button><button id="mediaVideos" type="button" role="tab" aria-selected="false">فیلم‌ها</button></div>
       <div class="media-gallery-open"><button type="button" id="mediaChooseGallery">انتخاب از گالری گوشی</button></div>
       <div class="media-sheet-grid">
        <button type="button" data-media-action="gallery"><span>▧</span><b>گالری</b></button>
@@ -2548,9 +2548,9 @@ $("msgs").addEventListener("click",vpClick);$("prev").addEventListener("click",v
 $("sendB").onclick=send;
 $("txt").onkeydown=e=>{if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing&&matchMedia("(pointer:fine)").matches){e.preventDefault();send();}};
 $("txt").oninput=()=>{$("txt").style.height="auto";$("txt").style.height=Math.min($("txt").scrollHeight,120)+"px";if(editState)$("editPreview").textContent=$("txt").value.trim()||"پیام بدون متن";syncComposerAction();};
-let mediaFilter="image";
+let mediaFilter="all";
 function closeMediaSheet(){$("mediaSheet").classList.remove("open","gallery-mode");$("mediaSheet").setAttribute("aria-hidden","true");}
-function openMediaSheet(){$("emo").classList.remove("open");$("mediaSheet").classList.remove("gallery-mode");$("mediaSheet").classList.add("open");$("mediaSheet").setAttribute("aria-hidden","false");}
+function openMediaSheet(){$("emo").classList.remove("open");setMediaFilter("all");$("mediaSheet").classList.add("gallery-mode","open");$("mediaSheet").setAttribute("aria-hidden","false");}
 function setMediaFilter(kind){
  mediaFilter=kind;
  [["mediaPhotos","image"],["mediaVideos","video"],["mediaAll","all"]].forEach(([id,k])=>{const b=$(id),on=k===kind;b.classList.toggle("active",on);b.setAttribute("aria-selected",on?"true":"false");});
@@ -2565,7 +2565,7 @@ $("mediaVideos").onclick=()=>setMediaFilter("video");
 $("mediaAll").onclick=()=>setMediaFilter("all");
 $("mediaSheet").querySelectorAll("[data-media-action]").forEach(b=>b.onclick=()=>{
  const a=b.dataset.mediaAction;
- if(a==="gallery"){$("mediaSheet").classList.add("gallery-mode");setMediaFilter("image");}
+ if(a==="gallery"){$("mediaSheet").classList.add("gallery-mode");setMediaFilter("all");}
  else if(a==="file")pickFile("all");
  else{closeMediaSheet();callToast(a==="location"?"ارسال موقعیت مکانی هنوز فعال نشده است.":a==="contact"?"ارسال مخاطب هنوز فعال نشده است.":"ارسال موسیقی هنوز فعال نشده است.");}
 });
