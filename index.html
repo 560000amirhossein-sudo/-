@@ -1890,7 +1890,7 @@ function openChat(id){
  $("ph").style.display="none";$("chat").style.display="flex";$("app").classList.add("open");callBtns();
  setAv($("hAv"),c.avatar,c.title);$("hNm").textContent=c.title;[$("hAv"),$("hNm")].forEach(e=>e.classList.toggle("lnk",c.type==="private"));
  $("hSub").textContent=c.type==="private"?presenceText(P[c.peer]):id===DEF&&pubErr?"اتصال برقرار نیست":TL[c.type]+(c.pub===false?" خصوصی":" عمومی");
- const p=canPost();$("attB").style.display=c.type==="private"?"none":"";$("comp").style.display=p?"flex":"none";$("joinbar").style.display=p?"none":"block";$("joinbar").textContent="فقط مدیر کانال می‌تواند پیام ارسال کند.";
+ const p=canPost();$("attB").style.display="";$("comp").style.display=p?"flex":"none";$("joinbar").style.display=p?"none":"block";$("joinbar").textContent="فقط مدیر کانال می‌تواند پیام ارسال کند.";
  if(id===DEF&&pubMsgs.length){D.seen=pubMsgs[pubMsgs.length-1].created_at;save();}
  renderMsgs(true);$("msgs").scrollTop=$("msgs").scrollHeight;renderList();
  if(c.gid)Promise.all([loadGM(c.gid),loadMembers(c.gid)]).then(([ok])=>{if(cur&&cur.id===c.id){renderMsgs(true);if(ok&&!document.hidden)markGroupRead(c.gid);}renderList();});
