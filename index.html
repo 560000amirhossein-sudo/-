@@ -2471,7 +2471,7 @@ async function startVoice(){
    const duration=Math.max(1,Math.round(ms/1000));await sendVoiceImmediately(blob,type,duration,peaksOf(pk));
   };
   try{const AC=window.AudioContext||window.webkitAudioContext;voiceCtx=new AC();voiceAn=voiceCtx.createAnalyser();voiceAn.fftSize=256;voiceCtx.createMediaStreamSource(stream).connect(voiceAn);}catch(e){voiceAn=null;}
-  $("emo").classList.remove("open");$("atm").classList.remove("open");
+  $("emo").classList.remove("open");$("atm")?.classList.remove("open");
   const w=$("recW");w.innerHTML="<i></i>".repeat(VBN);$("recT").textContent="0:00";$("recHint").textContent=voiceHoldLocked?"ضبط قفل شد":"چپ: لغو · بالا: قفل";
   rec.start(250);voiceStarted=Date.now();voiceTimer=setInterval(recTick,80);$("recBar").classList.add("on");
   if(voiceHoldCancel)cancelVoice();else if(!voiceHoldActive&&!voiceHoldLocked)stopVoice();
@@ -2706,7 +2706,7 @@ msgsBox.addEventListener("pointerup",e=>{clearTimeout(pressTimer);pressTimer=nul
 msgsBox.addEventListener("pointercancel",()=>{clearTimeout(pressTimer);pressTimer=null;pressTarget=null;pressStart=null;resetReplySwipe();});
 msgsBox.addEventListener("lostpointercapture",()=>{clearTimeout(pressTimer);pressTimer=null;pressTarget=null;pressStart=null;resetReplySwipe();});
 msgsBox.addEventListener("click",e=>{if(ignoreSwipeClick){e.preventDefault();e.stopPropagation();ignoreSwipeClick=false;}},true);
-document.addEventListener("click",e=>{if(!e.target.closest("#mmenu")&&!e.target.closest(".row"))hideMsgMenu();if(!e.target.closest("#atm"))$("atm").classList.remove("open");});
+document.addEventListener("click",e=>{if(!e.target.closest("#mmenu")&&!e.target.closest(".row"))hideMsgMenu();if(!e.target.closest("#atm"))$("atm")?.classList.remove("open");});
 $("mmForward").onclick=()=>{const m=getActiveMessage();hideMsgMenu();if(m)forwardModal([m]);};
 $("mmReply").onclick=()=>{const m=getActiveMessage();if(m){setReply(m);hideMsgMenu();$("emo").classList.remove("open");$("txt").focus();}};
 $("mmPin").onclick=pinToggle;
@@ -2977,7 +2977,7 @@ function drawEmojiPicker(){
  emojiBox.querySelectorAll("[data-emoji]").forEach(b=>b.onclick=()=>{const e=b.dataset.emoji,txt=$("txt"),a=txt.selectionStart??txt.value.length,z=txt.selectionEnd??txt.value.length;txt.value=txt.value.slice(0,a)+e+txt.value.slice(z);const p=a+e.length;txt.focus();txt.setSelectionRange(p,p);txt.dispatchEvent(new Event("input",{bubbles:true}));syncComposerAction();/* با انتخاب حتی یک ایموجی، دکمه ارسال فوراً نمایش داده شود. */});
 }
 drawEmojiPicker();
-$("emoB").onclick=()=>{$("atm").classList.remove("open");if(!emojiBox.classList.contains("open"))drawEmojiPicker();emojiBox.classList.toggle("open");};
+$("emoB").onclick=()=>{$("atm")?.classList.remove("open");if(!emojiBox.classList.contains("open"))drawEmojiPicker();emojiBox.classList.toggle("open");};
 
 // ---- پنجره‌ها ----
 const modal=h=>{const b=$("mdBody");b.className="card";b.removeAttribute("role");b.removeAttribute("aria-modal");$("md").classList.remove("pfo");b.innerHTML=h+'<button type="button" class="mx" id="mdX" aria-label="بستن" title="بستن">✕</button>';b.setAttribute("role","dialog");b.setAttribute("aria-modal","true");$("mdX").onclick=close;$("md").classList.add("open");},close=()=>{$("md").classList.remove("open");$("mdBody").innerHTML="";};
