@@ -2191,6 +2191,15 @@ html.day-mode .gset-empty{color:#64748b;border-color:#cbd5e1}
 html.day-mode .gset-role-pill{color:#6d28d9;background:#eee7ff;border-color:#d9c9f7}
 html.day-mode .gset-footer-note{background:#f5f0ff;border-color:#e5d8ff;color:#60758a}
 
+
+/* Media picker: bottom action dock */
+.media-sheet{display:flex;flex-direction:column;min-height:min(72dvh,680px);max-height:88dvh;overflow:hidden}
+.media-sheet-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;margin-top:auto;padding-top:18px;border-top:1px solid var(--bd)}
+.media-sheet-grid button{min-width:0;min-height:66px;padding:7px 2px;border:0;border-radius:11px;background:transparent;gap:6px;font-size:10px}
+.media-sheet-grid button span{font-size:21px;line-height:1}
+.media-sheet-grid button b{font-size:10px;white-space:nowrap;font-weight:650}
+.media-sheet-grid button:active{background:#8b5cf72b;transform:scale(.96)}
+@media(max-width:420px){.media-sheet{min-height:74dvh;padding-left:10px;padding-right:10px}.media-sheet-grid button b{font-size:9px}}
 </style><div class="fwd-head">${avHtml(sourceChat.avatar,forwardLabel(sourceChat),"")}<div><h3>فوروارد پیام‌ها</h3><div class="fwd-muted">از ${esc(forwardLabel(sourceChat))} · ${items.length.toLocaleString("fa-IR")} پیام</div></div></div><div class="fwd-muted">پیش‌نمایش پیام‌ها</div><div class="fwd-preview">${preview}${more}</div><label class="fwd-muted" for="forwardSearch">گفت‌وگوی مقصد را انتخاب کن</label><input id="forwardSearch" class="fwd-search" type="search" placeholder="جست‌وجوی نام گروه یا کاربر…" autocomplete="off"><div id="forwardTargets" class="fwd-targets">${targetCards}</div><div id="forwardNone" class="fwd-empty" style="display:none">مقصدی با این نام پیدا نشد.</div><button class="btn" id="forwardGo" type="button" style="margin-top:12px" disabled>انتخاب مقصد</button><button class="btn g" id="forwardNo" type="button">انصراف</button>`);
  let selectedTargetId="";
  const cards=[...$("mdBody").querySelectorAll(".fwd-target")];
