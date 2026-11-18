@@ -1293,18 +1293,23 @@ html.day-mode #mdBody:has(.inv-box) .mx{color:#4b6178!important}
 html.day-mode .inv-link{background:#eef4fb!important;color:#20364c!important;border-color:#b9d0e6!important}
 @media(max-width:420px){.inv-box h3{font-size:17px}.inv-link{font-size:11px}}
 
-/* Compact attachment dropdown */
-.media-sheet-backdrop{background:transparent;backdrop-filter:none;align-items:flex-end;justify-content:flex-start}
-.media-sheet{width:220px;min-height:0!important;max-height:none;padding:10px;background:linear-gradient(145deg,#21172f 0%,#120e1b 85%);border:1px solid #a78bfa66;border-radius:16px;box-shadow:0 14px 38px #000b,0 0 22px #8b5cf626}
-.media-sheet-head{margin:0 2px 7px;font-size:12px}
-.media-sheet-head button{width:27px;height:27px}
-.media-sheet-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;margin:0;padding:0;border:0}
-.media-sheet-grid button{min-height:58px;padding:7px 4px;border:0;border-radius:11px;background:#ffffff08;gap:5px;font-size:11px}
-.media-sheet-grid button span{font-size:20px}
-.media-sheet-grid button b{font-size:11px}
+/* Arya attachment popup: compact vertical menu inspired by Shad desktop */
+.media-sheet-backdrop{background:transparent!important;backdrop-filter:none!important;align-items:flex-end!important;justify-content:flex-start!important}
+.media-sheet{width:220px;min-height:0!important;max-height:none!important;padding:9px!important;overflow:hidden;background:linear-gradient(150deg,#21172f 0%,#100c19 92%)!important;border:1px solid #a78bfa75!important;border-radius:15px!important;box-shadow:0 16px 40px #000b,0 0 24px #8b5cf62b!important;animation:aryaAttachPop .16s ease-out both}
+@keyframes aryaAttachPop{from{opacity:0;transform:translateY(7px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+.media-sheet-head{display:none!important}
+.media-sheet-grid{display:grid!important;grid-template-columns:1fr!important;gap:2px!important;margin:0!important;padding:0!important;border:0!important;direction:rtl}
+.media-sheet-grid button{display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:flex-start!important;gap:13px!important;width:100%!important;min-height:51px!important;padding:7px 11px!important;border:0!important;border-radius:10px!important;background:transparent!important;color:var(--tx,#f4edff)!important;text-align:right!important;font-size:13px!important;transition:background .14s ease,transform .14s ease}
+.media-sheet-grid button:hover,.media-sheet-grid button:focus-visible{background:#a855f729!important;outline:none}
+.media-sheet-grid button:active{transform:scale(.985)}
+.media-sheet-grid button span{display:grid!important;place-items:center!important;flex:0 0 25px!important;width:25px!important;height:25px!important;font-size:21px!important;color:#c4a7ff!important}
+.media-sheet-grid button b{font-size:13px!important;font-weight:600!important;flex:1;text-align:right}
 .media-tabs,.media-gallery-open{display:none!important}
-html.day-mode .media-sheet{background:linear-gradient(145deg,#fff 0%,#f1edfa 100%);border-color:#bba8df;box-shadow:0 12px 32px #38265b33}
-html.day-mode .media-sheet-grid button{background:#8b5cf710}
+html.day-mode .media-sheet{background:linear-gradient(150deg,#fff 0%,#f4f0fa 100%)!important;border-color:#cbb9e8!important;box-shadow:0 14px 34px #38265b35!important}
+html.day-mode .media-sheet-grid button{color:#272033!important}
+html.day-mode .media-sheet-grid button:hover,html.day-mode .media-sheet-grid button:focus-visible{background:#8b5cf714!important}
+html.day-mode .media-sheet-grid button span{color:#7850b7!important}
+@media(max-width:420px){.media-sheet{width:205px!important}.media-sheet-grid button{min-height:48px!important}}
 </style>  <meta property="og:image" content="https://bolt.new/static/og_default.png">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:image" content="https://bolt.new/static/og_default.png">
@@ -2579,8 +2584,7 @@ $("mediaClose").onclick=closeMediaSheet;
 $("mediaSheet").onclick=e=>{if(e.target===$("mediaSheet"))closeMediaSheet();};
 $("mediaSheet").querySelectorAll("[data-media-action]").forEach(b=>b.onclick=()=>{
  const a=b.dataset.mediaAction;
- if(a==="music"){closeMediaSheet();callToast("انتخاب موسیقی فعلاً از پنجره فایل انجام می‌شود.");}
- else pickFile(a);
+ pickFile(a);
 });
 document.addEventListener("click",e=>{if($("mediaSheet").classList.contains("open")&&!$("mediaSheet").contains(e.target)&&!$("attB").contains(e.target))closeMediaSheet();});
 window.addEventListener("resize",()=>{if($("mediaSheet").classList.contains("open"))closeMediaSheet();});
