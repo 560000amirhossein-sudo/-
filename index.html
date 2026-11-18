@@ -246,7 +246,7 @@ html.arya-session-pending #gate{display:none!important}
 .media-sheet-grid button{display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:flex-start!important;gap:13px!important;width:100%!important;min-height:51px!important;padding:7px 11px!important;border:0!important;border-radius:10px!important;background:transparent!important;color:var(--tx,#f4edff)!important;text-align:right!important;font-size:13px!important;transition:background .14s ease,transform .14s ease}
 .media-sheet-grid button:hover,.media-sheet-grid button:focus-visible{background:#a855f729!important;outline:none}
 .media-sheet-grid button:active{transform:scale(.985)}
-.media-sheet-grid button span{display:grid!important;place-items:center!important;flex:0 0 25px!important;width:25px!important;height:25px!important;font-size:21px!important;color:#c4a7ff!important}
+.media-sheet-grid button span{display:grid!important;place-items:center!important;flex:0 0 30px!important;width:30px!important;height:30px!important;border-radius:9px!important;background:#a855f71c!important;font-size:21px!important;color:#c4a7ff!important}.media-sheet-grid button span svg{width:19px!important;height:19px!important;display:block!important}
 .media-sheet-grid button b{font-size:13px!important;font-weight:600!important;flex:1;text-align:right}
 html.day-mode .media-sheet{background:linear-gradient(150deg,#fff 0%,#f4f0fa 100%)!important;border-color:#cbb9e8!important;box-shadow:0 14px 34px #38265b35!important}
 html.day-mode .media-sheet-grid button{color:#272033!important}
@@ -1401,10 +1401,10 @@ try{var F=parseInt(localStorage.getItem("arya_text_scale_v1"),10);if(F>=85&&F<=1
      <section class="media-sheet" role="dialog" aria-modal="true" aria-label="انتخاب رسانه">
       <div class="media-sheet-head"><b>افزودن به پیام</b><button id="mediaClose" type="button" aria-label="بستن">✕</button></div>
       <div class="media-sheet-grid">
-       <button type="button" data-media-action="image"><span>▧</span><b>تصویر</b></button>
-       <button type="button" data-media-action="video"><span>▶</span><b>ویدیو</b></button>
-       <button type="button" data-media-action="music"><span>♫</span><b>موسیقی</b></button>
-       <button type="button" data-media-action="file"><span>📁</span><b>فایل</b></button>
+       <button type="button" data-media-action="image"><span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="8.5" cy="8.5" r="1.7" fill="currentColor"/><path d="m4 17 5-5 3 3 3-4 5 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><b>تصویر</b></button>
+       <button type="button" data-media-action="video"><span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="13" height="14" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="m16 10 5-3v10l-5-3z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></span><b>ویدئو</b></button>
+       <button type="button" data-media-action="music"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l12-2v13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="18" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="18" cy="16" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></span><b>موسیقی</b></button>
+       <button type="button" data-media-action="file"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l5 5v13H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M14 3v6h5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></span><b>فایل</b></button>
       </div>
      </section>
     </div>
