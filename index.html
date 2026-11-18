@@ -1298,19 +1298,20 @@ html.day-mode #mdBody:has(.inv-box) .mx{color:#4b6178!important}
 html.day-mode .inv-link{background:#eef4fb!important;color:#20364c!important;border-color:#b9d0e6!important}
 @media(max-width:420px){.inv-box h3{font-size:17px}.inv-link{font-size:11px}}
 
-/* Arya attachment popup: compact vertical menu inspired by Shad desktop */
-.media-sheet-backdrop{background:transparent!important;backdrop-filter:none!important;align-items:flex-end!important;justify-content:flex-start!important}
-.media-sheet{width:220px;min-height:0!important;max-height:none!important;padding:9px!important;overflow:hidden;background:linear-gradient(150deg,#21172f 0%,#100c19 92%)!important;border:1px solid #a78bfa75!important;border-radius:15px!important;box-shadow:0 16px 40px #000b,0 0 24px #8b5cf62b!important;animation:aryaAttachPop .16s ease-out both}
+/* Arya attachment popup: Shad-like vertical desktop menu */
+.media-sheet-backdrop{background:transparent!important;backdrop-filter:none!important}
+.media-sheet{width:220px;min-height:0!important;max-height:none!important;padding:7px!important;overflow:hidden;background:linear-gradient(155deg,#21172f 0%,#100c19 95%)!important;border:1px solid #a78bfa75!important;border-radius:13px!important;box-shadow:0 15px 38px #000b,0 0 22px #8b5cf626!important;animation:aryaAttachPop .16s ease-out both}
 @keyframes aryaAttachPop{from{opacity:0;transform:translateY(7px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
 .media-sheet-head{display:none!important}
-.media-sheet-grid{display:grid!important;grid-template-columns:1fr!important;gap:2px!important;margin:0!important;padding:0!important;border:0!important;direction:rtl}
-.media-sheet-grid button{display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:flex-start!important;gap:13px!important;width:100%!important;min-height:51px!important;padding:7px 11px!important;border:0!important;border-radius:10px!important;background:transparent!important;color:var(--tx,#f4edff)!important;text-align:right!important;font-size:13px!important;transition:background .14s ease,transform .14s ease}
+.media-sheet-grid{display:grid!important;grid-template-columns:1fr!important;gap:1px!important;margin:0!important;padding:0!important;border:0!important;direction:rtl}
+.media-sheet-grid button{display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:flex-start!important;gap:12px!important;width:100%!important;min-height:50px!important;padding:7px 12px!important;border:0!important;border-radius:9px!important;background:transparent!important;color:var(--tx,#f4edff)!important;text-align:right!important;font-size:13px!important;transition:background .14s ease,transform .14s ease}
 .media-sheet-grid button:hover,.media-sheet-grid button:focus-visible{background:#a855f729!important;outline:none}
 .media-sheet-grid button:active{transform:scale(.985)}
-.media-sheet-grid button span{display:grid!important;place-items:center!important;flex:0 0 25px!important;width:25px!important;height:25px!important;font-size:21px!important;color:#c4a7ff!important}
+.media-sheet-grid button span{display:grid!important;place-items:center!important;flex:0 0 27px!important;width:27px!important;height:27px!important;border-radius:7px!important;background:#a855f71c!important;font-size:20px!important;color:#c4a7ff!important}
+.media-sheet-grid button span svg{width:19px!important;height:19px!important;display:block!important}
 .media-sheet-grid button b{font-size:13px!important;font-weight:600!important;flex:1;text-align:right}
 .media-tabs,.media-gallery-open{display:none!important}
-html.day-mode .media-sheet{background:linear-gradient(150deg,#fff 0%,#f4f0fa 100%)!important;border-color:#cbb9e8!important;box-shadow:0 14px 34px #38265b35!important}
+html.day-mode .media-sheet{background:linear-gradient(155deg,#fff 0%,#f4f0fa 100%)!important;border-color:#cbb9e8!important;box-shadow:0 14px 34px #38265b35!important}
 html.day-mode .media-sheet-grid button{color:#272033!important}
 html.day-mode .media-sheet-grid button:hover,html.day-mode .media-sheet-grid button:focus-visible{background:#8b5cf714!important}
 html.day-mode .media-sheet-grid button span{color:#7850b7!important}
