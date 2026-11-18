@@ -1292,6 +1292,19 @@ html.day-mode #mdBody:has(.inv-box) .msg{color:#b4232a!important}
 html.day-mode #mdBody:has(.inv-box) .mx{color:#4b6178!important}
 html.day-mode .inv-link{background:#eef4fb!important;color:#20364c!important;border-color:#b9d0e6!important}
 @media(max-width:420px){.inv-box h3{font-size:17px}.inv-link{font-size:11px}}
+
+/* Compact attachment dropdown */
+.media-sheet-backdrop{background:transparent;backdrop-filter:none;align-items:flex-end;justify-content:flex-start}
+.media-sheet{width:220px;min-height:0!important;max-height:none;padding:10px;background:linear-gradient(145deg,#21172f 0%,#120e1b 85%);border:1px solid #a78bfa66;border-radius:16px;box-shadow:0 14px 38px #000b,0 0 22px #8b5cf626}
+.media-sheet-head{margin:0 2px 7px;font-size:12px}
+.media-sheet-head button{width:27px;height:27px}
+.media-sheet-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;margin:0;padding:0;border:0}
+.media-sheet-grid button{min-height:58px;padding:7px 4px;border:0;border-radius:11px;background:#ffffff08;gap:5px;font-size:11px}
+.media-sheet-grid button span{font-size:20px}
+.media-sheet-grid button b{font-size:11px}
+.media-tabs,.media-gallery-open{display:none!important}
+html.day-mode .media-sheet{background:linear-gradient(145deg,#fff 0%,#f1edfa 100%);border-color:#bba8df;box-shadow:0 12px 32px #38265b33}
+html.day-mode .media-sheet-grid button{background:#8b5cf710}
 </style>  <meta property="og:image" content="https://bolt.new/static/og_default.png">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:image" content="https://bolt.new/static/og_default.png">
@@ -1377,14 +1390,11 @@ try{var F=parseInt(localStorage.getItem("arya_text_scale_v1"),10);if(F>=85&&F<=1
     <div class="media-sheet-backdrop" id="mediaSheet" aria-hidden="true">
      <section class="media-sheet" role="dialog" aria-modal="true" aria-label="انتخاب رسانه">
       <div class="media-sheet-head"><b>افزودن به پیام</b><button id="mediaClose" type="button" aria-label="بستن">✕</button></div>
-      <div class="media-tabs" role="tablist"><button class="active" id="mediaAll" type="button" role="tab" aria-selected="true">همه</button><button id="mediaPhotos" type="button" role="tab" aria-selected="false">عکس‌ها</button><button id="mediaVideos" type="button" role="tab" aria-selected="false">فیلم‌ها</button></div>
-      <div class="media-gallery-open"><button type="button" id="mediaChooseGallery">انتخاب از گالری گوشی</button></div>
       <div class="media-sheet-grid">
-       <button type="button" data-media-action="gallery"><span>▧</span><b>گالری</b></button>
-       <button type="button" data-media-action="file"><span>📁</span><b>فایل</b></button>
-       <button type="button" data-media-action="location"><span>⌖</span><b>موقعیت مکانی</b></button>
-       <button type="button" data-media-action="contact"><span>♙</span><b>مخاطب</b></button>
+       <button type="button" data-media-action="image"><span>▧</span><b>تصویر</b></button>
+       <button type="button" data-media-action="video"><span>▶</span><b>ویدیو</b></button>
        <button type="button" data-media-action="music"><span>♫</span><b>موسیقی</b></button>
+       <button type="button" data-media-action="file"><span>📁</span><b>فایل</b></button>
       </div>
      </section>
     </div>
@@ -2548,27 +2558,32 @@ $("msgs").addEventListener("click",vpClick);$("prev").addEventListener("click",v
 $("sendB").onclick=send;
 $("txt").onkeydown=e=>{if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing&&matchMedia("(pointer:fine)").matches){e.preventDefault();send();}};
 $("txt").oninput=()=>{$("txt").style.height="auto";$("txt").style.height=Math.min($("txt").scrollHeight,120)+"px";if(editState)$("editPreview").textContent=$("txt").value.trim()||"پیام بدون متن";syncComposerAction();};
-let mediaFilter="all";
-function closeMediaSheet(){$("mediaSheet").classList.remove("open","gallery-mode");$("mediaSheet").setAttribute("aria-hidden","true");}
-function openMediaSheet(){$("emo").classList.remove("open");setMediaFilter("all");$("mediaSheet").classList.add("gallery-mode","open");$("mediaSheet").setAttribute("aria-hidden","false");}
-function setMediaFilter(kind){
- mediaFilter=kind;
- [["mediaPhotos","image"],["mediaVideos","video"],["mediaAll","all"]].forEach(([id,k])=>{const b=$(id),on=k===kind;b.classList.toggle("active",on);b.setAttribute("aria-selected",on?"true":"false");});
+function closeMediaSheet(){$("mediaSheet").classList.remove("open");$("mediaSheet").setAttribute("aria-hidden","true");}
+function openMediaSheet(){
+ $("emo").classList.remove("open");
+ const anchor=$("attB").getBoundingClientRect(),menu=$("mediaSheet").querySelector(".media-sheet");
+ $("mediaSheet").classList.add("open");$("mediaSheet").setAttribute("aria-hidden","false");
+ const width=Math.min(230,window.innerWidth-20);
+ menu.style.width=width+"px";
+ menu.style.left=Math.max(10,Math.min(window.innerWidth-width-10,anchor.right-width))+"px";
+ menu.style.top="auto";
+ menu.style.bottom=Math.max(10,window.innerHeight-anchor.top+8)+"px";
 }
-const pickFile=mode=>{closeMediaSheet();$("file").accept=mode==="image"?"image/*":mode==="video"?"video/*":"image/*,video/*";$("file").click();};
-$("mediaChooseGallery").onclick=()=>pickFile(mediaFilter);
+const pickFile=mode=>{
+ closeMediaSheet();
+ $("file").accept=mode==="image"?"image/*":mode==="video"?"video/*":mode==="music"?"audio/*":"*/*";
+ $("file").click();
+};
 $("attB").onclick=e=>{e.stopPropagation();openMediaSheet();};
 $("mediaClose").onclick=closeMediaSheet;
 $("mediaSheet").onclick=e=>{if(e.target===$("mediaSheet"))closeMediaSheet();};
-$("mediaPhotos").onclick=()=>setMediaFilter("image");
-$("mediaVideos").onclick=()=>setMediaFilter("video");
-$("mediaAll").onclick=()=>setMediaFilter("all");
 $("mediaSheet").querySelectorAll("[data-media-action]").forEach(b=>b.onclick=()=>{
  const a=b.dataset.mediaAction;
- if(a==="gallery"){$("mediaSheet").classList.add("gallery-mode");setMediaFilter("all");}
- else if(a==="file")pickFile("all");
- else{closeMediaSheet();callToast(a==="location"?"ارسال موقعیت مکانی هنوز فعال نشده است.":a==="contact"?"ارسال مخاطب هنوز فعال نشده است.":"ارسال موسیقی هنوز فعال نشده است.");}
+ if(a==="music"){closeMediaSheet();callToast("انتخاب موسیقی فعلاً از پنجره فایل انجام می‌شود.");}
+ else pickFile(a);
 });
+document.addEventListener("click",e=>{if($("mediaSheet").classList.contains("open")&&!$("mediaSheet").contains(e.target)&&!$("attB").contains(e.target))closeMediaSheet();});
+window.addEventListener("resize",()=>{if($("mediaSheet").classList.contains("open"))closeMediaSheet();});
 // ---- منوی پیام (long-press / right-click) ----
 const msgsBox=$("msgs");
 msgsBox.addEventListener("scroll",()=>{if(cur&&cur.id===DEF&&msgsBox.scrollTop<70)loadOlderPublic();},{passive:true});
