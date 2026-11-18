@@ -2245,8 +2245,8 @@ html.day-mode .gset-footer-note{background:#f5f0ff;border-color:#e5d8ff;color:#6
  .media-tabs{display:flex!important;gap:22px;align-items:center;justify-content:flex-start;order:0;padding:8px 8px 14px;border-bottom:1px solid #8883}
  .media-tabs button{padding:7px 3px;background:none;color:inherit;font-size:14px;border-bottom:2px solid transparent}
  .media-tabs button.active{color:#3988e8;border-color:#3988e8;font-weight:800}
- .media-gallery-open{display:flex!important;align-items:center!important;justify-content:center!important;flex:1 1 auto!important;min-height:0!important;order:1;padding:14px 0!important}
- .media-gallery-open button{width:min(42%,210px)!important;min-height:132px!important;border-radius:12px!important;background:linear-gradient(145deg,#8b1d2c,#250b12)!important;color:#fff!important;font-size:14px!important;box-shadow:0 5px 18px #0003!important}
+ .media-gallery-open{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;align-content:start!important;align-items:start!important;justify-content:stretch!important;flex:1 1 auto!important;min-height:0!important;order:1;padding:10px 0!important;overflow:auto!important}
+ .media-gallery-open button{grid-column:1!important;width:100%!important;min-height:210px!important;border-radius:3px!important;background:linear-gradient(145deg,#8b1d2c,#250b12)!important;color:#fff!important;font-size:14px!important;box-shadow:none!important}
  .media-gallery-open button:before{content:"📷";display:block;font-size:42px;margin-bottom:8px}
  .media-sheet-grid{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:2px!important;flex:0 0 auto!important;order:2;margin-top:auto!important;padding:12px 0 2px!important;border-top:1px solid #8883!important}
  .media-sheet-grid button{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;min-width:0!important;min-height:64px!important;padding:6px 1px!important;gap:5px!important;color:inherit!important}
