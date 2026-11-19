@@ -1,0 +1,13 @@
+{
+  "id": "/",
+  "name": "آریا پیوند",
+  "short_name": "آریا پیوند",
+  "description": "جایی برای پیوند آدم‌ها",
+  "lang": "fa",
+  "dir": "rtl",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#080711",
+  "theme_color": "#080711"
+}
