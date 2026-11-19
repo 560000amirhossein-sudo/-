@@ -2490,7 +2490,7 @@ async function send(){
   save();$("txt").value="";$("txt").style.height="";clearPending();clearReply();syncComposerAction();
   confirmSendSfx();renderMsgs(true);renderList();
   if(publicOptimistic)pull().then(()=>{removeOptimisticMessage(optimistic);D.seen=pubMsgs[pubMsgs.length-1]?.created_at||D.seen;save();if(cur&&cur.id===DEF)renderMsgs(true);renderList();}).catch(e=>console.warn("همگام‌سازی پیام عمومی:",e));
- }catch(e){console.error(e);removeOptimisticMessage(optimistic);renderMsgs(true);alert("ارسال ناموفق بود. اتصال، مجوز ذخیره‌سازی و وجود ستون‌های رسانه را بررسی کن.");}
+ }catch(e){console.error(e);if(!pending&&!navigator.onLine&&text&&optimistic){try{await aryaQueueOfflineText({text,kind:optimistic.kind,id:optimistic.id,gid:optimistic.gid||null,peer:optimistic.peer||null,userId:ME&&ME.id||null,replyTo:replyTo&&replyTo.id||null});$("txt").value="";$("txt").style.height="";clearReply();save();renderMsgs(true);renderList();callToast("پیام ذخیره شد؛ بعد از اتصال ارسال می‌شود.");}catch(qe){removeOptimisticMessage(optimistic);renderMsgs(true);alert("ذخیره آفلاین پیام ممکن نشد؛ فضای ذخیره‌سازی مرورگر را بررسی کن.");}}else{removeOptimisticMessage(optimistic);renderMsgs(true);alert("ارسال ناموفق بود. اتصال، مجوز ذخیره‌سازی و وجود ستون‌های رسانه را بررسی کن.");}}
  $("sendB").disabled=false;sendBusy=false;syncComposerAction();
 }
 // ---- ضبط پیام صوتی ----
@@ -4468,6 +4468,44 @@ setInterval(async()=>{if(document.hidden)return;pubPollCount++;if(!pubRtOk||pubP
   });
   window.addEventListener("pagehide",()=>{if(pinEnabled())showPinLock();});
 }catch(e){console.error("settings page:",e);}})();
+
+/* Arya Peyvand: durable text-only offline send queue */
+const ARYA_OFFLINE_DB="arya-peyvand-offline-v1";
+function aryaOpenOfflineDB(){
+ return new Promise((resolve,reject)=>{
+  const req=indexedDB.open(ARYA_OFFLINE_DB,1);
+  req.onupgradeneeded=()=>{const db=req.result;if(!db.objectStoreNames.contains("outbox"))db.createObjectStore("outbox",{keyPath:"qid",autoIncrement:true});};
+  req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);
+ });
+}
+async function aryaQueueOfflineText(item){
+ const db=await aryaOpenOfflineDB();
+ await new Promise((resolve,reject)=>{const tx=db.transaction("outbox","readwrite");tx.objectStore("outbox").add({...item,createdAt:Date.now()});tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});
+ db.close();
+}
+async function aryaFlushOfflineQueue(){
+ if(!navigator.onLine||!ME||!ME.id||!sb)return;
+ let db;try{db=await aryaOpenOfflineDB();}catch(e){return;}
+ const items=await new Promise((resolve,reject)=>{const tx=db.transaction("outbox","readonly");const q=tx.objectStore("outbox").getAll();q.onsuccess=()=>resolve(q.result||[]);q.onerror=()=>reject(q.error);});
+ for(const item of items){
+  if(String(item.userId)!==String(ME.id))continue;
+  try{
+   let result;
+   if(item.kind==="public"){const row={name:D.me.name,text:item.text};if(item.replyTo&&replyOk)row.reply_to_id=item.replyTo;result=await sb.from("messages").insert(row);}
+   else if(item.kind==="group"){const row={group_id:item.gid,sender_id:ME.id,text:item.text};if(item.replyTo)row.reply_to_id=item.replyTo;result=await sb.from("group_messages").insert(row);}
+   else if(item.kind==="private"){const row={sender_id:ME.id,recipient_id:item.peer,text:item.text};if(item.replyTo&&replyOkP)row.reply_to_id=item.replyTo;result=await sb.from("private_messages").insert(row);}
+   else {result={error:new Error("گفتگوی محلی")};}
+   if(result.error)throw result.error;
+   const optimistic={kind:item.kind,id:item.id,gid:item.gid,peer:item.peer};
+   removeOptimisticMessage(optimistic);
+   await new Promise((resolve,reject)=>{const tx=db.transaction("outbox","readwrite");tx.objectStore("outbox").delete(item.qid);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});
+   save();if(cur){renderMsgs(true);renderList();}
+  }catch(e){console.warn("Arya offline queue waiting:",e);break;}
+ }
+ db.close();
+}
+window.addEventListener("online",()=>{aryaFlushOfflineQueue().catch(e=>console.warn(e));});
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)aryaFlushOfflineQueue().catch(e=>console.warn(e));});
 </script>
 <script>
 (function(){
