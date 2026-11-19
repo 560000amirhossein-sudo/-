@@ -3270,6 +3270,8 @@ async function boot0(user){
   if(UUID.test(joinGroupParam))openGroupInvite(joinGroupParam);
   else callToast("لینک دعوت معتبر نیست.");
  }
+ // صف پیام‌های آفلاین پس از آماده‌شدن نشست و پروفایل نیز همگام می‌شود.
+ aryaFlushOfflineQueue().catch(e=>console.warn("همگام‌سازی صف آفلاین پس از ورود:",e));
 }
 const wide=()=>matchMedia("(min-width:761px)").matches;
 sb.auth.onAuthStateChange((ev,s)=>{setTimeout(()=>{
