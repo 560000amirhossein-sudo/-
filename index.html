@@ -1406,7 +1406,7 @@ try{var F=parseInt(localStorage.getItem("arya_text_scale_v1"),10);if(F>=85&&F<=1
        <button type="button" data-gallery-filter="image">عکس‌ها</button>
        <button type="button" data-gallery-filter="video">فیلم‌ها</button>
       </div>
-      <div class="media-gallery-open"><button type="button" id="openPhoneGallery">انتخاب از گالری گوشی</button></div>
+      <div class="media-gallery-open"><button type="button" id="openPhoneGallery"><span class="gallery-open-icon">▧</span><strong>باز کردن گالری گوشی</strong><small>انتخاب عکس‌ها و ویدیوهای دستگاه</small></button></div>
       <div class="media-sheet-grid">
        <button type="button" data-media-action="gallery"><span>▧</span><b>گالری</b></button>
        <button type="button" data-media-action="file"><span>▤</span><b>فایل</b></button>
@@ -2231,32 +2231,42 @@ html.day-mode .gset-footer-note{background:#f5f0ff;border-color:#e5d8ff;color:#6
 @media(max-width:420px){.media-sheet{min-height:74dvh;padding-left:10px;padding-right:10px}.media-sheet-grid button b{font-size:9px}}
 
 /* Gallery-only filters and picker action */
+/* Mobile gallery sheet only. Desktop attachment menu above remains unchanged. */
 .media-tabs,.media-gallery-open{display:none}
 .media-sheet-backdrop.gallery-mode .media-tabs{display:flex}
-.media-sheet-backdrop.gallery-mode .media-gallery-open{display:block;padding:14px 0}
-.media-gallery-open button{width:100%;min-height:46px;border-radius:13px;background:linear-gradient(120deg,#8b5cf6,#6d28d9);color:#fff;font-weight:800}
+.media-sheet-backdrop.gallery-mode .media-gallery-open{display:flex}
 @media(max-width:760px){
- .media-sheet-backdrop{position:fixed;inset:0;z-index:100;display:none;pointer-events:none;background:#0006!important;backdrop-filter:blur(2px)!important}
+ .media-sheet-backdrop{position:fixed;inset:0;z-index:100;display:none;pointer-events:none;background:#05030db8!important;backdrop-filter:blur(5px)!important}
  .media-sheet-backdrop.open{display:flex;align-items:flex-end;justify-content:center;pointer-events:auto}
- .media-sheet{position:relative!important;inset:auto!important;width:100%!important;max-width:none!important;height:min(56dvh,760px)!important;min-height:54dvh!important;max-height:90dvh!important;margin:0!important;padding:44px 10px max(12px,env(safe-area-inset-bottom))!important;overflow:hidden!important;border:0!important;border-radius:22px 22px 0 0!important;background:#fff!important;color:#222!important;box-shadow:0 -8px 35px #0003!important;display:flex!important;flex-direction:column!important;animation:aryaMobileSheet .22s ease-out both!important}
+ .media-sheet{position:relative!important;inset:auto!important;width:100%!important;max-width:none!important;height:min(78dvh,760px)!important;min-height:68dvh!important;max-height:90dvh!important;margin:0!important;padding:28px 16px max(12px,env(safe-area-inset-bottom))!important;overflow:hidden!important;border:1px solid #ffffff16!important;border-bottom:0!important;border-radius:25px 25px 0 0!important;background:linear-gradient(160deg,#211b30,#11111b 68%)!important;color:#f5f3fa!important;box-shadow:0 -16px 55px #0009!important;display:flex!important;flex-direction:column!important;animation:aryaMobileSheet .22s cubic-bezier(.2,.8,.2,1) both!important}
  @keyframes aryaMobileSheet{from{transform:translateY(100%)}to{transform:translateY(0)}}
- .media-sheet:before{content:"";position:absolute;top:17px;left:calc(50% - 34px);width:68px;height:6px;border-radius:8px;background:#e0e2e8}
- html:not(.day-mode) .media-sheet{background:#171821!important;color:#f5f5f7!important}
- .media-tabs{display:flex!important;gap:22px;align-items:center;justify-content:flex-start;order:0;padding:8px 8px 14px;border-bottom:1px solid #8883}
- .media-tabs button{padding:7px 3px;background:none;color:inherit;font-size:14px;border-bottom:2px solid transparent}
- .media-tabs button.active{color:#3988e8;border-color:#3988e8;font-weight:800}
- .media-gallery-open{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;align-content:start!important;align-items:start!important;justify-content:stretch!important;flex:1 1 auto!important;min-height:0!important;order:1;padding:10px 0!important;overflow:auto!important}
- .media-gallery-open button{grid-column:1!important;width:100%!important;aspect-ratio:1/1!important;min-height:0!important;max-height:210px!important;border-radius:3px!important;background:linear-gradient(145deg,#8b1d2c,#250b12)!important;color:#fff!important;font-size:0!important;box-shadow:none!important;display:flex!important;align-items:center!important;justify-content:center!important;flex-direction:column!important}
- .media-gallery-open button:before{content:"📷";display:block;font-size:42px;margin:0!important}
- .media-sheet-grid{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:2px!important;flex:0 0 auto!important;order:2;margin-top:auto!important;padding:12px 0 2px!important;border-top:1px solid #8883!important}
- .media-sheet-grid button{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;min-width:0!important;min-height:64px!important;padding:6px 1px!important;gap:5px!important;color:inherit!important}
- .media-sheet-grid button span{display:grid!important;place-items:center!important;width:42px!important;height:42px!important;flex:0 0 42px!important;border-radius:50%!important;background:#3988e8!important;color:#fff!important;font-size:22px!important}
- .media-sheet-grid button:nth-child(2) span{background:#27b5d5!important}
- .media-sheet-grid button:nth-child(3) span{background:#55bd63!important}
- .media-sheet-grid button:nth-child(4) span{background:#edbd43!important}
- .media-sheet-grid button:nth-child(5) span{background:#e45b68!important}
- .media-sheet-grid button b{font-size:10px!important;white-space:nowrap!important;color:inherit!important}
- html.day-mode .media-sheet{background:#fff!important;color:#24242a!important}
+ .media-sheet:before{content:"";position:absolute;top:10px;left:calc(50% - 28px);width:56px;height:5px;border-radius:8px;background:#ffffff38}
+ .media-sheet-head{display:flex!important;align-items:center;justify-content:space-between;order:-1;padding:3px 2px 16px!important;color:inherit!important;font-size:15px!important}
+ .media-sheet-head button{width:30px;height:30px;border-radius:50%;background:#ffffff12!important;color:inherit!important}
+ .media-tabs{display:flex!important;gap:24px;align-items:center;justify-content:flex-start;order:0;padding:8px 4px 13px!important;border-bottom:1px solid #ffffff18!important}
+ .media-tabs button{padding:7px 2px 9px!important;background:none!important;color:#aaa4b8!important;font-size:14px!important;border-bottom:2px solid transparent!important}
+ .media-tabs button.active{color:#79b5ff!important;border-color:#58a2ff!important;font-weight:800!important}
+ .media-gallery-open{display:flex!important;flex:1 1 auto!important;min-height:0!important;align-items:center!important;justify-content:center!important;order:1;padding:16px 0!important;overflow:auto!important}
+ .media-gallery-open button{position:relative!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:10px!important;width:min(100%,310px)!important;min-height:190px!important;padding:24px 18px!important;border:1px dashed #8b78b8!important;border-radius:20px!important;background:linear-gradient(145deg,#34264b88,#171522)!important;color:#f5f3fa!important;text-align:center!important;box-shadow:inset 0 0 35px #8b5cf614!important}
+ .media-gallery-open button .gallery-open-icon{display:grid;place-items:center;width:66px;height:66px;border-radius:20px;background:linear-gradient(145deg,#a855f7,#526de8);font-size:32px;color:white;box-shadow:0 8px 24px #7c3aed55}
+ .media-gallery-open button strong{font-size:15px;font-weight:800}
+ .media-gallery-open button small{font-size:11px;color:#aaa4b8;font-weight:400}
+ .media-sheet-grid{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:2px!important;flex:0 0 auto!important;order:2;margin-top:auto!important;padding:13px 0 2px!important;border-top:1px solid #ffffff18!important}
+ .media-sheet-grid button{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;min-width:0!important;min-height:70px!important;padding:5px 1px!important;gap:6px!important;color:inherit!important}
+ .media-sheet-grid button span{display:grid!important;place-items:center!important;width:43px!important;height:43px!important;flex:0 0 43px!important;border-radius:15px!important;background:#3988e8!important;color:#fff!important;font-size:22px!important}
+ .media-sheet-grid button:nth-child(2) span{background:#27a9c9!important}
+ .media-sheet-grid button:nth-child(3) span{background:#39a96a!important}
+ .media-sheet-grid button:nth-child(4) span{background:#bd9135!important}
+ .media-sheet-grid button:nth-child(5) span{background:#d65b72!important}
+ .media-sheet-grid button b{font-size:10px!important;white-space:nowrap!important;color:inherit!important;font-weight:650!important}
+ .media-sheet-grid button:active{transform:scale(.95);opacity:.85}
+ html.day-mode .media-sheet{background:linear-gradient(160deg,#fff,#f1eff7)!important;color:#252235!important;border-color:#ded6eb!important}
+ html.day-mode .media-sheet-head button{background:#eeeaf5!important}
+ html.day-mode .media-tabs button{color:#777184!important}
+ html.day-mode .media-tabs button.active{color:#2675d7!important;border-color:#3988e8!important}
+ html.day-mode .media-gallery-open button{background:linear-gradient(145deg,#f8f5ff,#eee9f8)!important;color:#29243a!important;border-color:#c9b9e5!important}
+ html.day-mode .media-gallery-open button small{color:#777184!important}
+ html.day-mode .media-sheet-grid{border-color:#ded8e8!important}
 }
 
 </style><div class="fwd-head">${avHtml(sourceChat.avatar,forwardLabel(sourceChat),"")}<div><h3>فوروارد پیام‌ها</h3><div class="fwd-muted">از ${esc(forwardLabel(sourceChat))} · ${items.length.toLocaleString("fa-IR")} پیام</div></div></div><div class="fwd-muted">پیش‌نمایش پیام‌ها</div><div class="fwd-preview">${preview}${more}</div><label class="fwd-muted" for="forwardSearch">گفت‌وگوی مقصد را انتخاب کن</label><input id="forwardSearch" class="fwd-search" type="search" placeholder="جست‌وجوی نام گروه یا کاربر…" autocomplete="off"><div id="forwardTargets" class="fwd-targets">${targetCards}</div><div id="forwardNone" class="fwd-empty" style="display:none">مقصدی با این نام پیدا نشد.</div><button class="btn" id="forwardGo" type="button" style="margin-top:12px" disabled>انتخاب مقصد</button><button class="btn g" id="forwardNo" type="button">انصراف</button>`);
