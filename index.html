@@ -2474,9 +2474,9 @@ async function send(){
    }
    const {error}=await sb.from("messages").insert(row);if(error)throw error;confirmSendSfx();
   }else if(cur.gid){
-   if(!await gSend(text)){removeOptimisticMessage(optimistic);renderMsgs(true);$("sendB").disabled=false;sendBusy=false;return;}confirmSendSfx();
+   if(!await gSend(text)){if(!navigator.onLine)throw new Error("offline");removeOptimisticMessage(optimistic);renderMsgs(true);$("sendB").disabled=false;sendBusy=false;return;}confirmSendSfx();
   }else if(cur.type==="private"){
-   if(!await sendPM(text)){removeOptimisticMessage(optimistic);renderMsgs(true);$("sendB").disabled=false;sendBusy=false;return;}confirmSendSfx();
+   if(!await sendPM(text)){if(!navigator.onLine)throw new Error("offline");removeOptimisticMessage(optimistic);renderMsgs(true);$("sendB").disabled=false;sendBusy=false;return;}confirmSendSfx();
   }else{
    if(pendingKind==="video"){alert("ویدیو فقط در گروه عمومی ارسال می‌شود.");removeOptimisticMessage(optimistic);renderMsgs(true);$("sendB").disabled=false;sendBusy=false;return;}
    const m={id:"m"+Date.now(),text,img:pending&&pendingKind==="image"?await b2d(pending):null,aud:pending&&pendingKind==="audio"?await b2d(pending):null,at:new Date().toISOString()};
