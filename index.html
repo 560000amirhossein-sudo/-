@@ -2668,7 +2668,7 @@ const pickFile=mode=>{
  $("mediaSheet").classList.toggle("gallery-mode",mode==="gallery");
  $("file").click();
 };
-$("attB").onclick=e=>{e.stopPropagation();openMediaSheet();if($("mediaSheet").classList.contains("mobile-mode"))pickFile("gallery");};
+$("attB").onclick=e=>{e.stopPropagation();openMediaSheet();};
 $("mediaClose").onclick=closeMediaSheet;
 $("mediaSheet").onclick=e=>{if(e.target===$("mediaSheet"))closeMediaSheet();};
 $("mediaSheet").querySelectorAll("[data-media-action]").forEach(b=>b.onclick=()=>{
