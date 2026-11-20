@@ -1410,7 +1410,7 @@ try{var F=parseInt(localStorage.getItem("arya_text_scale_v1"),10);if(F>=85&&F<=1
        <button type="button" data-gallery-filter="image">عکس‌ها</button>
        <button type="button" data-gallery-filter="video">فیلم‌ها</button>
       </div>
-      <div class="media-gallery-open"><button type="button" id="openPhoneGallery"><span class="gallery-open-icon">▧</span><strong>باز کردن گالری گوشی</strong><small>انتخاب عکس‌ها و ویدیوهای دستگاه</small></button></div>
+      <div class="media-gallery-open"><button type="button" id="openPhoneGallery"><span class="gallery-open-icon">▧</span><strong>انتخاب از گالری گوشی</strong><small>عکس‌ها و ویدیوها در همین پنل آماده می‌شوند</small></button><div class="media-picked" id="mediaPicked" aria-live="polite"></div></div>
       <div class="media-sheet-grid">
        <button type="button" data-media-action="gallery"><span>▧</span><b>گالری</b></button>
        <button type="button" data-media-action="file"><span>▤</span><b>فایل</b></button>
@@ -2234,6 +2234,18 @@ html.day-mode .gset-footer-note{background:#f5f0ff;border-color:#e5d8ff;color:#6
 .media-sheet-grid button:active{background:#8b5cf72b;transform:scale(.96)}
 @media(max-width:420px){.media-sheet{min-height:74dvh;padding-left:10px;padding-right:10px}.media-sheet-grid button b{font-size:9px}}
 
+/* Inline media selection stays inside the mobile attachment sheet */
+.media-picked{width:100%;display:grid;gap:10px;padding:8px 2px;overflow:auto}
+.media-picked:empty{display:none}
+.media-picked-note{padding:16px;border:1px dashed var(--bd);border-radius:14px;color:var(--muted);text-align:center;font-size:12px}
+.media-picked-file,.media-picked-image{display:flex;align-items:center;gap:12px;padding:10px;border-radius:14px;background:#ffffff0b;border:1px solid #ffffff16;min-width:0}
+.media-picked-file>span{display:grid;place-items:center;width:42px;height:42px;border-radius:12px;background:#8b5cf72b;color:#d8c5ff;font-size:24px;flex:none}
+.media-picked-file div,.media-picked-image div{min-width:0;display:grid;gap:4px}
+.media-picked-file b,.media-picked-image b{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.media-picked-file small,.media-picked-image small{font-size:11px;color:var(--muted)}
+.media-picked-image img{width:64px;height:64px;object-fit:cover;border-radius:10px;flex:none}
+html.day-mode .media-picked-file,html.day-mode .media-picked-image{background:#f5f1fa;border-color:#e2d9ef}
+@media(max-width:760px),(pointer:coarse){.media-sheet[data-mode="music"] .media-tabs,.media-sheet[data-mode="music"] .media-gallery-open>button,.media-sheet[data-mode="file"] .media-tabs,.media-sheet[data-mode="file"] .media-gallery-open>button{display:none!important}.media-sheet[data-mode="music"] .media-gallery-open,.media-sheet[data-mode="file"] .media-gallery-open{display:block!important;flex:1;overflow:auto}}
 /* Gallery-only filters and picker action */
 /* Mobile gallery sheet only. Desktop attachment menu above remains unchanged. */
 .media-tabs,.media-gallery-open{display:none}
@@ -2636,10 +2648,24 @@ function setGalleryFilter(filter){
  mobileGalleryFilter=filter;
  $("mediaSheet").querySelectorAll("[data-gallery-filter]").forEach(b=>b.classList.toggle("active",b.dataset.galleryFilter===filter));
 }
+let mediaPickMode="gallery";
 const pickFile=mode=>{
- closeMediaSheet();
+ mediaPickMode=mode;
  $("file").accept=mode==="image"?"image/*":mode==="video"?"video/*":mode==="music"?"audio/*":mode==="gallery"?(mobileGalleryFilter==="image"?"image/*":mobileGalleryFilter==="video"?"video/*":"image/*,video/*"):"*/*";
- $("file").multiple=mode==="gallery"||mode==="file";
+ $("file").multiple=false;
+ $("mediaSheet").querySelector(".media-sheet").dataset.mode=mode;
+ if(mode==="music"){
+  $("mediaSheet").querySelector(".media-sheet-head b").textContent="انتخاب موسیقی";
+  $("mediaPicked").innerHTML='<div class="media-picked-note">یک فایل صوتی از گوشی انتخاب کن</div>';
+ }else if(mode==="file"){
+  $("mediaSheet").querySelector(".media-sheet-head b").textContent="انتخاب فایل";
+  $("mediaPicked").innerHTML='<div class="media-picked-note">انتخاب فایل از گوشی</div>';
+ }else{
+  $("mediaSheet").querySelector(".media-sheet-head b").textContent="گالری";
+  $("mediaPicked").innerHTML="";
+  setGalleryFilter(mobileGalleryFilter);
+ }
+ $("mediaSheet").classList.toggle("gallery-mode",mode==="gallery");
  $("file").click();
 };
 $("attB").onclick=e=>{e.stopPropagation();openMediaSheet();};
@@ -2989,14 +3015,26 @@ function renderPinX(){
 setInterval(()=>{if(!ME||document.hidden||!cur)return;loadExtras();},10000);
 $("file").onchange=async()=>{
  const f=$("file").files[0];$("file").value="";if(!f)return;
+ const picked=$("mediaPicked");
+ if(f.type.startsWith("audio/")){
+  if(!/^audio\/(?:mpeg|mp4|ogg|wav|webm|aac|x-m4a)/i.test(f.type)){callToast("فرمت فایل صوتی پشتیبانی نمی‌شود.");return;}
+  if(f.size>MAXV){callToast("حجم فایل صوتی باید کمتر از ۲۰ مگابایت باشد.");return;}
+  clearPending();pending=f;pendingFile=null;pendingKind="audio";pendingDur=0;syncComposerAction();
+  $("prevImg").style.display="none";$("prev").querySelector("span").textContent="🎵 موسیقی آماده ارسال: "+f.name;$("prev").classList.add("show");
+  picked.innerHTML='<div class="media-picked-file"><span>♫</span><div><b>'+esc(f.name)+'</b><small>فایل صوتی آماده ارسال</small></div></div>';
+  $("mediaSheet").querySelector(".media-sheet-head b").textContent="موسیقی انتخاب شد";
+  return;
+ }
  if(f.type.startsWith("video/")){
   if(!["video/mp4","video/webm","video/quicktime"].includes(f.type)){gWarn("فقط mp4، webm یا mov پشتیبانی می‌شود.");return;}
   if(f.size>MAXV){gWarn("حجم ویدیو باید کمتر از ۲۰ مگابایت باشد.");return;}
-  clearPending();pending=f;pendingFile=f;pendingKind="video";syncComposerAction();$("prevImg").style.display="none";$("prev").querySelector("span").textContent="🎬 ویدیو آماده ارسال: "+f.name;$("prev").classList.add("show");return;
+  clearPending();pending=f;pendingFile=f;pendingKind="video";syncComposerAction();$("prevImg").style.display="none";$("prev").querySelector("span").textContent="🎬 ویدیو آماده ارسال: "+f.name;$("prev").classList.add("show");
+  picked.innerHTML='<div class="media-picked-file"><span>▶</span><div><b>'+esc(f.name)+'</b><small>ویدیو آماده ارسال</small></div></div>';
+  $("mediaSheet").querySelector(".media-sheet-head b").textContent="ویدیو انتخاب شد";return;
  }
  if(!f.type.startsWith("image/")){if(cur&&cur.gid)callToast("فقط عکس یا ویدیو قابل ارسال است.");return;}
  if(cur&&cur.gid){if(!/^image\/(jpeg|png|webp|gif|heic|heif)$/.test(f.type)){callToast("فرمت عکس پشتیبانی نمی‌شود (JPG، PNG، WebP، GIF یا HEIC).");return;}if(f.size>MAXI){callToast("حجم عکس باید کمتر از ۱۵ مگابایت باشد.");return;}}
- try{clearPending();pending=await resize(f,cur&&cur.id===DEF?1024:cur&&cur.gid?1280:640,false);syncComposerAction();if(cur&&cur.gid&&pending.size>MAXIO){clearPending();callToast("حجم عکس پس از فشرده‌سازی هنوز زیاد است؛ عکس کوچک‌تری انتخاب کن.");return;}$("prevImg").src=URL.createObjectURL(pending);$("prev").classList.add("show");}catch{if(cur&&cur.gid)callToast("عکس قابل خواندن نبود.");else alert("عکس قابل خواندن نبود.");}
+ try{clearPending();pending=await resize(f,cur&&cur.id===DEF?1024:cur&&cur.gid?1280:640,false);syncComposerAction();if(cur&&cur.gid&&pending.size>MAXIO){clearPending();callToast("حجم عکس پس از فشرده‌سازی هنوز زیاد است؛ عکس کوچک‌تری انتخاب کن.");return;}const previewUrl=URL.createObjectURL(pending);$("prevImg").src=previewUrl;$("prev").classList.add("show");picked.innerHTML='<div class="media-picked-image"><img src="'+previewUrl+'" alt="پیش‌نمایش عکس"><div><b>'+esc(f.name)+'</b><small>عکس آماده ارسال</small></div></div>';$("mediaSheet").querySelector(".media-sheet-head b").textContent="عکس انتخاب شد";}catch{if(cur&&cur.gid)callToast("عکس قابل خواندن نبود.");else alert("عکس قابل خواندن نبود.");}
 };
 $("prevX").onclick=()=>{if(upBusy){abortUp();return;}clearPending();};
 const EMOJI_GROUPS=[
