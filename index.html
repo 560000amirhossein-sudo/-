@@ -2618,7 +2618,7 @@ let mobileGalleryFilter="all";
 function closeMediaSheet(){$("mediaSheet").classList.remove("open","gallery-mode","mobile-mode");$("mediaSheet").setAttribute("aria-hidden","true");}
 function openMediaSheet(){
  $("emo").classList.remove("open");
- const mobile=window.matchMedia("(max-width:760px)").matches||window.matchMedia("(pointer:coarse)").matches||navigator.maxTouchPoints>0||/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+ const mobile=window.matchMedia("(max-width:760px)").matches||window.matchMedia("(pointer:coarse)").matches||window.matchMedia("(any-pointer:coarse)").matches||window.matchMedia("(hover:none)").matches||navigator.maxTouchPoints>0||("ontouchstart" in window)||/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
  const menu=$("mediaSheet").querySelector(".media-sheet");
  $("mediaSheet").classList.toggle("mobile-mode",mobile);
  $("mediaSheet").classList.toggle("gallery-mode",mobile);
@@ -4562,5 +4562,8 @@ html.day-mode .media-sheet-backdrop.mobile-mode .media-sheet{background:linear-g
 html.day-mode .media-sheet-backdrop.mobile-mode .media-tabs button.active{color:#2675d7!important;border-color:#3988e8!important}
 html.day-mode .media-sheet-backdrop.mobile-mode .media-gallery-open button{background:linear-gradient(145deg,#f8f5ff,#eee9f8)!important;color:#29243a!important;border-color:#c9b9e5!important}
 @media(max-width:420px){.media-sheet-backdrop.mobile-mode .media-sheet{padding-left:10px!important;padding-right:10px!important}}
+</style>
+<style id="arya-mobile-picker-force-v3">
+@media (any-pointer:coarse), (hover:none){.media-sheet-backdrop:not(.mobile-mode) .media-sheet{width:100%!important;max-width:none!important}}
 </style>
 </body></html>
